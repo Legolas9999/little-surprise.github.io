@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>七夕告白</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #0c1445 0%, #1a237e 40%, #283593 100%);
+            overflow-x: hidden;
+            color: #f0f0ff;
+        }
+
+        /* 背景爱心粒子画布 */
+        #heartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 主内容容器 */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 卡片容器 */
+        .card {
+            width: 100%;
+            padding: 45px 40px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(255, 107, 157, 0.2);
+        }
+
+        /* 标题 */
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #ffe066;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        /* 动图容器 */
+        .gif-wrapper {
+            margin-bottom: 35px;
+        }
+
+        .gif-wrapper img {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+            transition: transform 0.3s ease;
+        }
+
+        .gif-wrapper img:hover {
+            transform: scale(1.02);
+        }
+
+        /* 告白文案 */
+        .confession-text p {
+            font-size: 18px;
+            line-height: 2.1;
+            margin: 18px 0;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .confession-text p:nth-child(1) { animation-delay: 0.5s; }
+        .confession-text p:nth-child(2) { animation-delay: 1.3s; }
+        .confession-text p:nth-child(3) { animation-delay: 2.1s; }
+
+        /* 重点文字发光 */
+        .glow-text {
+            color: #ffe066;
+            font-weight: 500;
+            animation: textGlow 2.2s ease-in-out infinite alternate;
+        }
+
+        /* 底部祝福语 */
+        .footer-text {
+            margin-top: 35px;
+            font-size: 17px;
+            color: #ffc8dd;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+            animation-delay: 2.9s;
+        }
+
+        /* 动画定义 */
+        @keyframes titleGlow {
+            0% {
+                text-shadow: 0 0 8px #ffe066, 0 0 15px rgba(255, 224, 102, 0.4);
+            }
+            100% {
+                text-shadow: 0 0 15px #ffe066, 0 0 30px #ff8fab, 0 0 40px rgba(255, 107, 157, 0.5);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes textGlow {
+            0% {
+                text-shadow: 0 0 4px #ffe066, 0 0 8px rgba(255, 224, 102, 0.5);
+            }
+            100% {
+                text-shadow: 0 0 10px #ffe066, 0 0 20px #ff8fab, 0 0 30px rgba(255, 107, 157, 0.4);
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .card {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .confession-text p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+
+    <div class="container">
+        <div class="card">
+            <h1>七夕告白 ✨</h1>
+            
+            <div class="gif-wrapper">
+                <img src="七夕.gif" alt="七夕告白动画">
+            </div>
+
+            <div class="confession-text">
+                <p>今年七夕，银河依旧横贯夜空，而我最幸运的事，是不用等鹊桥相会，<span class="glow-text">一转头就能看见你</span>。</p>
+                <p>从前觉得七夕只是传说里的浪漫，直到遇见你才懂，真正的心动，是<span class="glow-text">把每一个平凡日子都过成佳期</span>。</p>
+                <p>往后的<span class="glow-text">岁岁年年</span>，想和你一起看遍人间烟火，也守好彼此的温柔。</p>
+            </div>
+
+            <div class="footer-text">
+                💞 七夕快乐 · 朝夕与共 💞
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+        const heartCount = 35; // 爱心粒子数量
+
+        // 调整画布尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 爱心粒子类
+        class Heart {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * -canvas.height;
+                this.size = Math.random() * 10 + 6; // 大小 6-16px
+                this.speed = Math.random() * 1.2 + 0.4; // 下落速度
+                this.opacity = Math.random() * 0.5 + 0.3; // 透明度
+                this.sway = Math.random() * 1.5 + 0.5; // 左右摆动幅度
+                this.swayOffset = Math.random() * Math.PI * 2; // 摆动初始相位
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y * 0.01 + this.swayOffset) * this.sway * 0.3;
+
+                // 超出底部后重置到顶部
+                if (this.y > canvas.height + 20) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#ff6b9d';
+                
+                // 绘制爱心
+                const x = this.x;
+                const y = this.y;
+                const s = this.size;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, y + s / 4);
+                ctx.bezierCurveTo(x, y, x - s / 2, y, x - s / 2, y + s / 4);
+                ctx.bezierCurveTo(x - s / 2, y + s / 2, x, y + s * 0.75, x, y + s);
+                ctx.bezierCurveTo(x, y + s * 0.75, x + s / 2, y + s / 2, x + s / 2, y + s / 4);
+                ctx.bezierCurveTo(x + s / 2, y, x, y, x, y + s / 4);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // 初始化爱心粒子
+        function initHearts() {
+            hearts = [];
+            for (let i = 0; i < heartCount; i++) {
+                const heart = new Heart();
+                heart.y = Math.random() * canvas.height; // 初始随机分布在全屏
+                hearts.push(heart);
+            }
+        }
+
+        // 动画循环
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            hearts.forEach(heart => {
+                heart.update();
+                heart.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // 启动
+        initHearts();
+        animate();
+
+        // 窗口大小变化时重新初始化
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initHearts();
+        });
+    </script>
+</body>
+</html>
