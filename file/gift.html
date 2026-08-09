@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的故事</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            overflow-x: hidden;
+            color: #fff;
+        }
+
+        /* 背景爱心飘落画布 */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 自定义爱心光标 */
+        #cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            z-index: 9999;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: cursorBeat 1.2s ease-in-out infinite;
+        }
+        #cursor::before, #cursor::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 16px;
+            background: #ff6b9d;
+            border-radius: 10px 10px 0 0;
+            top: 0;
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.7);
+        }
+        #cursor::before {
+            left: 10px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+        #cursor::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        @keyframes cursorBeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.25); }
+        }
+
+        /* 点击产生的爱心粒子 */
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            animation: clickHeartFloat 1.5s ease-out forwards;
+        }
+        @keyframes clickHeartFloat {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.2); }
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            padding: 60px 20px 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: #ffe066;
+            text-shadow: 0 0 20px rgba(255, 224, 102, 0.5);
+            margin-bottom: 10px;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        .page-title p {
+            color: #ffc8dd;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(255, 224, 102, 0.3); }
+            100% { text-shadow: 0 0 25px rgba(255, 224, 102, 0.7), 0 0 40px rgba(255, 107, 157, 0.4); }
+        }
+
+        /* 爱心照片墙容器 */
+        .photo-wall {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 800px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        /* 单张照片样式（拍立得风格） */
+        .photo-item {
+            position: absolute;
+            background: #fff;
+            padding: 10px 10px 40px;
+            border-radius: 4px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: photoFloat 6s ease-in-out infinite;
+            cursor: pointer;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 2px;
+        }
+        .photo-item:hover {
+            transform: translate(-50%, -50%) scale(1.15) rotate(0deg) !important;
+            box-shadow: 0 10px 35px rgba(255, 107, 157, 0.4);
+            z-index: 10;
+        }
+        @keyframes photoFloat {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(var(--rotate)); }
+            50% { transform: translate(-50%, -50%) translateY(-8px) rotate(var(--rotate)); }
+        }
+
+        /* 照片入场动画 */
+        .photo-item.show {
+            opacity: 1;
+        }
+
+        /* 故事弹窗 */
+        .story-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+        .story-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #333;
+        }
+        .story-modal.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 16px 16px 0 0;
+        }
+        .modal-body {
+            padding: 25px 30px 30px;
+        }
+        .modal-date {
+            color: #ff6b9d;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .modal-story {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #444;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            line-height: 36px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            * {
+                cursor: auto !important;
+            }
+            #cursor {
+                display: none;
+            }
+            .page-title h1 {
+                font-size: 1.8rem;
+            }
+            .photo-wall {
+                height: 600px;
+            }
+            .photo-item {
+                padding: 6px 6px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 自定义爱心光标 -->
+    <div id="cursor"></div>
+
+    <!-- 背景爱心飘落画布 -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- 页面标题 -->
+    <div class="page-title">
+        <h1>我们的故事</h1>
+        <p>点击照片，解锁专属回忆 ✨</p>
+    </div>
+
+    <!-- 爱心照片墙容器 -->
+    <div class="photo-wall" id="photoWall"></div>
+
+    <!-- 故事弹窗 -->
+    <div class="story-modal" id="storyModal">
+        <button class="close-btn" id="closeBtn">×</button>
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="照片">
+            <div class="modal-body">
+                <div class="modal-date" id="modalDate"></div>
+                <div class="modal-story" id="modalStory"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================================================
+        // 【请在这里替换你的照片和故事】
+        // 每一个 {} 对应一张照片
+        // src: 图片文件路径（和html同文件夹直接写文件名即可）
+        // date: 照片日期/标题
+        // story: 这张照片背后的故事
+        // 可以随意增减数量，会自动排列成爱心
+        // ==================================================
+        const photos = [
+            {
+                src: "photo1.jpg",
+                date: "2024.02.14",
+                story: "第一次一起过情人节，你说这是你收到过最丑的花，但还是开心了好久。那天的晚风很甜，你的眼睛比路灯还亮。"
+            },
+            {
+                src: "photo2.jpg",
+                date: "2024.03.20",
+                story: "周末一起去海边看日出，你冻得缩在我怀里，说日出也没什么好看的，却偷偷拍了好多张我的侧脸。"
+            },
+            {
+                src: "photo3.jpg",
+                date: "2024.05.01",
+                story: "一起去爬泰山，你半路累到走不动，嘴上说着再也不爬山了，还是咬牙坚持到了山顶，看你骄傲的样子真的很可爱。"
+            },
+            {
+                src: "photo4.jpg",
+                date: "2024.06.18",
+                story: "你生日那天，我偷偷准备了你念叨了很久的礼物，你拆礼物的时候眼睛红红的，说我是全世界最懂你的人。"
+            },
+            {
+                src: "photo5.jpg",
+                date: "2024.08.09",
+                story: "七夕节，我们在家煮了火锅，你说不用什么隆重的仪式，只要和我在一起，每天都是节日。"
+            },
+            {
+                src: "photo6.jpg",
+                date: "2024.10.07",
+                story: "国庆一起回了老家，你陪我奶奶聊了一下午的天，奶奶偷偷跟我说，这个姑娘真好，要我好好珍惜。"
+            },
+            {
+                src: "photo7.jpg",
+                date: "2024.12.25",
+                story: "圣诞节的初雪，我们在楼下踩雪，你把冻僵的手塞进我脖子里，笑得像个傻子。"
+            },
+            {
+                src: "photo8.jpg",
+                date: "2025.01.01",
+                story: "跨年的烟花下，你说新的一年还要在一起，我说不止今年，往后每一年都要和你一起。"
+            },
+            {
+                src: "photo9.jpg",
+                date: "2025.02.20",
+                story: "一起养的小猫第一次学会握手，你激动得录了十几个视频，说我们也是一家三口了。"
+            },
+            {
+                src: "photo10.jpg",
+                date: "2025.04.05",
+                story: "春天一起去野餐，你准备了一篮子好吃的，结果大部分都进了我的肚子，你笑着说要把我养胖。"
+            },
+            {
+                src: "photo11.jpg",
+                date: "2025.06.01",
+                story: "儿童节给你买了棒棒糖和旺仔牛奶，你说在我身边永远可以当小朋友。"
+            },
+            {
+                src: "photo12.jpg",
+                date: "2025.08.07",
+                story: "在一起两周年，我们去拍了纪念照，你说时间过得好快，好像昨天才刚认识我。"
+            }
+        ];
+        // ==================================================
+        //  照片配置结束，下面的代码不用改
+        // ==================================================
+
+
+        // 1. 自定义光标跟随
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // 2. 点击生成爱心粒子
+        document.addEventListener('click', (e) => {
+            for(let i = 0; i < 5; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'click-heart';
+                heart.innerHTML = '💗';
+                heart.style.left = e.clientX + (Math.random() - 0.5) * 60 + 'px';
+                heart.style.top = e.clientY + (Math.random() - 0.5) * 30 + 'px';
+                heart.style.fontSize = (12 + Math.random() * 12) + 'px';
+                heart.style.animationDelay = (i * 0.1) + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1500);
+            }
+        });
+
+        // 3. 生成爱心形状的照片坐标
+        const photoWall = document.getElementById('photoWall');
+        function generateHeartPoints(count, width, height) {
+            const points = [];
+            const scale = Math.min(width, height) / 35;
+            const centerX = width / 2;
+            const centerY = height / 2 - 20;
+            
+            for(let i = 0; i < count; i++) {
+                const t = (i / count) * Math.PI * 2;
+                // 爱心参数方程
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                
+                points.push({
+                    x: centerX + x * scale,
+                    y: centerY + y * scale
+                });
+            }
+            return points;
+        }
+
+        // 4. 渲染照片墙
+        function renderPhotos() {
+            const wallRect = photoWall.getBoundingClientRect();
+            const points = generateHeartPoints(photos.length, wallRect.width, wallRect.height);
+            
+            photos.forEach((photo, index) => {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                
+                // 随机大小和旋转角度
+                const size = 90 + Math.random() * 40;
+                const rotate = (Math.random() - 0.5) * 20;
+                
+                item.style.width = size + 'px';
+                item.style.height = size * 1.2 + 'px';
+                item.style.left = points[index].x + 'px';
+                item.style.top = points[index].y + 'px';
+                item.style.setProperty('--rotate', rotate + 'deg');
+                item.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
+                item.style.animationDelay = (index * 0.1) + 's';
+                
+                item.innerHTML = `<img src="${photo.src}" alt="照片${index+1}" loading="lazy">`;
+                
+                // 点击弹出故事
+                item.addEventListener('click', () => {
+                    openModal(photo);
+                });
+                
+                photoWall.appendChild(item);
+                
+                // 依次入场
+                setTimeout(() => {
+                    item.classList.add('show');
+                }, 300 + index * 120);
+            });
+        }
+
+        // 5. 弹窗逻辑
+        const modal = document.getElementById('storyModal');
+        const modalImg = document.getElementById('modalImg');
+        const modalDate = document.getElementById('modalDate');
+        const modalStory = document.getElementById('modalStory');
+        const closeBtn = document.getElementById('closeBtn');
+
+        function openModal(photo) {
+            modalImg.src = photo.src;
+            modalDate.textContent = photo.date;
+            modalStory.textContent = photo.story;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') closeModal();
+        });
+
+        // 6. 背景飘落爱心
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class BgHeart {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.size = 4 + Math.random() * 10;
+                this.speed = 0.5 + Math.random() * 1.5;
+                this.opacity = 0.2 + Math.random() * 0.4;
+                this.swayOffset = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y * 0.01 + this.swayOffset) * 0.5;
+                if(this.y > canvas.height + 20) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#ff6b9d';
+                ctx.beginPath();
+                const x = this.x;
+                const y = this.y;
+                const s = this.size;
+                ctx.moveTo(x, y + s * 0.25);
+                ctx.bezierCurveTo(x, y, x - s/2, y, x - s/2, y + s * 0.25);
+                ctx.bezierCurveTo(x - s/2, y + s * 0.5, x, y + s * 0.75, x, y + s);
+                ctx.bezierCurveTo(x, y + s * 0.75, x + s/2, y + s * 0.5, x + s/2, y + s * 0.25);
+                ctx.bezierCurveTo(x + s/2, y, x, y, x, y + s * 0.25);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initBgHearts() {
+            hearts = [];
+            const count = Math.floor(canvas.width / 30);
+            for(let i = 0; i < count; i++) {
+                hearts.push(new BgHeart());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(h => {
+                h.update();
+                h.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            renderPhotos();
+            initBgHearts();
+            animate();
+        });
+
+        // 窗口大小变化时重新排布
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                photoWall.innerHTML = '';
+                renderPhotos();
+                initBgHearts();
+            }, 300);
+        });
+    </script>
+</body>
+</html>
