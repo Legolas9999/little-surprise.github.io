@@ -14,10 +14,56 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 50%, #f0f9ff 100%);
+            background: 
+                radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.7) 0, transparent 26%),
+                radial-gradient(circle at 82% 75%, rgba(255, 255, 255, 0.6) 0, transparent 22%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35) 0, transparent 35%),
+                repeating-radial-gradient(circle at center, rgba(220, 230, 245, 0.2) 0, rgba(220, 230, 245, 0.2) 2px, transparent 2px, transparent 22px),
+                linear-gradient(135deg, #f5f7fa 0%, #eaf0f9 50%, #f3f0fa 100%);
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             overflow-x: hidden;
             color: #5a4a52;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.85) 0 8%, transparent 9%),
+                radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.75) 0 10%, transparent 11%),
+                radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.65) 0 7%, transparent 8%),
+                radial-gradient(circle at 85% 80%, rgba(255, 255, 255, 0.7) 0 9%, transparent 10%),
+                linear-gradient(90deg, rgba(200, 215, 235, 0.15) 1px, transparent 1px),
+                linear-gradient(rgba(200, 215, 235, 0.15) 1px, transparent 1px);
+            background-size:
+                100% 100%,
+                100% 100%,
+                100% 100%,
+                100% 100%,
+                50px 50px,
+                50px 50px;
+            background-position: center center;
+            opacity: 0.6;
+        }
+
+        .continue-text {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1;
+            font-size: 1rem;
+            color: #9a7ba3;
+            letter-spacing: 2px;
+            opacity: 0.85;
+            font-style: italic;
+            pointer-events: none;
         }
 
         #bgCanvas {
@@ -65,12 +111,8 @@
         }
 
         @keyframes cursorBeat {
-            0%, 100% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.2);
-            }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
         }
 
         .click-heart {
@@ -78,69 +120,127 @@
             pointer-events: none;
             z-index: 9998;
             animation: clickHeartFloat 1.5s ease-out forwards;
-            color: #f4b6ce;
+            color: #f28eb8;
         }
 
         @keyframes clickHeartFloat {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -150%) scale(1.2);
-            }
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.2); }
         }
 
         .page-title {
             text-align: center;
-            padding: 60px 20px 30px;
+            padding: 16px 20px 0;
             position: relative;
             z-index: 1;
         }
 
         .page-title h1 {
             font-size: 2.5rem;
-            color: #b86b8a;
+            color: #a87a9a;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             animation: titleGlow 3s ease-in-out infinite alternate;
         }
 
         .page-title p {
-            color: #a78998;
+            color: #8f8aa0;
             font-size: 1.05rem;
             opacity: 0.9;
         }
 
         @keyframes titleGlow {
-            0% {
-                text-shadow: 0 0 10px rgba(216, 152, 179, 0.25);
-            }
-            100% {
-                text-shadow: 0 0 20px rgba(216, 152, 179, 0.45);
-            }
+            0% { text-shadow: 0 0 10px rgba(180, 150, 190, 0.25); }
+            100% { text-shadow: 0 0 20px rgba(180, 150, 190, 0.45); }
         }
 
         .photo-wall {
             position: relative;
-            width: 90%;
-            max-width: 1100px;
-            height: 860px;
-            margin: 0 auto;
+            width: 92%;
+            max-width: 1200px;
+            min-height: 780px;
+            margin: 0 auto 40px;
             z-index: 1;
+        }
+
+        .rope-set {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            z-index: 1;
+        }
+
+        .rope-set.top { top: 42px; }
+        .rope-set.middle { top: 340px; }
+        .rope-set.bottom { top: 610px; }
+
+        .rope-canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 70px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .rope-anchor {
+            position: absolute;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 42% 38%, rgba(255, 255, 255, 0.32), transparent 35%),
+                radial-gradient(circle at 50% 50%, #e2c19b, #d4a373, #b8895a);
+            box-shadow:
+                inset 0 2px 3px rgba(255, 255, 255, 0.45),
+                inset 0 -3px 6px rgba(70, 40, 20, 0.4),
+                0 3px 5px rgba(0, 0, 0, 0.28),
+                0 8px 16px rgba(0, 0, 0, 0.22);
+            z-index: 4;
+        }
+
+        .rope-anchor.left { left: -14px; }
+        .rope-anchor.right { right: -14px; }
+
+        .rope-anchor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(70, 45, 25, 0.55), rgba(70, 45, 25, 0.35));
+            transform: translate(-50%, -50%);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+        }
+
+        .rope-anchor::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
         }
 
         .photo-item {
             position: absolute;
             background: #ffffff;
-            padding: 7px 7px 28px;
+            padding: 7px 7px 16px;
             border-radius: 4px;
-            box-shadow: 0 6px 18px rgba(200, 150, 175, 0.18);
+            box-shadow:
+                0 8px 20px rgba(180, 180, 200, 0.22),
+                0 4px 10px rgba(0, 0, 0, 0.08);
             transition: all 0.4s ease;
             opacity: 0;
             animation: photoFloat 6s ease-in-out infinite;
             cursor: pointer;
+            z-index: 5;
         }
 
         .photo-item img {
@@ -152,22 +252,68 @@
         }
 
         .photo-item:hover {
-            transform: translate(-50%, -50%) scale(1.18) rotate(0deg) !important;
-            box-shadow: 0 12px 28px rgba(220, 160, 185, 0.28);
+            transform: translate(-50%, -50%) scale(1.15) rotate(0deg) !important;
+            box-shadow:
+                0 15px 35px rgba(190, 180, 210, 0.35),
+                0 8px 18px rgba(0, 0, 0, 0.12);
             z-index: 20;
         }
 
         @keyframes photoFloat {
-            0%, 100% {
-                transform: translate(-50%, -50%) translateY(0) rotate(var(--rotate));
-            }
-            50% {
-                transform: translate(-50%, -50%) translateY(-5px) rotate(var(--rotate));
-            }
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(var(--rotate)); }
+            50% { transform: translate(-50%, -50%) translateY(-5px) rotate(var(--rotate)); }
         }
 
-        .photo-item.show {
-            opacity: 1;
+        .photo-item.show { opacity: 1; }
+
+        .wood-clip {
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 42px;
+            height: 14px;
+            background: linear-gradient(180deg, #d9a876 0%, #c18f5f 50%, #a6784a 100%);
+            border-radius: 2px;
+            z-index: 6;
+            box-shadow:
+                inset 0 1px 2px rgba(255, 255, 255, 0.4),
+                inset 0 -2px 4px rgba(70, 45, 20, 0.35),
+                0 2px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .wood-clip::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 9px;
+            background: linear-gradient(180deg, #9a9a9a, #6a6a6a);
+            border-radius: 1px;
+        }
+
+        .cute-element {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.75;
+            animation: floatElement 8s ease-in-out infinite;
+            z-index: 0;
+            font-size: 28px;
+        }
+
+        .cute-element.star { color: #f4d66b; font-size: 22px; }
+        .cute-element.heart { color: #f4b6ce; font-size: 20px; }
+        .cute-element.sparkle { color: #d8c8f0; font-size: 24px; }
+        .cute-element.cloud { color: #ffffff; font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)); }
+        .cute-element.animal { font-size: 42px; opacity: 0.85; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12)); }
+        .cute-element.tree { font-size: 38px; opacity: 0.8; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12)); }
+        .cute-element.leaf { color: #89b96a; font-size: 20px; opacity: 0.7; }
+
+        @keyframes floatElement {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(8deg); }
         }
 
         .story-modal {
@@ -176,7 +322,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(250, 240, 245, 0.7);
+            background: rgba(240, 240, 250, 0.7);
             backdrop-filter: blur(8px);
             z-index: 1000;
             display: flex;
@@ -194,19 +340,19 @@
         }
 
         .modal-content {
-            background: #fffafc;
+            background: #fafbff;
             border-radius: 16px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
             transform: scale(0.8);
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             color: #5a4a52;
-            box-shadow: 0 15px 40px rgba(180, 130, 155, 0.2);
+            box-shadow: 0 15px 40px rgba(160, 160, 190, 0.2);
         }
 
-        .story-modal.active .modal-content {
+        .story-modal.active .modal-content{
             transform: scale(1);
         }
 
@@ -216,12 +362,10 @@
             border-radius: 16px 16px 0 0;
         }
 
-        .modal-body {
-            padding: 25px 30px 30px;
-        }
+        .modal-body { padding: 25px 30px 30px; }
 
         .modal-date {
-            color: #c27a96;
+            color: #a07ba8;
             font-size: 0.95rem;
             margin-bottom: 10px;
             font-weight: 500;
@@ -242,50 +386,161 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.6);
             border: none;
-            color: #b86b8a;
+            color: #a87a9a;
             font-size: 20px;
             line-height: 36px;
             text-align: center;
             transition: background 0.3s;
+            cursor: pointer;
         }
 
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
+        .close-btn:hover { background: rgba(255, 255, 255, 0.9); }
+
+        /* ========== 背景音乐控件 ========== */
+        .music-player {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(180, 160, 200, 0.15);
         }
 
+        .music-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            color: #a87a9a;
+            flex-shrink: 0;
+        }
+
+        .music-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            max-width: 200px;
+        }
+
+        .song-name {
+            font-size: 0.9rem;
+            color: #7a5a82;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .lyric-line {
+            font-size: 0.8rem;
+            color: #9a8aa2;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 180px;
+            text-align: right;
+            position: relative;
+            opacity: 1;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .lyric-line .lyric-content {
+            display: inline-block;
+        }
+
+        .lyric-line.scrolling .lyric-content {
+            animation: lyricScroll 8s linear infinite;
+        }
+
+        @keyframes lyricScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 移动端适配 */
         @media (max-width: 768px) {
-            * {
-                cursor: auto !important;
+            * { cursor: auto !important; }
+            #cursor { display: none; }
+
+            .page-title { padding: 14px 20px 0; }
+            .page-title h1 { font-size: 1.8rem; }
+
+            .photo-wall { min-height: 620px; }
+            .rope-set.top { top: 32px; }
+            .rope-set.middle { top: 270px; }
+            .rope-set.bottom { top: 490px; }
+
+            .photo-item { padding: 5px 5px 12px; }
+            .wood-clip { width: 36px; height: 12px; top: -6px; }
+            .wood-clip::before { width: 4px; height: 8px; }
+
+            .cute-element.animal { font-size: 32px; }
+            .cute-element.tree { font-size: 30px; }
+
+            .continue-text {
+                right: 16px;
+                bottom: 16px;
+                font-size: 0.9rem;
+                letter-spacing: 1px;
             }
 
-            #cursor {
-                display: none;
+            .music-player {
+                top: 12px;
+                right: 12px;
+                padding: 6px 10px;
+                gap: 8px;
             }
-
-            .page-title h1 {
-                font-size: 1.8rem;
-            }
-
-            .photo-wall {
-                height: 700px;
-            }
-
-            .photo-item {
-                padding: 6px 6px 24px;
-            }
+            .music-icon { width: 30px; height: 30px; font-size: 18px; }
+            .music-info { max-width: 140px; }
+            .song-name { font-size: 0.8rem; }
+            .lyric-line { width: 130px; font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
+    <!-- 背景音乐控件 -->
+    <div class="music-player" id="musicPlayer">
+        <div class="music-info">
+            <div class="song-name">白い恋人達</div>
+            <div class="lyric-line" id="lyricLine">点击右侧图标播放音乐</div>
+        </div>
+        <div class="music-icon" id="musicIcon">🎵</div>
+    </div>
+
     <div id="cursor"></div>
     <canvas id="bgCanvas"></canvas>
+
+    <div class="continue-text">未完待续…</div>
 
     <div class="page-title">
         <h1>我们的故事</h1>
         <p>点击照片，解锁专属回忆 ✨</p>
     </div>
 
-    <div class="photo-wall" id="photoWall"></div>
+    <div class="photo-wall" id="photoWall">
+        <div class="rope-set top">
+            <div class="rope-anchor left"></div>
+            <canvas class="rope-canvas"></canvas>
+            <div class="rope-anchor right"></div>
+        </div>
+        <div class="rope-set middle">
+            <div class="rope-anchor left"></div>
+            <canvas class="rope-canvas"></canvas>
+            <div class="rope-anchor right"></div>
+        </div>
+        <div class="rope-set bottom">
+            <div class="rope-anchor left"></div>
+            <canvas class="rope-canvas"></canvas>
+            <div class="rope-anchor right"></div>
+        </div>
+    </div>
 
     <div class="story-modal" id="storyModal">
         <button class="close-btn" id="closeBtn">×</button>
@@ -301,48 +556,25 @@
     <script>
         // ==================================================
         // 【照片配置区】
-        // 数量保持 32 张不变，你只需要修改 src、date、story
         // ==================================================
         const photos = [
-            { src: "photo01.jpg", date: "2024.02.14", story: "第一次一起过情人节，你说这是你收到过最丑的花，但还是开心了好久。那天的晚风很甜，你的眼睛比路灯还亮。" },
-            { src: "photo02.jpg", date: "2024.03.20", story: "周末一起去海边看日出，你冻得缩在我怀里，说日出也没什么好看的，却偷偷拍了好多张我的侧脸。" },
-            { src: "photo03.jpg", date: "2024.05.01", story: "一起去爬泰山，你半路累到走不动，嘴上说着再也不爬山了，还是咬牙坚持到了山顶。" },
-            { src: "photo04.jpg", date: "2024.06.18", story: "你生日那天，我偷偷准备了你念叨了很久的礼物，你拆礼物的时候眼睛红红的。" },
-            { src: "photo05.jpg", date: "2024.08.09", story: "七夕节，我们在家煮了火锅，你说不用什么隆重的仪式，只要和我在一起，每天都是节日。" },
-            { src: "photo06.jpg", date: "2024.10.07", story: "国庆一起回了老家，你陪我奶奶聊了一下午的天，奶奶偷偷跟我说，这个姑娘真好。" },
-            { src: "photo07.jpg", date: "2024.12.25", story: "圣诞节的初雪，我们在楼下踩雪，你把冻僵的手塞进我脖子里，笑得像个傻子。" },
-            { src: "photo08.jpg", date: "2025.01.01", story: "跨年的烟花下，你说新的一年还要在一起，我说不止今年，往后每一年都要和你一起。" },
-            { src: "photo09.jpg", date: "2025.02.20", story: "一起养的小猫第一次学会握手，你激动得录了十几个视频，说我们也是一家三口了。" },
-            { src: "photo10.jpg", date: "2025.04.05", story: "春天一起去野餐，你准备了一篮子好吃的，结果大部分都进了我的肚子。" },
-            { src: "photo11.jpg", date: "2025.06.01", story: "儿童节给你买了棒棒糖和旺仔牛奶，你说在我身边永远可以当小朋友。" },
-            { src: "photo12.jpg", date: "2025.08.07", story: "在一起两周年，我们去拍了纪念照，你说时间过得好快，好像昨天才刚认识我。" },
+            { src: "photo01.jpg", date: "2024.02.14", story: "第一次一起过情人节，你说这是你收到过最丑的花，但还是开心了好久。", rope: 0 },
+            { src: "photo02.jpg", date: "2024.03.20", story: "周末一起去海边看日出，你冻得缩在我怀里，说日出也没什么好看的。", rope: 0 },
+            { src: "photo03.jpg", date: "2024.05.01", story: "一起去爬泰山，你半路累到走不动，嘴上说着再也不爬山了，还是坚持到了山顶。", rope: 0 },
+            { src: "photo04.jpg", date: "2024.06.18", story: "你生日那天，我偷偷准备了你念叨了很久的礼物，你拆礼物的时候眼睛红红的。", rope: 0 },
 
-            { src: "photo13.jpg", date: "2024.01.01", story: "那天我们第一次牵手，你手心有点出汗，我假装很镇定，其实心跳已经快到听得到。" },
-            { src: "photo14.jpg", date: "2024.04.15", story: "一起去看演唱会，你在人群里跟着唱，我在旁边看你，觉得全世界都安静了。" },
-            { src: "photo15.jpg", date: "2024.07.22", story: "夏天的傍晚，我们一起散步买冰棒，你把最甜的那一口留给了我。" },
-            { src: "photo16.jpg", date: "2024.09.10", story: "你说这一天很普通，但因为一起吃了晚饭，所以变得特别。" },
-            { src: "photo17.jpg", date: "2024.11.11", story: "我们没有买买买，只是坐在窗边喝热饮，你说这样也很好。" },
-            { src: "photo18.jpg", date: "2024.12.31", story: "跨年夜倒数的时候，我偷偷许愿：以后的每一年都要和你一起。" },
-            { src: "photo19.jpg", date: "2025.02.14", story: "第二个情人节，我们比以前更懂彼此了，连沉默都觉得很安心。" },
-            { src: "photo20.jpg", date: "2025.03.08", story: "那天给你拍了好多照片，你说自己不好看，可我觉得每一张都很喜欢。" },
-            { src: "photo21.jpg", date: "2025.05.20", story: "520这天没有说很复杂的话，只是想告诉你：我真的很庆幸遇见你。" },
-            { src: "photo22.jpg", date: "2025.07.07", story: "我们一起躲雨，你把伞偏向我这边，自己肩膀湿了一大片。" },
-            { src: "photo23.jpg", date: "2025.09.09", story: "你加班到很晚，我去接你，你看到我时眼睛亮得像星星。" },
-            { src: "photo24.jpg", date: "2025.11.02", story: "一起整理房间，你把照片摆成一排，说这样看着就很幸福。" },
+            { src: "photo05.jpg", date: "2024.08.09", story: "七夕节，我们在家煮了火锅，你说不用什么隆重的仪式，只要和我在一起就好。", rope: 1 },
+            { src: "photo06.jpg", date: "2024.07.07", story: "国庆一起回了老家，你陪我奶奶聊了一下午的天，奶奶说这个姑娘真好。", rope: 1 },
+            { src: "photo07.jpg", date: "2024.12.25", story: "圣诞节的初雪，我们在楼下踩雪，你把冻僵的手塞进我脖子里，笑得像个傻子。", rope: 1 },
+            { src: "photo08.jpg", date: "2025.01.01", story: "跨年的烟花下，你说新的一年还要在一起，我说不止今年，往后每一年都要一起。", rope: 1 },
+            { src: "photo09.jpg", date: "2025.02.20", story: "一起养的小猫第一次学会握手，你激动得录了十几个视频，说我们也是一家三口了。", rope: 1 },
 
-            { src: "photo25.jpg", date: "2023.12.24", story: "平安夜我们第一次正式约会，你穿了浅色外套，干净得像冬天里的阳光。" },
-            { src: "photo26.jpg", date: "2024.02.22", story: "一起去逛花店，你捧着一束小花站在路边，我突然想把所有温柔都给你。" },
-            { src: "photo27.jpg", date: "2024.06.01", story: "你像小朋友一样要吃糖，我像答应小朋友一样答应你：以后都给你买。" },
-            { src: "photo28.jpg", date: "2024.08.15", story: "那天我们坐在江边吹晚风，你说未来很远，但你愿意和我一起走。" },
-            { src: "photo29.jpg", date: "2024.10.20", story: "一起做了一顿很咸的饭，最后笑着吃完了，因为是和你一起做的。" },
-            { src: "photo30.jpg", date: "2025.01.20", story: "下雪天我们一起踩脚印，你说要把快乐也踩进雪里。" },
-            { src: "photo31.jpg", date: "2025.04.20", story: "春天花开的时候，你站在花下面拍照，我心里悄悄说：你比花还好看。" },
-            { src: "photo32.jpg", date: "2025.08.08", story: "今天只是普通的一天，但因为有你，所以值得被放进这颗心里。" }
+            { src: "photo10.jpg", date: "2025.04.05", story: "春天一起去野餐，你准备了一篮子好吃的，结果大部分都进了我的肚子。", rope: 2 },
+            { src: "photo11.jpg", date: "2025.06.01", story: "儿童节给你买了棒棒糖和旺仔牛奶，你说在我身边永远可以当小朋友。", rope: 2 },
+            { src: "photo12.jpg", date: "2025.08.07", story: "在一起两周年，我们去拍了纪念照，你说时间过得好快，好像昨天才刚认识我。", rope: 2 },
+            { src: "photo13.jpg", date: "2025.09.09", story: "你加班到很晚，我去接你，你看到我时眼睛亮得像星星。", rope: 2 },
+            { src: "photo14.jpg", date: "2025.11.02", story: "一起整理房间，你把照片摆成一排，说这样看着就很幸福。", rope: 2 }
         ];
-        // ==================================================
-        //  照片配置结束
-        // ==================================================
-
 
         const cursor = document.getElementById('cursor');
         document.addEventListener('mousemove', (e) => {
@@ -354,7 +586,7 @@
             for (let i = 0; i < 5; i++) {
                 const heart = document.createElement('div');
                 heart.className = 'click-heart';
-                heart.innerHTML = '🤍';
+                heart.innerHTML = '❤️';
                 heart.style.left = e.clientX + (Math.random() - 0.5) * 60 + 'px';
                 heart.style.top = e.clientY + (Math.random() - 0.5) * 30 + 'px';
                 heart.style.fontSize = (12 + Math.random() * 12) + 'px';
@@ -365,91 +597,182 @@
         });
 
         const photoWall = document.getElementById('photoWall');
+        const ropeSets = document.querySelectorAll('.rope-set');
 
-        function heartPoint(t, scale) {
-            const x = 16 * Math.pow(Math.sin(t), 3);
-            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-            return { x: x * scale, y: y * scale };
-        }
+        function drawTwistedRope(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const width = Math.floor(rect.width);
+            const height = 70;
 
-        function generateHeartFillPoints(count, width, height) {
-            const points = [];
-            const centerX = width / 2;
-            const centerY = height / 2 - 30;
+            // 保护：宽度为0直接返回，不绘制
+            if(width <= 10) return null;
 
-            const layers = [
-                { scale: 18, count: 20 },
-                { scale: 13, count: 8 },
-                { scale: 7,  count: 4 }
-            ];
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
 
-            let totalGenerated = 0;
+            const startX = 16;
+            const endX = width - 16;
+            const startY = 16;
+            const endY = 16;
 
-            layers.forEach(layer => {
-                for (let i = 0; i < layer.count && totalGenerated < count; i++) {
-                    const t = (i / layer.count) * Math.PI * 2 + Math.random() * 0.3;
-                    const p = heartPoint(t, layer.scale);
+            const midY = 38 + Math.random() * 10;
+            const shadowOffsetY = 3;
 
-                    const offsetX = (Math.random() - 0.5) * 45;
-                    const offsetY = (Math.random() - 0.5) * 45;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + shadowOffsetY);
+            ctx.quadraticCurveTo(width / 2, midY + shadowOffsetY + 8, endX, endY + shadowOffsetY);
+            ctx.strokeStyle = 'rgba(60, 35, 15, 0.2)';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+            ctx.filter = 'blur(2px)';
+            ctx.stroke();
+            ctx.filter = 'none';
 
-                    points.push({
-                        x: centerX + p.x + offsetX,
-                        y: centerY + p.y + offsetY
-                    });
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(width / 2, midY + 4, endX, endY);
+            ctx.strokeStyle = 'rgba(90, 60, 30, 0.15)';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.stroke();
 
-                    totalGenerated++;
-                }
-            });
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(width / 2, midY, endX, endY);
+            ctx.strokeStyle = '#c98f5a';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
 
-            while (totalGenerated < count) {
-                const t = Math.random() * Math.PI * 2;
-                const p = heartPoint(t, 18);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY - 1);
+            ctx.quadraticCurveTo(width / 2, midY - 1.5, endX, endY - 1);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
 
-                const offsetX = (Math.random() - 0.5) * 50;
-                const offsetY = (Math.random() - 0.5) * 50;
+            for (let i = 0; i < 12; i++) {
+                const t = i / 11;
+                const x = startX + (endX - startX) * t;
+                const y = (1 - t) * (1 - t) * startY + 2 * t * (1 - t) * midY + t * t * endY;
 
-                points.push({
-                    x: centerX + p.x + offsetX,
-                    y: centerY + p.y + offsetY
-                });
+                ctx.fillStyle = 'rgba(180, 130, 90, 0.45)';
+                ctx.beginPath();
+                ctx.arc(x, y, 1.8, 0, Math.PI * 2);
+                ctx.fill();
 
-                totalGenerated++;
+                ctx.fillStyle = 'rgba(130, 90, 60, 0.35)';
+                ctx.beginPath();
+                ctx.arc(x + 2, y + 2, 1.2, 0, Math.PI * 2);
+                ctx.fill();
             }
 
-            return points;
+            return { startX, endX, startY, endY, controlY: midY };
         }
 
         function renderPhotos() {
             const wallRect = photoWall.getBoundingClientRect();
-            const points = generateHeartFillPoints(photos.length, wallRect.width, wallRect.height);
+            if(wallRect.width < 50){
+                return;
+            }
 
-            photos.forEach((photo, index) => {
-                const item = document.createElement('div');
-                item.className = 'photo-item';
+            ropeSets.forEach((set, ropeIndex) => {
+                const canvas = set.querySelector('.rope-canvas');
+                const curve = drawTwistedRope(canvas);
+                if(!curve) return;
 
-                const size = 68 + Math.random() * 24;
-                const rotate = (Math.random() - 0.5) * 16;
+                const groupPhotos = photos.filter(p => p.rope === ropeIndex);
+                const count = groupPhotos.length;
 
-                item.style.width = size + 'px';
-                item.style.height = size * 1.2 + 'px';
-                item.style.left = points[index].x + 'px';
-                item.style.top = points[index].y + 'px';
-                item.style.setProperty('--rotate', rotate + 'deg');
-                item.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
-                item.style.animationDelay = (index * 0.08) + 's';
+                const setRect = set.getBoundingClientRect();
+                const setWidth = setRect.width;
+                const startX = 20;
+                const endX = setWidth - 20;
+                const gap = (endX - startX) / (count + 1);
 
-                item.innerHTML = `<img src="${photo.src}" alt="照片${index + 1}" loading="lazy">`;
+                const isMobile = window.innerWidth <= 768;
+                const baseWidth = isMobile ? 70 : 105;
+                const sizeRange = isMobile ? 20 : 28;
 
-                item.addEventListener('click', () => {
-                    openModal(photo);
+                groupPhotos.forEach((photo, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'photo-item';
+
+                    const size = baseWidth + Math.random() * sizeRange;
+                    const photoHeight = size * 1.3;
+                    const rotate = (Math.random() - 0.5) * 8;
+
+                    const baseX = startX + gap * (index + 1);
+                    const offsetX = (Math.random() - 0.5) * gap * 0.15;
+                    const currentX = baseX + offsetX;
+
+                    const t = (currentX - curve.startX) / (curve.endX - curve.startX);
+                    const ropeY = (1 - t) * (1 - t) * curve.startY + 2 * t * (1 - t) * curve.controlY + t * t * curve.endY;
+
+                    const itemTop = ropeY + photoHeight / 2 + Math.random() * 3;
+
+                    item.style.width = size + 'px';
+                    item.style.height = photoHeight + 'px';
+                    item.style.left = currentX + 'px';
+                    item.style.top = itemTop + 'px';
+                    item.style.setProperty('--rotate', rotate + 'deg');
+                    item.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
+                    item.style.animationDelay = (index * 0.12) + 's';
+
+                    item.innerHTML = `
+                        <div class="wood-clip"></div>
+                        <img src="${photo.src}" alt="照片" loading="lazy">
+                    `;
+
+                    item.addEventListener('click', () => {
+                        openModal(photo);
+                    });
+
+                    set.appendChild(item);
+
+                    setTimeout(() => {
+                        item.classList.add('show');
+                    }, 350 + index * 120 + ropeIndex * 180);
                 });
+            });
 
+            addCuteElements();
+        }
+
+        function addCuteElements() {
+            const elements = [
+                { type: 'animal', emoji: '🦌', left: '6%', top: '8%' },
+                { type: 'animal', emoji: '🐯', left: '88%', top: '10%' },
+                { type: 'animal', emoji: '🐰', left: '8%', top: '36%' },
+                { type: 'animal', emoji: '🐻', left: '90%', top: '34%' },
+                { type: 'animal', emoji: '🦊', left: '10%', top: '64%' },
+                { type: 'animal', emoji: '🐱', left: '86%', top: '62%' },
+                { type: 'animal', emoji: '🐶', left: '46%', top: '18%' },
+                { type: 'animal', emoji: '🐼', left: '54%', top: '82%' },
+                { type: 'tree', emoji: '🌳', left: '4%', top: '78%' },
+                { type: 'tree', emoji: '🌲', left: '92%', top: '76%' },
+                { type: 'tree', emoji: '🌴', left: '2%', top: '46%' },
+                { type: 'tree', emoji: '🎄', left: '94%', top: '44%' },
+                { type: 'leaf', emoji: '🍃', left: '18%', top: '24%' },
+                { type: 'leaf', emoji: '🍂', left: '82%', top: '22%' },
+                { type: 'leaf', emoji: '🌿', left: '22%', top: '74%' },
+                { type: 'leaf', emoji: '☘️', left: '78%', top: '72%' },
+                { type: 'star', emoji: '⭐', left: '50%', top: '6%' },
+                { type: 'heart', emoji: '💗', left: '14%', top: '80%' },
+                { type: 'sparkle', emoji: '✨', left: '86%', top: '78%' },
+                { type: 'cloud', emoji: '☁️', left: '48%', top: '86%' }
+            ];
+
+            elements.forEach(el => {
+                const item = document.createElement('div');
+                item.className = `cute-element ${el.type}`;
+                item.textContent = el.emoji;
+                item.style.left = el.left;
+                item.style.top = el.top;
+                item.style.animationDelay = Math.random() * 5 + 's';
                 photoWall.appendChild(item);
-
-                setTimeout(() => {
-                    item.classList.add('show');
-                }, 300 + index * 100);
             });
         }
 
@@ -478,9 +801,10 @@
             if (e.key === 'Escape') closeModal();
         });
 
+        // 飘雪动画
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
-        let hearts = [];
+        let snowflakes = [];
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -490,7 +814,7 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        class BgHeart {
+        class SnowFlake {
             constructor() {
                 this.reset();
                 this.y = Math.random() * canvas.height;
@@ -499,15 +823,16 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = -20;
-                this.size = 4 + Math.random() * 10;
-                this.speed = 0.5 + Math.random() * 1.5;
-                this.opacity = 0.15 + Math.random() * 0.25;
+                this.size = 2 + Math.random() * 5;
+                this.speed = 0.3 + Math.random() * 1;
+                this.opacity = 0.4 + Math.random() * 0.5;
                 this.swayOffset = Math.random() * Math.PI * 2;
+                this.swaySpeed = 0.005 + Math.random() * 0.01;
             }
 
             update() {
                 this.y += this.speed;
-                this.x += Math.sin(this.y * 0.01 + this.swayOffset) * 0.5;
+                this.x += Math.sin(this.y * this.swaySpeed + this.swayOffset) * 0.8;
 
                 if (this.y > canvas.height + 20) {
                     this.reset();
@@ -517,39 +842,29 @@
             draw() {
                 ctx.save();
                 ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = '#f0b8cd';
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-
-                const x = this.x;
-                const y = this.y;
-                const s = this.size;
-
-                ctx.moveTo(x, y + s * 0.25);
-                ctx.bezierCurveTo(x, y, x - s / 2, y, x - s / 2, y + s * 0.25);
-                ctx.bezierCurveTo(x - s / 2, y + s * 0.5, x, y + s * 0.75, x, y + s);
-                ctx.bezierCurveTo(x, y + s * 0.75, x + s / 2, y + s * 0.5, x + s / 2, y + s * 0.25);
-                ctx.bezierCurveTo(x + s / 2, y, x, y, x, y + s * 0.25);
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
-
                 ctx.restore();
             }
         }
 
-        function initBgHearts() {
-            hearts = [];
-            const count = Math.floor(canvas.width / 30);
+        function initSnowflakes() {
+            snowflakes = [];
+            const count = Math.floor(canvas.width / 25);
 
             for (let i = 0; i < count; i++) {
-                hearts.push(new BgHeart());
+                snowflakes.push(new SnowFlake());
             }
         }
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            hearts.forEach(h => {
-                h.update();
-                h.draw();
+            snowflakes.forEach(s => {
+                s.update();
+                s.draw();
             });
 
             requestAnimationFrame(animate);
@@ -557,7 +872,7 @@
 
         window.addEventListener('load', () => {
             renderPhotos();
-            initBgHearts();
+            initSnowflakes();
             animate();
         });
 
@@ -565,10 +880,179 @@
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                photoWall.innerHTML = '';
-                renderPhotos();
-                initBgHearts();
-            }, 300);
+                // 等待浏览器重排完成，再执行DOM重建
+                requestAnimationFrame(()=>{
+                    photoWall.innerHTML = '';
+
+                    const ropeSetsHTML = `
+                        <div class="rope-set top">
+                            <div class="rope-anchor left"></div>
+                            <canvas class="rope-canvas"></canvas>
+                            <div class="rope-anchor right"></div>
+                        </div>
+                        <div class="rope-set middle">
+                            <div class="rope-anchor left"></div>
+                            <canvas class="rope-canvas"></canvas>
+                            <div class="rope-anchor right"></div>
+                        </div>
+                        <div class="rope-set bottom">
+                            <div class="rope-anchor left"></div>
+                            <canvas class="rope-canvas"></canvas>
+                            <div class="rope-anchor right"></div>
+                        </div>
+                    `;
+                    photoWall.innerHTML = ropeSetsHTML;
+                    renderPhotos();
+                    initSnowflakes();
+                })
+            }, 250);
+        });
+
+        // ==================================================
+        // 【背景音乐配置区】
+        // ==================================================
+        const musicConfig = {
+            src: "music/桑田佳祐 - 白い恋人達 (白色恋人们).flac",
+            songName: "白い恋人達-桑田圭祐",
+            lyrics: [
+                { time: 0, text: "~~~~~~~~" },
+                { time: 16, text: "夜に向かって雪が降り積もると" },
+                { time: 22, text: "悲しみがそっと胸にこみ上げる" },
+                { time: 29, text: "涙で心の灯を消して" },
+                { time: 35, text: "通り過ぎてゆく季節を見ていた" },
+                { time: 41, text: "外はため息さえ凍りついて" },
+                { time: 48, text: "冬枯れの街路樹に風が泣く" },
+                { time: 54, text: "あの赤レンガの停車場で" },
+                { time: 60, text: "二度と帰らない誰かを待ってる Woo…" },
+                { time: 68, text: "今宵 涙こらえて奏でる愛のSerenade" },
+                { time: 74, text: "今も忘れない恋の歌" },
+                { time: 81, text: "雪よもう一度だけこのときめきをCelebrate" },
+                { time: 87, text: "ひとり泣き濡れた夜に White Love" },
+                { time: 94, text: "聖なる鐘の音が響く頃に" },
+                { time: 100, text: "最果ての街並みを夢に見る" },
+                { time: 106, text: "天使が空から降りて来て" },
+                { time: 112, text: "春が来る前に微笑みをくれた Woo…" },
+                { time: 120, text: "心折れないように負けないように Loneliness" },
+                { time: 126, text: "白い恋人が待っている" },
+                { time: 132, text: "だから夢と希望を胸に抱いて Foreverness" },
+                { time: 138, text: "辛い毎日がやがて White Love" },
+                { time: 146, text: "今宵 涙こらえて奏でる愛のSerenade" },
+                { time: 152, text: "今も忘れない恋の歌" },
+                { time: 158, text: "せめてもう一度だけこの旅立ちをCelebrate" },
+                { time: 164, text: "ひとり泣き濡れた冬に White Love" },
+                { time: 172, text: "(Instrumental)" },
+                { time: 188, text: "今宵 涙こらえて奏でる愛のSerenade" },
+                { time: 194, text: "今も忘れない恋の歌" },
+                { time: 200, text: "雪よもう一度だけこのときめきをCelebrate" },
+                { time: 206, text: "ひとり泣き濡れた夜に White Love" },
+                { time: 214, text: "心折れないように負けないように Loneliness" },
+                { time: 220, text: "白い恋人が待っている" },
+                { time: 226, text: "だから夢と希望を胸に抱いて Foreverness" },
+                { time: 232, text: "辛い毎日がやがて White Love" },
+                { time: 240, text: "今宵 涙こらえて奏でる愛のSerenade" },
+                { time: 246, text: "今も忘れない恋の歌" },
+                { time: 252, text: "せめてもう一度だけこの旅立ちをCelebrate" },
+                { time: 258, text: "ひとり泣き濡れた冬に White Love" },
+                { time: 270, text: "White Love" }
+            ]
+        };
+
+        const bgmAudio = new Audio(musicConfig.src);
+        bgmAudio.loop = true;
+
+        const musicIcon = document.getElementById('musicIcon');
+        const lyricLine = document.getElementById('lyricLine');
+        const songNameEl = document.querySelector('.song-name');
+
+        songNameEl.textContent = musicConfig.songName;
+
+        let isPlaying = false;
+        let iconRotateDeg = 0;
+        let rotateAnimId = null;
+        // 4秒一圈，每帧旋转角度
+        const rotateStep = 1.44;
+
+        function startIconRotate(){
+            function tick(){
+                iconRotateDeg += rotateStep;
+                musicIcon.style.transform = `rotate(${iconRotateDeg}deg)`;
+                rotateAnimId = requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        function stopIconRotate(){
+            if(rotateAnimId){
+                cancelAnimationFrame(rotateAnimId);
+                rotateAnimId = null;
+            }
+        }
+
+        musicIcon.addEventListener('click', () => {
+            if (isPlaying) {
+                bgmAudio.pause();
+                stopIconRotate();
+                isPlaying = false;
+            } else {
+                bgmAudio.play().catch(err => {
+                    console.log('播放失败，请检查音乐文件路径', err);
+                    lyricLine.textContent = '播放失败，请检查音乐文件';
+                });
+                startIconRotate();
+                isPlaying = true;
+            }
+        });
+
+        let currentLyricIndex = -1;
+        let isLyricSwitching = false;
+
+        function switchLyric(index) {
+            if (isLyricSwitching || index === currentLyricIndex) return;
+            
+            isLyricSwitching = true;
+            currentLyricIndex = index;
+            const text = musicConfig.lyrics[index].text;
+            
+            lyricLine.style.opacity = '0';
+            
+            setTimeout(() => {
+                lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
+                const contentEl = lyricLine.querySelector('.lyric-content');
+                const containerWidth = lyricLine.clientWidth;
+
+                if (contentEl.scrollWidth > containerWidth) {
+                    lyricLine.innerHTML = `<span class="lyric-content">${text}${text}</span>`;
+                    lyricLine.classList.add('scrolling');
+                } else {
+                    lyricLine.classList.remove('scrolling');
+                }
+                
+                requestAnimationFrame(() => {
+                    lyricLine.style.opacity = '1';
+                });
+                
+                setTimeout(() => {
+                    isLyricSwitching = false;
+                }, 400);
+            }, 400);
+        }
+
+        bgmAudio.addEventListener('timeupdate', () => {
+            const currentTime = bgmAudio.currentTime;
+            let targetIndex = 0;
+            
+            for (let i = musicConfig.lyrics.length - 1; i >= 0; i--) {
+                if (currentTime >= musicConfig.lyrics[i].time) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            
+            switchLyric(targetIndex);
+        });
+
+        bgmAudio.addEventListener('error', () => {
+            lyricLine.textContent = '音乐文件加载失败';
         });
     </script>
 </body>
