@@ -266,6 +266,10 @@
 
         .photo-item.show { opacity: 1; }
 
+        .photo-item {
+    opacity: 1;
+}
+
         .wood-clip {
             position: absolute;
             top: -7px;
@@ -839,15 +843,37 @@
                 }
             }
 
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
+           draw() {
+    ctx.save();
+
+    ctx.globalAlpha = this.opacity;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+
+    ctx.translate(this.x, this.y);
+
+    // 雪花六角旋转
+    for (let i = 0; i < 6; i++) {
+
+        ctx.rotate(Math.PI / 3);
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -this.size * 2);
+
+        // 雪花枝杈
+        ctx.moveTo(0, -this.size * 1.2);
+        ctx.lineTo(-this.size * 0.5, -this.size * 1.7);
+
+        ctx.moveTo(0, -this.size * 1.2);
+        ctx.lineTo(this.size * 0.5, -this.size * 1.7);
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
         }
 
         function initSnowflakes() {
@@ -876,43 +902,18 @@
             animate();
         });
 
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                // 等待浏览器重排完成，再执行DOM重建
-                requestAnimationFrame(()=>{
-                    photoWall.innerHTML = '';
-
-                    const ropeSetsHTML = `
-                        <div class="rope-set top">
-                            <div class="rope-anchor left"></div>
-                            <canvas class="rope-canvas"></canvas>
-                            <div class="rope-anchor right"></div>
-                        </div>
-                        <div class="rope-set middle">
-                            <div class="rope-anchor left"></div>
-                            <canvas class="rope-canvas"></canvas>
-                            <div class="rope-anchor right"></div>
-                        </div>
-                        <div class="rope-set bottom">
-                            <div class="rope-anchor left"></div>
-                            <canvas class="rope-canvas"></canvas>
-                            <div class="rope-anchor right"></div>
-                        </div>
-                    `;
-                    photoWall.innerHTML = ropeSetsHTML;
-                    renderPhotos();
-                    initSnowflakes();
-                })
-            }, 250);
+            window.addEventListener('resize', () => {
+        requestAnimationFrame(() => {
+            initSnowflakes();
         });
+    });
+        
 
         // ==================================================
         // 【背景音乐配置区】
         // ==================================================
         const musicConfig = {
-            src: "music/桑田佳祐 - 白い恋人達 (白色恋人们).flac",
+            src: "music/桑田佳祐 - 白い恋人達 (白色恋人们)-soConvert.mp3",
             songName: "白い恋人達-桑田圭祐",
             lyrics: [
                 { time: 0, text: "~~~~~~~~" },
