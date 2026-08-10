@@ -298,9 +298,52 @@
         }
 
         @keyframes photoFloat {
-            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(var(--rotate)); }
-            50% { transform: translate(-50%, -50%) translateY(-5px) rotate(var(--rotate)); }
-        }
+
+    0% {
+        transform:
+        translate(-50%, -50%)
+        translateX(0)
+        translateY(0)
+        rotate(var(--rotate));
+    }
+
+
+    25% {
+        transform:
+        translate(-50%, -50%)
+        translateX(var(--swing))
+        translateY(-4px)
+        rotate(calc(var(--rotate) + 2deg));
+    }
+
+
+    50% {
+        transform:
+        translate(-50%, -50%)
+        translateX(0)
+        translateY(-8px)
+        rotate(var(--rotate));
+    }
+
+
+    75% {
+        transform:
+        translate(-50%, -50%)
+        translateX(calc(var(--swing) * -1))
+        translateY(-4px)
+        rotate(calc(var(--rotate) - 2deg));
+    }
+
+
+    100% {
+        transform:
+        translate(-50%, -50%)
+        translateX(0)
+        translateY(0)
+        rotate(var(--rotate));
+    }
+
+}
 
         .photo-item.show { opacity: 1; }
 
@@ -763,6 +806,18 @@
                     item.style.left = currentX + 'px';
                     item.style.top = itemTop + 'px';
                     item.style.setProperty('--rotate', rotate + 'deg');
+                    
+                    // 设置风吹左右方向
+                    const swing =
+                        (index % 2 === 0 ? 1 : -1) *
+                        (4 + Math.random() * 8);
+
+
+                    item.style.setProperty(
+                        '--swing',
+                        swing + 'px'
+                    );
+                    
                     item.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
                     item.style.animationDelay = (index * 0.12) + 's';
 
