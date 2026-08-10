@@ -970,6 +970,32 @@
         let isPlaying = false;
         let iconRotateDeg = 0;
         let rotateAnimId = null;
+
+        let userStartedMusic = false;
+
+document.addEventListener('click', (e) => {
+
+    // 如果点击的是音乐按钮，不处理
+    if (e.target.closest('#musicIcon')) {
+        return;
+    }
+
+    if (!userStartedMusic) {
+
+        bgmAudio.play().then(() => {
+
+            isPlaying = true;
+            userStartedMusic = true;
+            startIconRotate();
+
+        }).catch(err => {
+            console.log('播放失败', err);
+        });
+
+    }
+
+});
+
         // 4秒一圈，每帧旋转角度
         const rotateStep = 1.44;
 
@@ -989,20 +1015,30 @@
             }
         }
 
-        musicIcon.addEventListener('click', () => {
-            if (isPlaying) {
-                bgmAudio.pause();
-                stopIconRotate();
-                isPlaying = false;
-            } else {
-                bgmAudio.play().catch(err => {
-                    console.log('播放失败，请检查音乐文件路径', err);
-                    lyricLine.textContent = '播放失败，请检查音乐文件';
-                });
-                startIconRotate();
-                isPlaying = true;
-            }
+  musicIcon.addEventListener('click', (e) => {
+
+    e.stopPropagation();
+
+    if (isPlaying) {
+
+        bgmAudio.pause();
+        stopIconRotate();
+        isPlaying = false;
+
+    } else {
+
+        bgmAudio.play().catch(err => {
+            console.log('播放失败，请检查音乐文件路径', err);
+            lyricLine.textContent = '播放失败，请检查音乐文件';
         });
+
+        startIconRotate();
+        isPlaying = true;
+        userStartedMusic = true;
+
+    }
+
+});
 
         let currentLyricIndex = -1;
         let isLyricSwitching = false;
