@@ -460,8 +460,8 @@
         }
 
         .lyric-line.scrolling .lyric-content {
-            animation: lyricScroll 8s linear infinite;
-        }
+    animation: lyricScroll 8s linear forwards;
+}
 
         @keyframes lyricScroll {
             0% { transform: translateX(0); }
@@ -1058,11 +1058,16 @@ document.addEventListener('click', (e) => {
                 const containerWidth = lyricLine.clientWidth;
 
                 if (contentEl.scrollWidth > containerWidth) {
-                    lyricLine.innerHTML = `<span class="lyric-content">${text}${text}</span>`;
-                    lyricLine.classList.add('scrolling');
-                } else {
-                    lyricLine.classList.remove('scrolling');
-                }
+
+    lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
+
+    lyricLine.classList.add('scrolling');
+
+} else {
+
+    lyricLine.classList.remove('scrolling');
+
+}
                 
                 requestAnimationFrame(() => {
                     lyricLine.style.opacity = '1';
