@@ -627,9 +627,24 @@
     width: 260px;
 }
 
-.music-player {
-    transform:scale(0.85);
-    transform-origin:right top;
+@media(max-width:768px){
+
+    .music-player {
+
+        position:absolute;
+
+        top:95px;
+
+        right:50%;
+
+        transform:translateX(50%);
+
+        padding:5px 10px;
+
+        border-radius:20px;
+
+    }
+
 }
 
 .music-icon {
