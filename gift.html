@@ -683,9 +683,230 @@
 
 }
         }
+
+
+        /* =========================
+   密码保护层
+========================= */
+
+
+#passwordOverlay {
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:99999;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    background:
+
+    rgba(255,255,255,0.35);
+
+
+    backdrop-filter:blur(15px);
+
+    -webkit-backdrop-filter:blur(15px);
+
+}
+
+
+
+/* 密码卡片 */
+
+.password-box {
+
+
+    width:300px;
+
+    padding:30px 25px;
+
+
+    background:
+
+    rgba(255,255,255,0.85);
+
+
+    border-radius:30px;
+
+
+    text-align:center;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,0.15);
+
+
+}
+
+
+
+.lock-icon {
+
+    font-size:45px;
+
+}
+
+
+
+.password-box h2 {
+
+    margin:15px 0 8px;
+
+    color:#c57b95;
+
+    font-size:22px;
+
+}
+
+
+
+.password-box p {
+
+    color:#999;
+
+    font-size:14px;
+
+}
+
+
+
+#passwordInput {
+
+
+    width:100%;
+
+    padding:12px;
+
+
+    margin-top:20px;
+
+
+    border-radius:20px;
+
+
+    border:
+
+    2px solid #f2c7d5;
+
+
+    outline:none;
+
+
+    text-align:center;
+
+
+    font-size:16px;
+
+
+}
+
+
+
+#unlockBtn {
+
+
+    margin-top:15px;
+
+
+    width:100%;
+
+
+    padding:12px;
+
+
+    border:none;
+
+
+    border-radius:20px;
+
+
+    background:#f3a8c0;
+
+
+    color:white;
+
+
+    font-size:16px;
+
+}
+
+
+
+#errorMsg {
+
+
+    display:none;
+
+
+    margin-top:12px;
+
+    color:#ff8aa8;
+
+    font-size:13px;
+
+}
+
+    #passwordOverlay{
+
+    transition:opacity 1s;
+
+}
+
     </style>
 </head>
 <body>
+    <!-- 密码控件 -->
+<div id="passwordOverlay">
+
+    <div class="password-box">
+
+        <div class="lock-icon">
+            🔒
+        </div>
+
+
+        <h2>
+            请输入房间密码
+        </h2>
+
+
+        <p>
+            只有我们知道的小秘密 ✨
+        </p>
+
+
+        <input 
+            id="passwordInput"
+            type="password"
+            placeholder="输入密码"
+        >
+
+
+        <button id="unlockBtn">
+            开启回忆
+        </button>
+
+
+        <div id="errorMsg">
+            密码不正确哦，再试一次 💕
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
     <!-- 背景音乐控件 -->
     <div class="music-player" id="musicPlayer">
         <div class="music-info">
@@ -1292,6 +1513,79 @@ document.addEventListener('click', (e) => {
         bgmAudio.addEventListener('error', () => {
             lyricLine.textContent = '音乐文件加载失败';
         });
+
+
+        const PASSWORD = "250521";
+
+
+const overlay =
+document.getElementById("passwordOverlay");
+
+
+const input =
+document.getElementById("passwordInput");
+
+
+const btn =
+document.getElementById("unlockBtn");
+
+
+const error =
+document.getElementById("errorMsg");
+
+
+
+btn.onclick=function(){
+
+
+    if(input.value === PASSWORD){
+
+
+        overlay.style.opacity="0";
+
+
+setTimeout(()=>{
+
+    overlay.style.display="none";
+
+},600);
+
+
+    }
+    else{
+
+
+        error.style.display="block";
+
+
+        input.value="";
+
+
+    }
+
+
+};
+
+
+
+input.addEventListener(
+"keydown",
+function(e){
+
+
+    if(e.key==="Enter"){
+
+        btn.click();
+
+    }
+
+
+});
+
+
+        
+
+
     </script>
 </body>
 </html>
