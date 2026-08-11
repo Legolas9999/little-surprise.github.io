@@ -54,17 +54,33 @@
         }
 
         .continue-text {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            z-index: 1;
-            font-size: 1rem;
-            color: #9a7ba3;
-            letter-spacing: 2px;
-            opacity: 0.85;
-            font-style: italic;
-            pointer-events: none;
-        }
+
+    position: fixed;
+
+    right: 24px;
+
+    bottom: 24px;
+
+    z-index: 10;
+
+    width: 220px;
+
+    pointer-events: none;
+
+    animation: continueFloat 3s ease-in-out infinite;
+
+}
+
+
+.continue-text img {
+
+    width: 100%;
+
+    height: auto;
+
+    display: block;
+
+}
 
         #bgCanvas {
             position: fixed;
@@ -114,6 +130,32 @@
             0%, 100% { transform: translate(-50%, -50%) scale(1); }
             50% { transform: translate(-50%, -50%) scale(1.2); }
         }
+
+        @keyframes continueFloat {
+
+    0%,100% {
+
+        transform:
+        translateY(0px)
+        rotate(-3deg);
+
+    }
+
+
+    50% {
+
+        transform:
+        translateY(-8px)
+        rotate(3deg);
+
+    }
+
+}
+
+
+
+
+
 
         .click-heart {
             position: fixed;
@@ -569,12 +611,17 @@
             .cute-element.animal { font-size: 32px; }
             .cute-element.tree { font-size: 30px; }
 
+            
             .continue-text {
-                right: 16px;
-                bottom: 16px;
-                font-size: 0.9rem;
-                letter-spacing: 1px;
-            }
+
+    right:16px;
+
+    bottom:16px;
+
+    width:140px;
+
+}
+
 
             .music-player {
                 top: 12px;
@@ -602,7 +649,9 @@
     <div id="cursor"></div>
     <canvas id="bgCanvas"></canvas>
 
-    <div class="continue-text">未完待续…</div>
+    <div class="continue-text">
+    <img src="image/continue_cropped_compressed.png">
+</div>
 
     <div class="page-title">
         <img src="image/story-title_compressed.png" class="story-title-img">
