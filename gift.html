@@ -1264,27 +1264,23 @@
       .comment-item {
         position: relative;
 
-        padding: 24px 24px 20px;
+        height: 320px;
+        min-height: 320px;
 
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.94),
-          rgba(255, 249, 252, 0.86)
-        );
+        padding: 38px 40px 28px;
 
-        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
 
-        border: 1px solid rgba(255, 255, 255, 0.95);
+        box-sizing: border-box;
 
-        box-shadow:
-          0 8px 20px rgba(170, 150, 175, 0.14),
-          0 2px 5px rgba(120, 100, 120, 0.06);
+        border-radius: 16px;
 
-        transform: rotate(var(--comment-rotate, 0deg));
+        background: rgba(255, 255, 255, 0.92);
 
-        transition:
-          transform 0.3s ease,
-          box-shadow 0.3s ease;
+        box-shadow: 0 8px 25px rgba(120, 100, 140, 0.08);
+
+        overflow: hidden;
       }
 
       /* 照片纸的小装饰 */
@@ -1330,15 +1326,36 @@
       /* ---------- 留言内容 ---------- */
 
       .comment-message {
-        color: #6e6067;
+        flex: 1;
 
-        font-size: 14px;
+        display: flex;
+        align-items: center;
 
+        margin-top: 15px;
+        margin-bottom: 15px;
+
+        font-size: 17px;
         line-height: 1.9;
 
-        white-space: pre-line;
+        text-align: left;
 
-        word-break: break-word;
+        overflow: hidden;
+      }
+
+      .comment-message::after {
+        content: "……";
+        position: absolute;
+
+        right: 0;
+        bottom: 0;
+
+        padding-left: 30px;
+
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.95) 40%
+        );
       }
 
       /* ---------- 日期 ---------- */
