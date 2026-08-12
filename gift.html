@@ -262,10 +262,14 @@
 
       .photo-wall {
         position: relative;
+
         width: 92%;
         max-width: 1200px;
+
         min-height: 780px;
-        margin: 0 auto 40px;
+
+        margin: 0 auto 0;
+
         z-index: 1;
       }
 
@@ -769,7 +773,11 @@
         .message-board {
           width: 90%;
 
-          margin: 55px auto 80px;
+          margin: 80px auto 90px;
+
+          position: relative;
+
+          clear: both;
         }
 
         .message-header h2 {
@@ -966,10 +974,16 @@
 
       .message-board {
         width: min(900px, 88%);
-        margin: 80px auto 120px;
+
         position: relative;
+
+        margin: 120px auto 140px;
+
         z-index: 2;
+
         text-align: center;
+
+        clear: both;
       }
 
       /* ---------- 标题 ---------- */
@@ -1411,8 +1425,6 @@
     </style>
   </head>
   <body>
-    <div id="commentsList"></div>
-
     <!-- 密码控件 -->
     <div id="passwordOverlay">
       <div class="password-box">
@@ -1668,6 +1680,13 @@
         const day = String(date.getDate()).padStart(2, "0");
 
         return `${year}.${month}.${day}`;
+      }
+
+      // 防止留言中的 HTML / JS 被执行
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
       }
 
       // supabase数据库
