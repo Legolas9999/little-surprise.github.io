@@ -761,6 +761,95 @@
 
           font-size: 0.55rem;
         }
+
+        /* =========================
+   留言板 - 手机端
+========================= */
+
+        .message-board {
+          width: 90%;
+
+          margin: 55px auto 80px;
+        }
+
+        .message-header h2 {
+          font-size: 22px;
+
+          letter-spacing: 2px;
+
+          padding: 6px 12px;
+        }
+
+        .message-header p {
+          font-size: 12px;
+
+          line-height: 1.8;
+        }
+
+        .message-header::before,
+        .message-header::after {
+          width: 15%;
+        }
+
+        .message-form {
+          padding: 20px 16px;
+
+          border-radius: 20px;
+        }
+
+        #commentName {
+          height: 44px;
+
+          font-size: 14px;
+        }
+
+        #commentMessage {
+          min-height: 115px;
+
+          font-size: 14px;
+        }
+
+        .message-submit {
+          width: 80%;
+
+          min-width: 0;
+
+          padding: 11px 16px;
+
+          font-size: 14px;
+        }
+
+        .comments-title {
+          margin-top: 40px;
+
+          font-size: 18px;
+
+          gap: 9px;
+        }
+
+        #commentsList {
+          grid-template-columns: 1fr;
+
+          gap: 18px;
+        }
+
+        .comment-item {
+          padding: 22px 20px 18px;
+        }
+
+        .comment-name {
+          font-size: 16px;
+        }
+
+        .comment-message {
+          font-size: 13px;
+
+          line-height: 1.85;
+        }
+
+        .comment-time {
+          font-size: 10px;
+        }
       }
 
       /* =========================
@@ -870,29 +959,458 @@
       #passwordOverlay {
         transition: opacity 2s;
       }
+
+      /* ========================================
+   💌 留言板
+======================================== */
+
+      .message-board {
+        width: min(900px, 88%);
+        margin: 80px auto 120px;
+        position: relative;
+        z-index: 2;
+        text-align: center;
+      }
+
+      /* ---------- 标题 ---------- */
+
+      .message-header {
+        position: relative;
+        margin-bottom: 32px;
+      }
+
+      .message-header::before,
+      .message-header::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 25%;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(196, 150, 170, 0.5)
+        );
+      }
+
+      .message-header::before {
+        left: 0;
+      }
+
+      .message-header::after {
+        right: 0;
+        transform: rotate(180deg);
+      }
+
+      .message-deco {
+        color: #e8a8c0;
+        font-size: 20px;
+        margin-bottom: 8px;
+        animation: messageSparkle 2s ease-in-out infinite;
+      }
+
+      .message-header h2 {
+        display: inline-block;
+        margin: 0;
+        padding: 8px 24px;
+
+        color: #a67891;
+
+        font-family: "KaiTi", "STKaiti", "PingFang SC", serif;
+
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: 3px;
+
+        text-shadow: 0 2px 8px rgba(180, 140, 160, 0.15);
+      }
+
+      .message-header p {
+        margin-top: 10px;
+
+        color: #9a8b94;
+
+        font-size: 14px;
+        line-height: 1.9;
+        letter-spacing: 1px;
+      }
+
+      /* ---------- 输入区域 ---------- */
+
+      .message-form {
+        width: min(600px, 100%);
+        margin: 0 auto;
+
+        padding: 30px;
+
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.82),
+          rgba(255, 248, 252, 0.72)
+        );
+
+        border: 1px solid rgba(255, 255, 255, 0.9);
+
+        border-radius: 24px;
+
+        box-shadow:
+          0 12px 30px rgba(170, 145, 170, 0.13),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      /* ---------- 输入框 ---------- */
+
+      .input-wrap,
+      .textarea-wrap {
+        position: relative;
+      }
+
+      .input-wrap {
+        margin-bottom: 14px;
+      }
+
+      .input-icon,
+      .textarea-icon {
+        position: absolute;
+
+        left: 16px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        color: #e0a4bb;
+
+        font-size: 18px;
+
+        pointer-events: none;
+      }
+
+      .textarea-icon {
+        top: 18px;
+        transform: none;
+      }
+
+      #commentName,
+      #commentMessage {
+        width: 100%;
+
+        border: 1.5px solid rgba(224, 175, 194, 0.55);
+
+        background: rgba(255, 255, 255, 0.65);
+
+        color: #665660;
+
+        outline: none;
+
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease,
+          background 0.3s ease;
+      }
+
+      #commentName {
+        height: 48px;
+
+        padding: 0 18px 0 46px;
+
+        border-radius: 18px;
+
+        font-size: 15px;
+      }
+
+      #commentMessage {
+        min-height: 130px;
+
+        padding: 16px 18px 16px 46px;
+
+        border-radius: 18px;
+
+        font-size: 15px;
+
+        line-height: 1.8;
+
+        resize: vertical;
+      }
+
+      #commentName::placeholder,
+      #commentMessage::placeholder {
+        color: #b7a6ae;
+      }
+
+      #commentName:focus,
+      #commentMessage:focus {
+        border-color: #e2a6bd;
+
+        background: rgba(255, 255, 255, 0.9);
+
+        box-shadow: 0 0 0 4px rgba(230, 170, 195, 0.12);
+      }
+
+      /* ---------- 提交按钮 ---------- */
+
+      .message-submit {
+        margin-top: 18px;
+
+        min-width: 190px;
+
+        padding: 12px 24px;
+
+        border: none;
+
+        border-radius: 30px;
+
+        background: linear-gradient(135deg, #efb0c7, #e39bb7);
+
+        color: white;
+
+        font-size: 15px;
+
+        letter-spacing: 2px;
+
+        cursor: pointer;
+
+        box-shadow: 0 7px 18px rgba(220, 150, 180, 0.25);
+
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+      }
+
+      .message-submit:hover {
+        transform: translateY(-2px) scale(1.02);
+
+        box-shadow: 0 10px 24px rgba(220, 150, 180, 0.32);
+      }
+
+      .message-submit:active {
+        transform: translateY(1px) scale(0.98);
+      }
+
+      .submit-heart {
+        display: inline-block;
+
+        margin-left: 8px;
+
+        font-size: 18px;
+
+        animation: submitHeartBeat 1.5s ease-in-out infinite;
+      }
+
+      /* ---------- 留言标题 ---------- */
+
+      .comments-title {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 14px;
+
+        margin: 55px auto 25px;
+
+        color: #a67c91;
+
+        font-family: "KaiTi", "STKaiti", serif;
+
+        font-size: 20px;
+
+        letter-spacing: 2px;
+      }
+
+      .comments-title span:first-child,
+      .comments-title span:last-child {
+        color: #e8a8c0;
+
+        font-size: 14px;
+      }
+
+      /* ---------- 留言列表 ---------- */
+
+      #commentsList {
+        width: min(760px, 100%);
+
+        margin: 0 auto;
+
+        display: grid;
+
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        gap: 22px;
+
+        text-align: left;
+      }
+
+      /* ---------- 单条留言 ---------- */
+
+      .comment-item {
+        position: relative;
+
+        padding: 24px 24px 20px;
+
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.94),
+          rgba(255, 249, 252, 0.86)
+        );
+
+        border-radius: 8px;
+
+        border: 1px solid rgba(255, 255, 255, 0.95);
+
+        box-shadow:
+          0 8px 20px rgba(170, 150, 175, 0.14),
+          0 2px 5px rgba(120, 100, 120, 0.06);
+
+        transform: rotate(var(--comment-rotate, 0deg));
+
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      /* 照片纸的小装饰 */
+
+      .comment-item::before {
+        content: "";
+
+        position: absolute;
+
+        top: -7px;
+        left: 50%;
+
+        width: 62px;
+        height: 14px;
+
+        transform: translateX(-50%) rotate(-2deg);
+
+        background: rgba(239, 205, 214, 0.72);
+
+        box-shadow: 0 2px 4px rgba(150, 120, 130, 0.08);
+      }
+
+      .comment-item:hover {
+        transform: rotate(0deg) translateY(-4px);
+
+        box-shadow: 0 14px 28px rgba(170, 150, 175, 0.2);
+      }
+
+      /* ---------- 名字 ---------- */
+
+      .comment-name {
+        margin-bottom: 12px;
+
+        color: #a16f88;
+
+        font-family: "KaiTi", "STKaiti", serif;
+
+        font-size: 17px;
+
+        font-weight: 600;
+      }
+
+      /* ---------- 留言内容 ---------- */
+
+      .comment-message {
+        color: #6e6067;
+
+        font-size: 14px;
+
+        line-height: 1.9;
+
+        white-space: pre-line;
+
+        word-break: break-word;
+      }
+
+      /* ---------- 日期 ---------- */
+
+      .comment-time {
+        margin-top: 14px;
+
+        padding-top: 10px;
+
+        border-top: 1px dashed rgba(205, 175, 190, 0.35);
+
+        color: #b2a2aa;
+
+        font-size: 11px;
+
+        text-align: right;
+
+        letter-spacing: 1px;
+      }
+
+      /* ---------- 动画 ---------- */
+
+      @keyframes messageSparkle {
+        0%,
+        100% {
+          transform: scale(1) rotate(0deg);
+
+          opacity: 0.7;
+        }
+
+        50% {
+          transform: scale(1.18) rotate(8deg);
+
+          opacity: 1;
+        }
+      }
+
+      @keyframes submitHeartBeat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.25);
+        }
+      }
+      /* 暂无留言 */
+      .empty-comments {
+        grid-column: 1 / -1;
+
+        padding: 35px 20px;
+
+        text-align: center;
+
+        color: #ad9ca5;
+
+        background: rgba(255, 255, 255, 0.55);
+
+        border-radius: 20px;
+
+        border: 1px dashed rgba(220, 180, 195, 0.5);
+      }
+
+      .empty-heart {
+        margin-bottom: 8px;
+
+        color: #e5a5bd;
+
+        font-size: 28px;
+
+        animation: submitHeartBeat 1.6s ease-in-out infinite;
+      }
+
+      .empty-comments small {
+        display: block;
+
+        margin-top: 7px;
+
+        color: #b9aab1;
+
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>
-    <!-- 留言板 -->
-    <div class="message-section">
-      <h2>留下你想说的话 💌</h2>
-
-      <input
-        type="text"
-        id="commentName"
-        placeholder="你的名字"
-        maxlength="20"
-      />
-
-      <textarea
-        id="commentMessage"
-        placeholder="写下你想说的话……"
-        maxlength="300"
-      ></textarea>
-
-      <button id="submitComment">留下这份心意</button>
-    </div>
-
     <div id="commentsList"></div>
 
     <!-- 密码控件 -->
@@ -962,6 +1480,67 @@
       </div>
     </div>
 
+    <!-- 留言板 -->
+    <!-- ========================= -->
+    <!--       留言板               -->
+    <!-- ========================= -->
+
+    <section class="message-board">
+      <div class="message-header">
+        <div class="message-deco">✦</div>
+
+        <h2>如果你也走到了这里</h2>
+
+        <p>
+          不妨留下几句话，<br />
+          让这段故事多一份温柔的回忆。
+        </p>
+      </div>
+
+      <!-- 留言输入区域 -->
+
+      <div class="message-form">
+        <div class="input-wrap">
+          <span class="input-icon">♡</span>
+
+          <input
+            type="text"
+            id="commentName"
+            placeholder="你的名字"
+            maxlength="20"
+          />
+        </div>
+
+        <div class="textarea-wrap">
+          <span class="textarea-icon">✎</span>
+
+          <textarea
+            id="commentMessage"
+            placeholder="写下你想说的话……"
+            maxlength="300"
+          ></textarea>
+        </div>
+
+        <button id="submitComment" class="message-submit">
+          <span>留下这份心意</span>
+
+          <span class="submit-heart">♡</span>
+        </button>
+      </div>
+
+      <!-- 留言列表 -->
+
+      <div class="comments-title">
+        <span>💌</span>
+
+        <span>大家留下的话</span>
+
+        <span>💌</span>
+      </div>
+
+      <div id="commentsList"></div>
+    </section>
+
     <script>
       // 提交留言数据
       async function submitComment() {
@@ -1026,25 +1605,53 @@
         const commentsList = document.getElementById("commentsList");
 
         commentsList.innerHTML = "";
+        // 暂无留言
+        if (!data || data.length === 0) {
+          commentsList.innerHTML = `
+        <div class="empty-comments">
 
-        data.forEach((comment) => {
+            <div class="empty-heart">♡</div>
+
+            <div>
+                还没有留言哦
+            </div>
+
+            <small>
+                成为第一个留下心意的人吧 ✨
+            </small>
+
+        </div>
+    `;
+
+          return;
+        }
+
+        data.forEach((comment, index) => {
           const item = document.createElement("div");
 
           item.className = "comment-item";
 
+          // 让留言卡片产生轻微的手写便签感
+          const rotate =
+            (index % 2 === 0 ? -1 : 1) * (0.6 + Math.random() * 1.2);
+
+          item.style.setProperty("--comment-rotate", rotate + "deg");
+
           item.innerHTML = `
-            <div class="comment-name">
-                ${escapeHtml(comment.name)}
-            </div>
 
-            <div class="comment-message">
-                ${escapeHtml(comment.message)}
-            </div>
+        <div class="comment-name">
+            ♡ ${escapeHtml(comment.name)}
+        </div>
 
-            <div class="comment-time">
-                ${formatCommentTime(comment.created_at)}
-            </div>
-        `;
+        <div class="comment-message">
+            ${escapeHtml(comment.message)}
+        </div>
+
+        <div class="comment-time">
+            ${formatCommentTime(comment.created_at)}
+        </div>
+
+    `;
 
           commentsList.appendChild(item);
         });
@@ -1062,8 +1669,6 @@
 
         return `${year}.${month}.${day}`;
       }
-      // 网页打开读取数据
-      loadComments();
 
       // supabase数据库
       const SUPABASE_URL = "https://oxtmecvezbcmeglqxnwz.supabase.co";
@@ -1073,6 +1678,9 @@
         SUPABASE_URL,
         SUPABASE_KEY,
       );
+
+      // 网页打开读取数据
+      loadComments();
 
       // ==================================================
       // 【照片配置区】
