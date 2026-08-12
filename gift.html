@@ -1262,6 +1262,8 @@
         gap: 22px;
 
         text-align: left;
+
+        align-items: start;
       }
 
       /* ---------- 单条留言 ---------- */
@@ -1269,8 +1271,9 @@
       .comment-item {
         position: relative;
 
-        height: 320px;
-        min-height: 320px;
+        min-height: 260px;
+
+        height: auto;
 
         padding: 38px 40px 28px;
 
@@ -1285,7 +1288,14 @@
 
         box-shadow: 0 8px 25px rgba(120, 100, 140, 0.08);
 
-        overflow: hidden;
+        overflow: visible;
+
+        align-self: start;
+
+        transition:
+          height 0.35s ease,
+          box-shadow 0.3s ease,
+          transform 0.3s ease;
       }
 
       /* 照片纸的小装饰 */
@@ -1331,18 +1341,20 @@
       /* ---------- 留言内容 ---------- */
 
       .comment-message {
-        flex: 1;
-
-        display: flex;
-        align-items: center;
-
         margin-top: 15px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
 
         font-size: 17px;
         line-height: 1.9;
 
         text-align: left;
+
+        white-space: pre-line;
+        word-break: break-word;
+
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 6;
 
         overflow: hidden;
       }
@@ -1387,22 +1399,6 @@
         color: #a96884;
 
         transform: translateY(-1px);
-      }
-
-      .comment-message::after {
-        content: "……";
-        position: absolute;
-
-        right: 0;
-        bottom: 0;
-
-        padding-left: 30px;
-
-        background: linear-gradient(
-          to right,
-          transparent,
-          rgba(255, 255, 255, 0.95) 40%
-        );
       }
 
       /* ---------- 日期 ---------- */
@@ -1735,6 +1731,7 @@
           const messageElement = item.querySelector(".comment-message");
           const moreButton = item.querySelector(".comment-more");
 
+          commentsList.appendChild(item);
           // 判断留言是否超过 6 行
           requestAnimationFrame(() => {
             if (messageElement.scrollHeight > messageElement.clientHeight + 2) {
@@ -1758,7 +1755,6 @@
               });
             }
           });
-          commentsList.appendChild(item);
         });
       }
 
