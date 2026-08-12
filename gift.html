@@ -855,6 +855,11 @@
           line-height: 1.85;
         }
 
+        .comment-more {
+          font-size: 12px;
+          margin-top: 6px;
+        }
+
         .comment-time {
           font-size: 10px;
         }
@@ -1342,6 +1347,48 @@
         overflow: hidden;
       }
 
+      .comment-more {
+        display: none;
+
+        margin-top: 8px;
+
+        border: none;
+
+        background: transparent;
+
+        padding: 2px 6px;
+
+        color: #c98aa4;
+
+        font-size: 13px;
+
+        font-family: "KaiTi", "STKaiti", serif;
+
+        cursor: pointer;
+
+        letter-spacing: 1px;
+
+        transition: all 0.25s ease;
+      }
+
+      .comment-message.expanded {
+        display: block;
+
+        -webkit-line-clamp: unset;
+
+        overflow: visible;
+      }
+
+      .comment-more:active {
+        transform: scale(0.95);
+      }
+
+      .comment-more:hover {
+        color: #a96884;
+
+        transform: translateY(-1px);
+      }
+
       .comment-message::after {
         content: "……";
         position: absolute;
@@ -1668,20 +1715,49 @@
 
           item.innerHTML = `
 
-        <div class="comment-name">
-            ♡ ${escapeHtml(comment.name)}
-        </div>
+    <div class="comment-name">
+        ♡ ${escapeHtml(comment.name)}
+    </div>
 
-        <div class="comment-message">
-            ${escapeHtml(comment.message)}
-        </div>
+    <div class="comment-message">
+        ${escapeHtml(comment.message)}
+    </div>
 
-        <div class="comment-time">
-            ${formatCommentTime(comment.created_at)}
-        </div>
+    <button class="comment-more" type="button">
+        查看全文 ↓
+    </button>
 
-    `;
+    <div class="comment-time">
+        ${formatCommentTime(comment.created_at)}
+    </div>
 
+`;
+          const messageElement = item.querySelector(".comment-message");
+          const moreButton = item.querySelector(".comment-more");
+
+          // 判断留言是否超过 6 行
+          requestAnimationFrame(() => {
+            if (messageElement.scrollHeight > messageElement.clientHeight + 2) {
+              moreButton.style.display = "inline-block";
+
+              moreButton.addEventListener("click", () => {
+                const isExpanded =
+                  messageElement.classList.contains("expanded");
+
+                if (isExpanded) {
+                  // 收起
+                  messageElement.classList.remove("expanded");
+
+                  moreButton.textContent = "查看全文 ↓";
+                } else {
+                  // 展开
+                  messageElement.classList.add("expanded");
+
+                  moreButton.textContent = "收起 ↑";
+                }
+              });
+            }
+          });
           commentsList.appendChild(item);
         });
       }
