@@ -1,0 +1,4105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <!-- 原有 Supabase 依赖，保持不变 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <meta
+    name="description"
+    content="一些我们一起走过的地方，一些没有被时间带走的记忆。"
+  />
+
+  <title>我们的故事</title>
+
+  <style>
+    /*
+      ============================================================
+      REDESIGN SYSTEM
+      Editorial Luxury + Z-Axis Cascade
+      ============================================================
+    */
+
+    :root {
+      --paper: #f4efe7;
+      --paper-light: #faf7f1;
+      --paper-deep: #e9dfd2;
+
+      --ink: #27231f;
+      --ink-soft: #625a52;
+      --ink-muted: #8b8177;
+
+      --accent: #9d655e;
+      --accent-soft: #c8958a;
+      --accent-pale: #ead6ce;
+
+      --rope: #a9784d;
+      --rope-dark: #725033;
+      --wood: #b98252;
+      --wood-light: #d5a675;
+
+      --white: rgba(255, 255, 255, 0.78);
+
+      --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+      --ease-spring: cubic-bezier(0.22, 1.18, 0.36, 1);
+
+      --z-background: 0;
+      --z-content: 10;
+      --z-floating: 30;
+      --z-overlay: 100;
+      --z-modal: 200;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none !important;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      min-height: 100dvh;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(
+          circle at 12% 12%,
+          rgba(255, 255, 255, 0.92),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 86% 72%,
+          rgba(205, 168, 147, 0.12),
+          transparent 30%
+        ),
+        linear-gradient(
+          135deg,
+          #f8f4ed 0%,
+          #eee6dc 48%,
+          #f5eee5 100%
+        );
+      font-family:
+        "Plus Jakarta Sans",
+        "Noto Sans SC",
+        "PingFang SC",
+        sans-serif;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-background);
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        radial-gradient(
+          rgba(50, 40, 30, 0.15) 0.6px,
+          transparent 0.6px
+        );
+      background-size: 5px 5px;
+      mix-blend-mode: multiply;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-background);
+      pointer-events: none;
+      background:
+        linear-gradient(
+          90deg,
+          transparent 0,
+          rgba(95, 72, 53, 0.025) 50%,
+          transparent 100%
+        );
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    ::selection {
+      color: var(--paper-light);
+      background: var(--accent);
+    }
+
+    /*
+      ============================================================
+      CUSTOM CURSOR
+      ============================================================
+    */
+
+    #cursor {
+      position: fixed;
+      width: 18px;
+      height: 18px;
+      left: 0;
+      top: 0;
+      z-index: var(--z-modal);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition:
+        width 500ms var(--ease-spring),
+        height 500ms var(--ease-spring),
+        opacity 300ms var(--ease-fluid);
+    }
+
+    #cursor::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(157, 101, 94, 0.75);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+    }
+
+    #cursor::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    body.cursor-hover #cursor {
+      width: 42px;
+      height: 42px;
+    }
+
+    @media (max-width: 768px) {
+      * {
+        cursor: auto !important;
+      }
+
+      #cursor {
+        display: none;
+      }
+    }
+
+    /*
+      ============================================================
+      BACKGROUND CANVAS
+      ============================================================
+    */
+
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-background);
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.32;
+    }
+
+    /*
+      ============================================================
+      TOP MUSIC ISLAND
+      ============================================================
+    */
+
+    .music-player {
+      position: fixed;
+      top: 24px;
+      right: 28px;
+      z-index: var(--z-floating);
+
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      min-width: 235px;
+      padding: 8px 9px 8px 18px;
+
+      border-radius: 999px;
+
+      background: rgba(250, 247, 241, 0.78);
+      box-shadow:
+        0 12px 38px rgba(82, 58, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      transition:
+        transform 650ms var(--ease-spring),
+        box-shadow 500ms var(--ease-fluid);
+    }
+
+    .music-player:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 18px 44px rgba(82, 58, 42, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .music-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .song-name {
+      color: var(--ink);
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .lyric-line {
+      width: 165px;
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--ink-muted);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 400ms var(--ease-fluid);
+    }
+
+    .lyric-content {
+      display: inline-block;
+    }
+
+    .lyric-line.scrolling .lyric-content {
+      animation: lyricScroll 8s linear forwards;
+    }
+
+    @keyframes lyricScroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    .music-icon {
+      position: relative;
+      display: grid;
+      place-items: center;
+
+      width: 38px;
+      height: 38px;
+
+      border-radius: 50%;
+
+      background: var(--ink);
+      color: var(--paper-light);
+
+      font-size: 15px;
+
+      cursor: pointer;
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 450ms var(--ease-fluid);
+    }
+
+    .music-icon:hover {
+      transform: scale(1.08);
+      background: var(--accent);
+    }
+
+    .music-icon:active {
+      transform: scale(0.94);
+    }
+
+    /*
+      ============================================================
+      INTRO / TITLE
+      ============================================================
+    */
+
+    .page-title {
+      position: relative;
+      z-index: var(--z-content);
+
+      width: min(1180px, calc(100% - 48px));
+      min-height: 390px;
+
+      margin: 0 auto;
+
+      padding:
+        clamp(125px, 15vw, 190px)
+        0
+        70px;
+
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+      align-items: end;
+      gap: 70px;
+    }
+
+    .title-copy {
+      position: relative;
+      max-width: 780px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+
+      margin-bottom: 24px;
+      padding: 7px 12px;
+
+      border-radius: 999px;
+
+      background: rgba(255, 255, 255, 0.45);
+
+      color: var(--accent);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    .title-copy h1 {
+      color: var(--ink);
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+
+      font-size: clamp(72px, 10vw, 145px);
+      font-weight: 500;
+      line-height: 0.83;
+      letter-spacing: -0.055em;
+      text-wrap: balance;
+    }
+
+    .title-copy h1 span {
+      display: block;
+      margin-left: 0.7em;
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .title-copy p {
+      max-width: 390px;
+      margin-top: 32px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 2;
+      letter-spacing: 0.03em;
+    }
+
+    .title-mark {
+      justify-self: end;
+      align-self: end;
+
+      position: relative;
+
+      width: 240px;
+      height: 240px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          rgba(255, 255, 255, 0.72),
+          transparent 32%
+        ),
+        rgba(255, 255, 255, 0.22);
+
+      box-shadow:
+        0 30px 80px rgba(83, 57, 43, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .title-mark::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(157, 101, 94, 0.24);
+      border-radius: 50%;
+    }
+
+    .title-mark::after {
+      content: "2025 - 2026";
+      position: absolute;
+      bottom: 34px;
+
+      color: var(--ink-muted);
+      font-size: 9px;
+      letter-spacing: 0.25em;
+    }
+
+    .story-title-img {
+      width: 155px;
+      height: auto;
+      opacity: 0.9;
+    }
+
+    /*
+      ============================================================
+      PHOTO WALL
+      ============================================================
+    */
+
+    .photo-wall {
+      position: relative;
+      z-index: var(--z-content);
+
+      width: min(1260px, calc(100% - 48px));
+      min-height: 860px;
+
+      margin: 0 auto;
+
+      padding-bottom: 120px;
+    }
+
+    .wall-intro {
+      width: min(460px, 100%);
+      margin-bottom: 40px;
+      margin-left: 8%;
+
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+    }
+
+    .wall-intro strong {
+      color: var(--ink);
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .wall-intro span {
+      color: var(--ink-muted);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .rope-set {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      height: 245px;
+    }
+
+    .rope-set.top {
+      top: 105px;
+    }
+
+    .rope-set.middle {
+      top: 335px;
+    }
+
+    .rope-set.bottom {
+      top: 570px;
+    }
+
+    .rope-canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+
+      width: 100%;
+      height: 90px;
+
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .rope-anchor {
+      position: absolute;
+      top: 3px;
+
+      width: 25px;
+      height: 25px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          rgba(255, 255, 255, 0.5),
+          transparent 28%
+        ),
+        linear-gradient(
+          145deg,
+          var(--wood-light),
+          var(--wood)
+        );
+
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        inset 0 -3px 5px rgba(68, 39, 20, 0.25),
+        0 8px 15px rgba(70, 44, 27, 0.12);
+
+      z-index: 4;
+    }
+
+    .rope-anchor.left {
+      left: -12px;
+    }
+
+    .rope-anchor.right {
+      right: -12px;
+    }
+
+    .rope-anchor::after {
+      content: "";
+      position: absolute;
+
+      width: 6px;
+      height: 6px;
+
+      top: 50%;
+      left: 50%;
+
+      transform: translate(-50%, -50%);
+
+      border-radius: 50%;
+      background: rgba(77, 47, 28, 0.48);
+    }
+
+    /*
+      PHOTO OBJECT
+    */
+
+    .photo-item {
+      position: absolute;
+
+      padding: 8px 8px 22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.99),
+          rgba(245, 240, 233, 0.96)
+        );
+
+      box-shadow:
+        0 26px 45px rgba(73, 53, 40, 0.12),
+        0 8px 15px rgba(73, 53, 40, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+      opacity: 0;
+
+      cursor: pointer;
+
+      transform-origin: 50% -15px;
+
+      transition:
+        transform 850ms var(--ease-spring),
+        box-shadow 650ms var(--ease-fluid),
+        opacity 900ms var(--ease-fluid);
+
+      z-index: 5;
+      will-change: transform;
+    }
+
+    .photo-item.show {
+      opacity: 1;
+    }
+
+    .photo-item img {
+      display: block;
+
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+
+      filter: saturate(0.9) contrast(0.98);
+
+      transition:
+        filter 800ms var(--ease-fluid),
+        transform 900ms var(--ease-spring);
+    }
+
+    .photo-item:hover {
+      z-index: 20;
+
+      box-shadow:
+        0 35px 65px rgba(73, 53, 40, 0.2),
+        0 12px 22px rgba(73, 53, 40, 0.11),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .photo-item:hover img {
+      filter: saturate(1) contrast(1.02);
+      transform: scale(1.025);
+    }
+
+    .wood-clip {
+      position: absolute;
+
+      top: -8px;
+      left: 50%;
+
+      width: 40px;
+      height: 15px;
+
+      transform: translateX(-50%);
+
+      background:
+        linear-gradient(
+          180deg,
+          #d6a477,
+          #ae774c
+        );
+
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(72, 42, 23, 0.25),
+        0 5px 9px rgba(62, 38, 24, 0.13);
+
+      z-index: 8;
+    }
+
+    .wood-clip::before {
+      content: "";
+
+      position: absolute;
+
+      top: 50%;
+      left: 50%;
+
+      width: 5px;
+      height: 9px;
+
+      transform: translate(-50%, -50%);
+
+      background: #76716c;
+    }
+
+    /*
+      ============================================================
+      AMBIENT DECOR
+      ============================================================
+    */
+
+    .cute-element {
+      position: absolute;
+      pointer-events: none;
+
+      color: rgba(157, 101, 94, 0.32);
+
+      font-family:
+        "Cormorant Garamond",
+        serif;
+
+      z-index: 1;
+
+      animation: ambientFloat 9s var(--ease-fluid) infinite;
+    }
+
+    .cute-element.animal,
+    .cute-element.tree {
+      filter: grayscale(1);
+      opacity: 0.12;
+    }
+
+    .cute-element.star,
+    .cute-element.heart,
+    .cute-element.sparkle,
+    .cute-element.leaf {
+      opacity: 0.4;
+    }
+
+    @keyframes ambientFloat {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+
+      50% {
+        transform: translate3d(0, -14px, 0) rotate(4deg);
+      }
+    }
+
+    /*
+      ============================================================
+      CONTINUE IMAGE
+      ============================================================
+    */
+
+    .continue-text {
+      position: fixed;
+
+      right: 28px;
+      bottom: 28px;
+
+      width: 145px;
+
+      z-index: var(--z-floating);
+
+      pointer-events: none;
+
+      opacity: 0.8;
+
+      animation: continueFloat 5s var(--ease-fluid) infinite;
+    }
+
+    .continue-text img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    @keyframes continueFloat {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    /*
+      ============================================================
+      STORY MODAL
+      ============================================================
+    */
+
+    .story-modal {
+      position: fixed;
+      inset: 0;
+
+      z-index: var(--z-modal);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px;
+
+      background: rgba(38, 32, 28, 0.48);
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      opacity: 0;
+      visibility: hidden;
+
+      transition:
+        opacity 650ms var(--ease-fluid),
+        visibility 650ms var(--ease-fluid);
+    }
+
+    .story-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-shell {
+      width: min(1080px, 100%);
+      max-height: min(780px, calc(100dvh - 60px));
+
+      padding: 8px;
+
+      border-radius: 34px;
+
+      background: rgba(255, 255, 255, 0.18);
+
+      box-shadow:
+        0 50px 120px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42);
+
+      transform:
+        translateY(42px)
+        scale(0.96);
+
+      transition:
+        transform 850ms var(--ease-spring);
+    }
+
+    .story-modal.active .modal-shell {
+      transform:
+        translateY(0)
+        scale(1);
+    }
+
+    .modal-content {
+      position: relative;
+
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+
+      width: 100%;
+      max-height: inherit;
+
+      overflow: hidden;
+
+      border-radius: 27px;
+
+      background: var(--paper-light);
+
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .modal-image-wrap {
+      min-height: 620px;
+      overflow: hidden;
+      background: #ded6cc;
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: 100%;
+
+      display: block;
+
+      object-fit: cover;
+
+      transition:
+        transform 1200ms var(--ease-fluid);
+    }
+
+    .story-modal.active .modal-content img {
+      transform: scale(1.015);
+    }
+
+    .modal-body {
+      min-height: 0;
+      overflow-y: auto;
+
+      padding: 70px 58px 55px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .modal-index {
+      margin-bottom: 20px;
+
+      color: var(--accent);
+
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    .modal-date {
+      margin-bottom: 22px;
+
+      color: var(--ink-muted);
+
+      font-size: 11px;
+      letter-spacing: 0.16em;
+    }
+
+    .modal-story {
+      color: var(--ink-soft);
+
+      font-family:
+        "Noto Serif SC",
+        "Songti SC",
+        serif;
+
+      font-size: 16px;
+      line-height: 2.05;
+
+      white-space: pre-line;
+    }
+
+    .modal-story::first-letter {
+      color: var(--accent);
+      font-size: 2.2em;
+      line-height: 0.9;
+    }
+
+    .close-btn {
+      position: absolute;
+
+      top: 22px;
+      right: 22px;
+
+      width: 42px;
+      height: 42px;
+
+      z-index: 5;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background: rgba(250, 247, 241, 0.72);
+
+      color: var(--ink);
+
+      font-size: 22px;
+      line-height: 1;
+
+      cursor: pointer;
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 450ms var(--ease-fluid);
+    }
+
+    .close-btn:hover {
+      transform: rotate(90deg) scale(1.08);
+      background: var(--paper-light);
+    }
+
+    .close-btn:active {
+      transform: rotate(90deg) scale(0.94);
+    }
+
+    /*
+      ============================================================
+      MESSAGE SECTION
+      ============================================================
+    */
+
+    .message-board {
+      position: relative;
+      z-index: var(--z-content);
+
+      width: min(1100px, calc(100% - 48px));
+
+      margin: 80px auto 160px;
+
+      padding-top: 100px;
+
+      border-top: 1px solid rgba(94, 72, 56, 0.08);
+    }
+
+    .message-header {
+      width: min(700px, 100%);
+      margin-bottom: 65px;
+    }
+
+    .message-header .eyebrow {
+      margin-bottom: 20px;
+    }
+
+    .message-header h2 {
+      color: var(--ink);
+
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+
+      font-size: clamp(44px, 6vw, 80px);
+      font-weight: 500;
+      line-height: 0.92;
+      letter-spacing: -0.045em;
+      text-wrap: balance;
+    }
+
+    .message-header p {
+      max-width: 460px;
+
+      margin-top: 26px;
+
+      color: var(--ink-muted);
+
+      font-size: 13px;
+      line-height: 2;
+    }
+
+    /*
+      DOUBLE BEZEL FORM
+    */
+
+    .message-form-shell {
+      width: min(760px, 100%);
+      margin-left: auto;
+
+      padding: 7px;
+
+      border-radius: 30px;
+
+      background: rgba(84, 62, 47, 0.045);
+
+      box-shadow:
+        inset 0 0 0 1px rgba(84, 62, 47, 0.05);
+    }
+
+    .message-form {
+      padding: 34px;
+
+      border-radius: 24px;
+
+      background: rgba(255, 252, 247, 0.84);
+
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
+    }
+
+    .form-label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      color: var(--ink-muted);
+
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .input-wrap,
+    .textarea-wrap {
+      margin-bottom: 22px;
+    }
+
+    #commentName,
+    #commentMessage {
+      width: 100%;
+
+      border: 0;
+      outline: 0;
+
+      border-radius: 17px;
+
+      background: rgba(239, 232, 223, 0.58);
+
+      color: var(--ink);
+
+      transition:
+        background 500ms var(--ease-fluid),
+        box-shadow 500ms var(--ease-fluid),
+        transform 500ms var(--ease-spring);
+    }
+
+    #commentName {
+      height: 54px;
+      padding: 0 18px;
+    }
+
+    #commentMessage {
+      min-height: 150px;
+
+      padding: 16px 18px;
+
+      resize: vertical;
+
+      line-height: 1.8;
+    }
+
+    #commentName::placeholder,
+    #commentMessage::placeholder {
+      color: #a69b90;
+    }
+
+    #commentName:hover,
+    #commentMessage:hover {
+      background: rgba(235, 226, 216, 0.74);
+    }
+
+    #commentName:focus,
+    #commentMessage:focus {
+      background: #f8f3eb;
+
+      box-shadow:
+        0 0 0 1px rgba(157, 101, 94, 0.2),
+        0 14px 32px rgba(86, 61, 45, 0.06);
+
+      transform: translateY(-1px);
+    }
+
+    .message-submit {
+      position: relative;
+
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+
+      min-height: 52px;
+
+      padding: 7px 8px 7px 22px;
+
+      border-radius: 999px;
+
+      background: var(--ink);
+      color: var(--paper-light);
+
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+
+      cursor: pointer;
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 500ms var(--ease-fluid);
+    }
+
+    .message-submit:hover {
+      transform: translateY(-3px);
+      background: var(--accent);
+    }
+
+    .message-submit:active {
+      transform: scale(0.98) translateY(1px);
+    }
+
+    .message-submit-icon {
+      width: 36px;
+      height: 36px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background: rgba(255, 255, 255, 0.12);
+
+      font-size: 14px;
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 500ms var(--ease-fluid);
+    }
+
+    .message-submit:hover .message-submit-icon {
+      transform: translateX(3px) scale(1.06);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /*
+      COMMENTS
+    */
+
+    .comments-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+
+      margin: 105px 0 35px;
+
+      color: var(--ink);
+
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+
+      font-size: 32px;
+      font-weight: 600;
+    }
+
+    .comments-title::after {
+      content: "";
+
+      width: 70px;
+      height: 1px;
+
+      background: rgba(94, 72, 56, 0.18);
+    }
+
+    #commentsList {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 18px;
+    }
+
+    /*
+      DOUBLE BEZEL COMMENT
+    */
+
+    .comment-item-shell {
+      padding: 6px;
+
+      border-radius: 26px;
+
+      background: rgba(84, 62, 47, 0.045);
+
+      transition:
+        transform 700ms var(--ease-spring);
+    }
+
+    .comment-item-shell:hover {
+      transform: translateY(-5px);
+    }
+
+    .comment-item {
+      min-height: 245px;
+
+      padding: 30px;
+
+      display: flex;
+      flex-direction: column;
+
+      border-radius: 20px;
+
+      background: rgba(255, 252, 247, 0.78);
+
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+
+    .comment-number {
+      margin-bottom: 26px;
+
+      color: var(--accent);
+
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+
+    .comment-name {
+      color: var(--ink);
+
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+
+      font-size: 23px;
+      font-weight: 600;
+    }
+
+    .comment-message {
+      margin-top: 16px;
+
+      color: var(--ink-soft);
+
+      font-family:
+        "Noto Serif SC",
+        "Songti SC",
+        serif;
+
+      font-size: 14px;
+      line-height: 1.9;
+
+      white-space: pre-line;
+      word-break: break-word;
+
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 6;
+
+      overflow: hidden;
+    }
+
+    .comment-message.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+    }
+
+    .comment-more {
+      display: none;
+
+      align-self: flex-start;
+
+      margin-top: 12px;
+
+      padding: 0;
+
+      background: transparent;
+
+      color: var(--accent);
+
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+
+      cursor: pointer;
+
+      transition:
+        transform 500ms var(--ease-spring),
+        opacity 400ms var(--ease-fluid);
+    }
+
+    .comment-more:hover {
+      transform: translateX(3px);
+    }
+
+    .comment-time {
+      margin-top: auto;
+      padding-top: 20px;
+
+      color: var(--ink-muted);
+
+      font-size: 9px;
+      letter-spacing: 0.16em;
+    }
+
+    .empty-comments {
+      grid-column: 1 / -1;
+
+      padding: 55px 30px;
+
+      border-radius: 24px;
+
+      background: rgba(255, 252, 247, 0.58);
+
+      color: var(--ink-muted);
+
+      text-align: center;
+    }
+
+    .empty-heart {
+      margin-bottom: 12px;
+
+      color: var(--accent);
+
+      font-family:
+        "Cormorant Garamond",
+        serif;
+
+      font-size: 38px;
+    }
+
+    .empty-comments small {
+      display: block;
+
+      margin-top: 10px;
+
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    /*
+      ============================================================
+      PASSWORD OVERLAY
+      ============================================================
+    */
+
+    #passwordOverlay {
+      position: fixed;
+      inset: 0;
+
+      z-index: var(--z-modal);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 24px;
+
+      background: rgba(39, 34, 29, 0.42);
+
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+
+      opacity: 1;
+
+      transition:
+        opacity 800ms var(--ease-fluid),
+        visibility 800ms var(--ease-fluid);
+    }
+
+    .password-shell {
+      width: min(440px, 100%);
+
+      padding: 8px;
+
+      border-radius: 32px;
+
+      background: rgba(255, 255, 255, 0.17);
+
+      box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+      transform: translateY(0);
+
+      transition:
+        transform 850ms var(--ease-spring);
+    }
+
+    .password-box {
+      padding: 54px 48px 46px;
+
+      border-radius: 25px;
+
+      background: var(--paper-light);
+
+      text-align: left;
+
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .password-kicker {
+      margin-bottom: 22px;
+
+      color: var(--accent);
+
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .lock-icon {
+      margin-bottom: 20px;
+
+      color: var(--ink);
+
+      font-family:
+        "Cormorant Garamond",
+        serif;
+
+      font-size: 30px;
+    }
+
+    .password-box h2 {
+      color: var(--ink);
+
+      font-family:
+        "Cormorant Garamond",
+        "Noto Serif SC",
+        serif;
+
+      font-size: 42px;
+      font-weight: 500;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .password-box p {
+      max-width: 280px;
+
+      margin-top: 18px;
+
+      color: var(--ink-muted);
+
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    #passwordInput {
+      width: 100%;
+
+      height: 54px;
+
+      margin-top: 30px;
+      padding: 0 18px;
+
+      border: 0;
+      outline: 0;
+
+      border-radius: 16px;
+
+      background: #eee7dd;
+
+      color: var(--ink);
+
+      text-align: left;
+
+      transition:
+        background 500ms var(--ease-fluid),
+        box-shadow 500ms var(--ease-fluid);
+    }
+
+    #passwordInput:focus {
+      background: #f8f3eb;
+
+      box-shadow:
+        0 0 0 1px rgba(157, 101, 94, 0.22),
+        0 14px 30px rgba(84, 61, 45, 0.06);
+    }
+
+    #unlockBtn {
+      width: 100%;
+
+      min-height: 54px;
+
+      margin-top: 12px;
+
+      padding: 7px 8px 7px 22px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border-radius: 999px;
+
+      background: var(--ink);
+      color: var(--paper-light);
+
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+
+      cursor: pointer;
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 500ms var(--ease-fluid);
+    }
+
+    #unlockBtn::after {
+      content: "↗";
+
+      width: 38px;
+      height: 38px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background: rgba(255, 255, 255, 0.1);
+
+      transition:
+        transform 600ms var(--ease-spring),
+        background 500ms var(--ease-fluid);
+    }
+
+    #unlockBtn:hover {
+      transform: translateY(-2px);
+      background: var(--accent);
+    }
+
+    #unlockBtn:hover::after {
+      transform: translate(2px, -2px) scale(1.05);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    #unlockBtn:active {
+      transform: scale(0.98);
+    }
+
+    #errorMsg {
+      display: none;
+
+      margin-top: 14px;
+
+      color: var(--accent);
+
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /*
+      ============================================================
+      TOAST
+      ============================================================
+    */
+
+    .toast {
+      position: fixed;
+
+      left: 50%;
+      bottom: 30px;
+
+      z-index: var(--z-modal);
+
+      min-width: 250px;
+      max-width: calc(100% - 40px);
+
+      padding: 15px 20px;
+
+      border-radius: 999px;
+
+      background: var(--ink);
+      color: var(--paper-light);
+
+      font-size: 11px;
+      text-align: center;
+
+      opacity: 0;
+
+      transform:
+        translate(-50%, 25px)
+        scale(0.96);
+
+      pointer-events: none;
+
+      transition:
+        opacity 550ms var(--ease-fluid),
+        transform 650ms var(--ease-spring);
+    }
+
+    .toast.show {
+      opacity: 1;
+
+      transform:
+        translate(-50%, 0)
+        scale(1);
+    }
+
+    /*
+      ============================================================
+      REVEAL ANIMATION
+      ============================================================
+    */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(8px);
+      transition:
+        opacity 900ms var(--ease-fluid),
+        transform 1000ms var(--ease-spring),
+        filter 1000ms var(--ease-fluid);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /*
+      ============================================================
+      ACCESSIBILITY
+      ============================================================
+    */
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    /*
+      ============================================================
+      MOBILE
+      ============================================================
+    */
+
+    @media (max-width: 768px) {
+      .music-player {
+        top: 16px;
+        right: 16px;
+
+        min-width: 0;
+
+        padding-left: 13px;
+      }
+
+      .music-info {
+        max-width: 130px;
+      }
+
+      .song-name {
+        font-size: 14px;
+      }
+
+      .lyric-line {
+        width: 110px;
+        font-size: 9px;
+      }
+
+      .page-title {
+        width: calc(100% - 32px);
+
+        min-height: auto;
+
+        padding:
+          125px
+          0
+          50px;
+
+        display: block;
+      }
+
+      .eyebrow {
+        margin-bottom: 18px;
+      }
+
+      .title-copy h1 {
+        font-size: clamp(60px, 20vw, 90px);
+        line-height: 0.86;
+      }
+
+      .title-copy h1 span {
+        margin-left: 0.25em;
+      }
+
+      .title-copy p {
+        max-width: 320px;
+        margin-top: 25px;
+        font-size: 12px;
+      }
+
+      .title-mark {
+        width: 150px;
+        height: 150px;
+
+        margin:
+          45px
+          0
+          0
+          auto;
+      }
+
+      .title-mark::before {
+        inset: 12px;
+      }
+
+      .title-mark::after {
+        bottom: 21px;
+        font-size: 7px;
+      }
+
+      .story-title-img {
+        width: 95px;
+      }
+
+      .photo-wall {
+        width: calc(100% - 32px);
+        min-height: 1120px;
+
+        padding-bottom: 30px;
+      }
+
+      .wall-intro {
+        width: 100%;
+        margin-left: 0;
+        margin-bottom: 25px;
+      }
+
+      .wall-intro strong {
+        font-size: 24px;
+      }
+
+      .rope-set {
+        left: 4%;
+        right: 4%;
+        height: 320px;
+      }
+
+      .rope-set.top {
+        top: 85px;
+      }
+
+      .rope-set.middle {
+        top: 400px;
+      }
+
+      .rope-set.bottom {
+        top: 715px;
+      }
+
+      .photo-item {
+        padding: 5px 5px 14px;
+      }
+
+      .wood-clip {
+        width: 32px;
+        height: 12px;
+      }
+
+      .modal-shell {
+        max-height: calc(100dvh - 28px);
+        padding: 5px;
+        border-radius: 25px;
+      }
+
+      .modal-content {
+        grid-template-columns: 1fr;
+
+        max-height: calc(100dvh - 38px);
+
+        overflow-y: auto;
+
+        border-radius: 21px;
+      }
+
+      .modal-image-wrap {
+        min-height: 48dvh;
+        max-height: 54dvh;
+      }
+
+      .modal-body {
+        padding: 38px 25px 35px;
+      }
+
+      .modal-story {
+        font-size: 14px;
+        line-height: 1.9;
+      }
+
+      .close-btn {
+        top: 13px;
+        right: 13px;
+
+        width: 38px;
+        height: 38px;
+      }
+
+      .message-board {
+        width: calc(100% - 32px);
+
+        margin-top: 40px;
+        margin-bottom: 100px;
+
+        padding-top: 70px;
+      }
+
+      .message-header {
+        margin-bottom: 45px;
+      }
+
+      .message-header h2 {
+        font-size: 52px;
+      }
+
+      .message-form-shell {
+        width: 100%;
+      }
+
+      .message-form {
+        padding: 24px 18px;
+      }
+
+      #commentsList {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .comments-title {
+        margin-top: 75px;
+        font-size: 28px;
+      }
+
+      .comment-item {
+        min-height: 220px;
+        padding: 25px 23px;
+      }
+
+      .continue-text {
+        right: 12px;
+        bottom: 12px;
+        width: 100px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- =========================================================
+       PASSWORD
+       ========================================================= -->
+
+  <div id="passwordOverlay">
+    <div class="password-shell">
+      <div class="password-box">
+        <div class="password-kicker">Private archive</div>
+
+        <div class="lock-icon">○</div>
+
+        <h2>我们的故事</h2>
+
+        <p>
+          有些记忆不需要被所有人看见。
+          这里，只留给知道密码的人。
+        </p>
+
+        <input
+          id="passwordInput"
+          type="password"
+          placeholder="输入密码"
+          autocomplete="off"
+          aria-label="房间密码"
+        />
+
+        <button id="unlockBtn" type="button">
+          <span>开启回忆</span>
+        </button>
+
+        <div id="errorMsg">
+          密码不正确，请再试一次。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MUSIC
+       ========================================================= -->
+
+  <div
+    class="music-player"
+    id="musicPlayer"
+    aria-label="音乐播放器"
+  >
+    <div class="music-info">
+      <div class="song-name">白い恋人達</div>
+      <div
+        class="lyric-line"
+        id="lyricLine"
+      >
+        点击右侧图标播放音乐
+      </div>
+    </div>
+
+    <button
+      class="music-icon"
+      id="musicIcon"
+      type="button"
+      aria-label="播放或暂停音乐"
+    >
+      ♪
+    </button>
+  </div>
+
+  <!-- =========================================================
+       BACKGROUND
+       ========================================================= -->
+
+  <canvas id="bgCanvas"></canvas>
+
+  <div id="cursor" aria-hidden="true"></div>
+
+  <div class="continue-text" aria-hidden="true">
+    <img
+      src="image/continue_cropped_compressed.png"
+      alt=""
+    />
+  </div>
+
+  <!-- =========================================================
+       HERO
+       ========================================================= -->
+
+  <header class="page-title">
+    <div class="title-copy reveal">
+      <div class="eyebrow">
+        A private collection of memories
+      </div>
+
+      <h1>
+        我们的
+        <span>故事</span>
+      </h1>
+
+      <p>
+        从一次旅行开始，到一次又一次的重逢。
+        有些日子看起来普通，却因为身边的人，
+        最终变成了值得被保存很久的记忆。
+      </p>
+    </div>
+
+    <div class="title-mark reveal">
+      <img
+        src="image/story-title_compressed.png"
+        class="story-title-img"
+        alt="我们的故事"
+      />
+    </div>
+  </header>
+
+  <!-- =========================================================
+       PHOTO WALL
+       ========================================================= -->
+
+  <main>
+    <section
+      class="photo-wall"
+      id="photoWall"
+      aria-label="我们的照片故事"
+    >
+      <div class="wall-intro reveal">
+        <strong>Fragments</strong>
+        <span>18 moments / 2025 - 2026</span>
+      </div>
+
+      <div class="rope-set top">
+        <div class="rope-anchor left"></div>
+        <canvas class="rope-canvas"></canvas>
+        <div class="rope-anchor right"></div>
+      </div>
+
+      <div class="rope-set middle">
+        <div class="rope-anchor left"></div>
+        <canvas class="rope-canvas"></canvas>
+        <div class="rope-anchor right"></div>
+      </div>
+
+      <div class="rope-set bottom">
+        <div class="rope-anchor left"></div>
+        <canvas class="rope-canvas"></canvas>
+        <div class="rope-anchor right"></div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         MESSAGE BOARD
+         ======================================================= -->
+
+    <section class="message-board">
+      <div class="message-header reveal">
+        <div class="eyebrow">
+          Leave a note
+        </div>
+
+        <h2>
+          如果你也走到了这里
+        </h2>
+
+        <p>
+          不妨留下几句话。
+          让这段故事除了我们之外，
+          也拥有一些来自远方的声音。
+        </p>
+      </div>
+
+      <div class="message-form-shell reveal">
+        <div class="message-form">
+          <div class="input-wrap">
+            <label
+              class="form-label"
+              for="commentName"
+            >
+              Your name
+            </label>
+
+            <input
+              type="text"
+              id="commentName"
+              placeholder="你的名字"
+              maxlength="20"
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="textarea-wrap">
+            <label
+              class="form-label"
+              for="commentMessage"
+            >
+              Your message
+            </label>
+
+            <textarea
+              id="commentMessage"
+              placeholder="写下你想说的话……"
+              maxlength="300"
+            ></textarea>
+          </div>
+
+          <button
+            id="submitComment"
+            class="message-submit"
+            type="button"
+          >
+            <span>留下这份心意</span>
+
+            <span class="message-submit-icon">
+              ↗
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="comments-title reveal">
+        <span>大家留下的话</span>
+      </div>
+
+      <div id="commentsList"></div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       STORY MODAL
+       ========================================================= -->
+
+  <div
+    class="story-modal"
+    id="storyModal"
+    aria-hidden="true"
+  >
+    <div class="modal-shell">
+      <div class="modal-content">
+        <button
+          class="close-btn"
+          id="closeBtn"
+          type="button"
+          aria-label="关闭故事"
+        >
+          ×
+        </button>
+
+        <div class="modal-image-wrap">
+          <img
+            id="modalImg"
+            src=""
+            alt="故事照片"
+          />
+        </div>
+
+        <div class="modal-body">
+          <div
+            class="modal-index"
+            id="modalIndex"
+          >
+            Memory
+          </div>
+
+          <div
+            class="modal-date"
+            id="modalDate"
+          ></div>
+
+          <div
+            class="modal-story"
+            id="modalStory"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       TOAST
+       ========================================================= -->
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+  <script>
+    /*
+      ============================================================
+      UTILITIES
+      ============================================================
+    */
+
+    const toast = document.getElementById("toast");
+
+    let toastTimer = null;
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2600);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatCommentTime(time) {
+      const date = new Date(time);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}.${month}.${day}`;
+    }
+
+    /*
+      ============================================================
+      SUPABASE
+      原有地址和 Key 保持不变
+      ============================================================
+    */
+
+    const SUPABASE_URL =
+      "https://oxtmecvezbcmeglqxnwz.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_1OZPJc2qmeNW4PBobh5DGg_ebyYAOtK";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    /*
+      ============================================================
+      COMMENTS
+      ============================================================
+    */
+
+    async function submitComment() {
+      const nameInput =
+        document.getElementById("commentName");
+
+      const messageInput =
+        document.getElementById("commentMessage");
+
+      const button =
+        document.getElementById("submitComment");
+
+      const name = nameInput.value.trim();
+      const message = messageInput.value.trim();
+
+      if (!name) {
+        showToast("请先留下你的名字。");
+        nameInput.focus();
+        return;
+      }
+
+      if (!message) {
+        showToast("还没有写下留言内容。");
+        messageInput.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.style.opacity = "0.6";
+
+      try {
+        const { error } =
+          await supabaseClient
+            .from("comments")
+            .insert([
+              {
+                name: name,
+                message: message,
+              },
+            ]);
+
+        if (error) {
+          console.error("留言提交失败：", error);
+          showToast("留言没有成功提交，请稍后再试。");
+          return;
+        }
+
+        nameInput.value = "";
+        messageInput.value = "";
+
+        showToast("你的留言已经留下。");
+
+        await loadComments();
+      } finally {
+        button.disabled = false;
+        button.style.opacity = "1";
+      }
+    }
+
+    document
+      .getElementById("submitComment")
+      .addEventListener(
+        "click",
+        submitComment
+      );
+
+    async function loadComments() {
+      const { data, error } =
+        await supabaseClient
+          .from("comments")
+          .select("*")
+          .order("created_at", {
+            ascending: false,
+          });
+
+      if (error) {
+        console.error("读取留言失败：", error);
+        return;
+      }
+
+      const commentsList =
+        document.getElementById("commentsList");
+
+      commentsList.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        commentsList.innerHTML = `
+          <div class="empty-comments">
+            <div class="empty-heart">♡</div>
+            <div>还没有留言哦</div>
+            <small>成为第一个留下心意的人吧</small>
+          </div>
+        `;
+
+        return;
+      }
+
+      data.forEach((comment, index) => {
+        const shell =
+          document.createElement("div");
+
+        shell.className =
+          "comment-item-shell reveal";
+
+        const item =
+          document.createElement("div");
+
+        item.className = "comment-item";
+
+        item.innerHTML = `
+          <div class="comment-number">
+            ${String(index + 1).padStart(2, "0")}
+          </div>
+
+          <div class="comment-name">
+            ${escapeHtml(comment.name)}
+          </div>
+
+          <div class="comment-message">
+            ${escapeHtml(comment.message)}
+          </div>
+
+          <button
+            class="comment-more"
+            type="button"
+          >
+            查看全文 ↓
+          </button>
+
+          <div class="comment-time">
+            ${formatCommentTime(comment.created_at)}
+          </div>
+        `;
+
+        shell.appendChild(item);
+        commentsList.appendChild(shell);
+
+        const messageElement =
+          item.querySelector(
+            ".comment-message"
+          );
+
+        const moreButton =
+          item.querySelector(
+            ".comment-more"
+          );
+
+        requestAnimationFrame(() => {
+          if (
+            messageElement.scrollHeight >
+            messageElement.clientHeight + 2
+          ) {
+            moreButton.style.display =
+              "inline-block";
+
+            moreButton.addEventListener(
+              "click",
+              () => {
+                const expanded =
+                  messageElement.classList.contains(
+                    "expanded"
+                  );
+
+                if (expanded) {
+                  messageElement.classList.remove(
+                    "expanded"
+                  );
+
+                  moreButton.textContent =
+                    "查看全文 ↓";
+                } else {
+                  messageElement.classList.add(
+                    "expanded"
+                  );
+
+                  moreButton.textContent =
+                    "收起 ↑";
+                }
+              }
+            );
+          }
+        });
+
+        requestAnimationFrame(() => {
+          shell.classList.add("visible");
+        });
+      });
+    }
+
+    /*
+      ============================================================
+      PHOTO DATA
+      原始图片路径和故事内容保持不变
+      ============================================================
+    */
+
+    const photos = [
+      {
+        src: "image/photo01.png",
+        date: "2025.05.12",
+        story: `留学毕业后的第一次旅行，没想到在那片雪山与湖泊之间，遇见了生命中一个特别的人。
+
+巍峨耸立的雪山脚下，在夜晚宁静的泸沽湖旁，你的笑容成为了那段旅途中最难忘的风景。
+
+后来，这个故事我向别人讲过很多遍，每一次回忆，依然会觉得温暖。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo02.png",
+        date: "2025.05.21",
+        story: `5月20日原本是一个特别的日子，却因为航班延误没能如期抵达。
+
+但幸运的是，5月21日，我们还是补上了那份迟来的浪漫。美味的牛排、日本带回来的礼物，还有你抱着小熊和鲜花时可爱的笑容，都成为了那一天最珍贵的回忆。
+
+也正是在这一天，我终于鼓起勇气，向你说出了藏在心里的那句话。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo03.png",
+        date: "2025.06.04",
+        story: `我们相处的时间其实并不算长，很快你便踏上了上海实习的旅程。
+
+在那段忙碌的日子里，刚好迎来了你的生日，我送给你一支钢笔，也写下了一封想对你说的话。视频时，看着你第一次读到那封信而流泪的样子，成为了我记忆里最温柔的瞬间。
+
+我也一直记得，那些一起牵着手漫步在苏州河边的时光，平凡却无比珍贵。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo04.png",
+        date: "2025.06.09",
+        story: `那是你第一次写给我的明信片。
+
+恰逢我要去欧洲旅行，在出发前，我小心翼翼地将这份珍贵的心意塑封起来，只为了让它能够陪我走过更远的路。
+
+于是，我带着你写给我的明信片，走过欧洲一座又一座城市，去看那些曾经只在照片里见过的风景。
+
+虽然那时你不在我的身边，但有你的字迹陪伴，好像你也一直和我一起旅行。那张小小的明信片，成为了连接我们距离的温柔纽带。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo05.png",
+        date: "2025.08.22",
+        story: `在正式开始工作之前，我又一次来到上海看望你。
+
+虽然我们已经许久未见，刚见面时，你看着我还有些许陌生与拘谨，但那份熟悉的情感一直都在。没过多久，我们又回到了曾经的相处状态。
+
+看着你一件一件拆开我从欧洲带回来的礼物，看着你眼里的惊喜与开心，那一刻，我觉得所有等待和奔波都变得值得。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo06.png",
+        date: "2025.09.20",
+        story: `因为工作地点的变动，我努力争取来到深圳，只希望能离你更近一些。幸运的是，愿望终于实现，我即将在这里度过工作的一年。
+
+这是你第一次写信给我，也是第一次陪我一起寻找属于我们的小空间。记得那天，看着你小小的身影蹲在洗衣机旁，安静地看着滚筒转动，我忍不住想：这个小家伙此刻在想些什么呢？
+
+虽然我不知道答案，但在那一刻，只觉得你可爱得让人心动。谢谢你陪我一起看房，也谢谢你陪我走进人生新的阶段。`,
+        rope: 0,
+      },
+
+      {
+        src: "image/photo07.png",
+        date: "2025.10.01",
+        story: `十一假期，我和爸妈一起去看了你的学校，也一起去了广州，走过了许多地方，留下了许多属于我们的回忆。
+
+可爱的你，小小的一只，却总是喜欢黏在我身边，仿佛走到哪里都要跟着我。后来我们一起去了酒吧，你喝得有些醉醺醺的，甚至还有点想吐。看着你那副迷迷糊糊的样子，我只觉得又好笑又可爱。
+
+那些看似平凡的时光，如今回想起来，却成了我最喜欢珍藏的片段。💕`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo08.png",
+        date: "2025.12.11",
+        story: `周末，我和同事一起去了香港找你，也和你的朋友们漫步在海边公园。你总是那么热情、开朗又大方，很自然地赢得了大家的喜欢。
+
+那段时间，我的工作上也有一些不太顺心的事情。没想到，在一个普通的夜晚，下班时，我远远地看见了站在公司楼下的你——小小的身影，手里捧着一束花，安静地等着我。
+
+我偷偷从身后拍下了那一刻。也许你不知道，那一瞬间真的让我特别感动。原来，在忙碌而不太顺利的日子里，有一个人愿意捧着花，在夜色里等你下班，就是最温柔的安慰。💕`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo09.png",
+        date: "2025.12.26",
+        story: `你从呈坎回来，给我带了一些小小的礼物。直到现在，我依然把它们好好收藏着，因为那不只是礼物，也是你从旅途中带给我的一份心意。
+
+我们的周末总是很简单，一起去深夜食堂吃烤串，带着我们的平板窝在一起，在一个个周末里，把《哈利·波特》全部看完。
+
+还有那一次，你第一次为了我帮忙打扫卫生。虽然我知道你并不喜欢做这些事，但你还是愿意为我做。或许喜欢就是这样，不一定是多么轰轰烈烈的事情，而是愿意为对方做一些自己并不喜欢，却能让对方开心的小事。
+
+而这些小小的瞬间，我一直都记得。`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo10.png",
+        date: "2025.12.28",
+        story: `年末，我们一起去看了羽毛球比赛，你也带我去体验了拼豆。我们依旧在不同的地方寻找好吃的东西，也一起尝试着许多从前没有体验过的小事。
+
+看着你坐在车里认真试驾的样子，我忽然想起了第一次见到你的时候。那时的你，就像一个灵动又充满好奇的小女孩，总能给人一种特别的感觉。
+
+后来我才发现，正是你的出现，让原本平淡的生活多了许多新奇与惊喜，也让我开始期待每一个普通的日子。`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo11.png",
+        date: "2026.02.14",
+        story: `公司发表活动结束后，我们一起去吃了顿饭。那张我们的自拍，你似乎特别喜欢，后来还一直把它设成了手表的壁纸。
+
+有一次，我们骑了很远的路，只为了去吃一碗麻辣烫。一路的疲惫让你有些不开心，可当真正吃到好吃的东西时，你又立刻恢复了开心的样子，真是可爱得让人忍不住想笑。
+
+临近春节，我也去了你家拜访，给大家做了一道番茄炒鸡蛋。虽然炒得有些糊，但老弟却格外捧场，最后把它全部吃完了。
+
+现在想起来，这些看似平凡的小事，却一点一点拼成了我们最真实、也最温暖的日常`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo12.png",
+        date: "2026.02.27",
+        story: `培训结束后，我突然被安排出差。
+
+那天晚上，我们抱在一起哭了很久。第二天醒来，彼此的眼睛都已经肿了。我们都知道，这一次离开之后，能够相处的时间真的所剩不多了。
+
+在出发前的最后一个周末，我带着你和老弟去了迪士尼。那一天，我们笑过，也沉默过。明明置身于这样快乐的地方，心里却始终藏着一点离别的难过。
+
+夜晚的烟花升起时，你靠在我的肩膀上，默默地流着泪。那一刻，我只希望时间能够停下来，让我们再多拥有一点属于彼此的时间。
+
+回到家，我突然想，如果我真的要离开，那我还能给你留下些什么？
+
+于是，我拿出剩下的便签，一张一张写下“我爱你”，然后把它们贴满了整间屋子。`,
+        rope: 1,
+      },
+
+      {
+        src: "image/photo13.png",
+        date: "2026.03.28",
+        story: `第一次出差，我开始了一个人的新生活，也努力适应着陌生的工作环境。可每当视频接通，看见你在电话那头偷偷掉眼泪，我的心还是会一下子软下来。
+
+后来，我们只能每隔两周，在短暂的周末里见上一面。见面的时间变少了，却也让每一次相聚都变得更加珍贵。
+
+也正是从那时候开始，我更加明白，原来两个人能够好好待在一起，就是一件值得珍惜的事情。`,
+        rope: 2,
+      },
+
+      {
+        src: "image/photo14.png",
+        date: "2026.04.04",
+        story: `清明假期，我们相约去了厦门。虽然只有短短的两天半，却留下了许多美好的回忆。
+
+那几天的你，穿着各种颜色的衣服，在海边迎着风翩翩起舞。为了把这些珍贵的瞬间留下来，我不停地举起相机，只想多记录一些你最美的样子。
+
+短暂的旅程很快结束了，但那些海风、阳光，还有你在镜头前的笑容，都被我好好收藏了起来。`,
+        rope: 2,
+      },
+
+      {
+        src: "image/photo15.png",
+        date: "2026.04.17",
+        story: `那时候，我们的见面变成了两周一次的限时相聚。为了见你，我常常一路奔波，可往返的飞机又总是晚点，等我真正到家时，天已经快亮了。
+
+但每一次推开门，看见熟睡的你，我都会觉得这一趟奔波并没有白费。哪怕只能陪你短短一会儿，也好像足够抵消所有的疲惫。
+
+相聚变得越来越难，也因此变得越来越珍贵。而我也在一次次奔向你的路上，慢慢发现自己的心正在发生变化。
+
+原来，不知不觉间，我已经开始向你倾斜了。`,
+        rope: 2,
+      },
+
+      {
+        src: "image/photo16.png",
+        date: "2026.05.01",
+        story: `五一假期，我们一起回到了昆明。你和爸爸妈妈一起来接我，那一刻的我，真的觉得幸福又开心。
+
+我们一起去了公园，慢慢走着，聊着一路上的琐碎，也诉说着即将分别的不舍。
+
+那时候才更加明白，无论是家人的陪伴，还是爱人的相守，真正能够在一起的时光其实都弥足珍贵。正因为知道分别终会到来，所以每一次相聚，都值得被好好珍藏。💕`,
+        rope: 2,
+      },
+
+      {
+        src: "image/photo17.png",
+        date: "2026.06.07",
+        story: `因为工作的安排，我又被调回了深圳。得知这个消息的时候，我是真的开心，因为这意味着，我们终于又可以经常见面了。
+
+等待与你见面的日子里，我提前为你挑选了一份属于我们的纪念礼物。看着你拆开它时脸上的笑容，我也跟着觉得满足。
+
+那个周末，你即将去香港实习，我陪你一起收拾宿舍。我们做着一些再普通不过的事情，却让我觉得这样的生活格外踏实。原来，只要身边是你，连收拾房间这样的小事，也可以变得有意义。
+
+晚上，我们一起走在海边的大坝上。我问你：“你知道我现在最想做的事情是什么吗？”
+
+其实答案一直都很简单。我想和你一起过最普通的生活——每天一起下班，一起吃饭，一起散步，牵着手遛我们的小狗。
+
+就像你信里说的那样，这些话，我好像已经对你说过无数遍了。可我还是愿意一遍又一遍地说。💕`,
+        rope: 2,
+      },
+
+      {
+        src: "image/photo18.png",
+        date: "2026.06.29",
+        story: `走过了这么多地方，也经历了那么多次离别与重逢，我才慢慢看清自己的心。
+
+我想要的，其实并没有那么复杂。只是看着一家人围坐在一起，和和睦睦地吃一顿饭；看着你小小的一只，又习惯性地黏在我的身边，我就觉得，这样的生活好像已经足够让我满足。
+
+原来，我真正想要的不是去往哪里，而是和谁一起生活。
+
+所以这一次，我想听从自己的内心。哪怕只是为了离你近一点，我也愿意留下来。
+
+我想留在你身边，所以，我想留在深圳。
+
+我爱你！💕`,
+        rope: 2,
+      },
+    ];
+
+    /*
+      ============================================================
+      CURSOR
+      ============================================================
+    */
+
+    const cursor =
+      document.getElementById("cursor");
+
+    document.addEventListener(
+      "mousemove",
+      (event) => {
+        cursor.style.left =
+          event.clientX + "px";
+
+        cursor.style.top =
+          event.clientY + "px";
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "mouseover",
+      (event) => {
+        if (
+          event.target.closest(
+            "button, input, textarea, .photo-item, a"
+          )
+        ) {
+          document.body.classList.add(
+            "cursor-hover"
+          );
+        }
+      }
+    );
+
+    document.addEventListener(
+      "mouseout",
+      (event) => {
+        if (
+          event.target.closest(
+            "button, input, textarea, .photo-item, a"
+          )
+        ) {
+          document.body.classList.remove(
+            "cursor-hover"
+          );
+        }
+      }
+    );
+
+    /*
+      ============================================================
+      PHOTO WALL
+      ============================================================
+    */
+
+    const photoWall =
+      document.getElementById("photoWall");
+
+    const ropeSets =
+      document.querySelectorAll(
+        ".rope-set"
+      );
+
+    function drawTwistedRope(canvas) {
+      const ctx =
+        canvas.getContext("2d");
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      const width =
+        Math.floor(rect.width);
+
+      const height = 90;
+
+      if (width <= 10) {
+        return null;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+      const startX = 16;
+      const endX = width - 16;
+
+      const startY = 17;
+      const endY = 17;
+
+      const midY =
+        43 + Math.random() * 8;
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        startX,
+        startY + 3
+      );
+
+      ctx.quadraticCurveTo(
+        width / 2,
+        midY + 9,
+        endX,
+        endY + 3
+      );
+
+      ctx.strokeStyle =
+        "rgba(64, 42, 28, 0.14)";
+
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+
+      ctx.filter = "blur(3px)";
+      ctx.stroke();
+
+      ctx.filter = "none";
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        startX,
+        startY
+      );
+
+      ctx.quadraticCurveTo(
+        width / 2,
+        midY + 3,
+        endX,
+        endY
+      );
+
+      ctx.strokeStyle =
+        "rgba(91, 60, 38, 0.18)";
+
+      ctx.lineWidth = 7;
+      ctx.lineCap = "round";
+
+      ctx.stroke();
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        startX,
+        startY
+      );
+
+      ctx.quadraticCurveTo(
+        width / 2,
+        midY,
+        endX,
+        endY
+      );
+
+      ctx.strokeStyle =
+        "#a9784d";
+
+      ctx.lineWidth = 4.5;
+
+      ctx.stroke();
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        startX,
+        startY - 1
+      );
+
+      ctx.quadraticCurveTo(
+        width / 2,
+        midY - 1.5,
+        endX,
+        endY - 1
+      );
+
+      ctx.strokeStyle =
+        "rgba(255, 255, 255, 0.3)";
+
+      ctx.lineWidth = 1.2;
+
+      ctx.stroke();
+
+      return {
+        startX,
+        endX,
+        startY,
+        endY,
+        controlY: midY,
+      };
+    }
+
+    function renderPhotos() {
+      ropeSets.forEach(
+        (set, ropeIndex) => {
+          const canvas =
+            set.querySelector(
+              ".rope-canvas"
+            );
+
+          const curve =
+            drawTwistedRope(canvas);
+
+          if (!curve) {
+            return;
+          }
+
+          const groupPhotos =
+            photos.filter(
+              (photo) =>
+                photo.rope === ropeIndex
+            );
+
+          const count =
+            groupPhotos.length;
+
+          const setRect =
+            set.getBoundingClientRect();
+
+          const setWidth =
+            setRect.width;
+
+          const startX = 20;
+          const endX =
+            setWidth - 20;
+
+          const gap =
+            (endX - startX) /
+            (count + 1);
+
+          const isMobile =
+            window.innerWidth <= 768;
+
+          const baseWidth =
+            isMobile ? 72 : 108;
+
+          const sizeRange =
+            isMobile ? 18 : 30;
+
+          groupPhotos.forEach(
+            (photo, index) => {
+              const item =
+                document.createElement(
+                  "div"
+                );
+
+              item.className =
+                "photo-item";
+
+              const size =
+                baseWidth +
+                Math.random() *
+                  sizeRange;
+
+              const photoHeight =
+                size * 1.3;
+
+              const rotate =
+                (Math.random() - 0.5) *
+                10;
+
+              const baseX =
+                startX +
+                gap * (index + 1);
+
+              const offsetX =
+                (Math.random() - 0.5) *
+                gap *
+                0.06;
+
+              const currentX =
+                baseX + offsetX;
+
+              const t =
+                (currentX -
+                  curve.startX) /
+                (curve.endX -
+                  curve.startX);
+
+              const ropeY =
+                (1 - t) *
+                  (1 - t) *
+                  curve.startY +
+                2 *
+                  t *
+                  (1 - t) *
+                  curve.controlY +
+                t *
+                  t *
+                  curve.endY;
+
+              const itemTop =
+                ropeY +
+                photoHeight / 2 +
+                Math.random() * 4;
+
+              item.style.width =
+                size + "px";
+
+              item.style.height =
+                photoHeight + "px";
+
+              item.style.left =
+                currentX + "px";
+
+              item.style.top =
+                itemTop + "px";
+
+              const swing =
+                (index % 2 === 0
+                  ? 1
+                  : -1) *
+                (3 +
+                  Math.random() * 5);
+
+              item.style.setProperty(
+                "--rotate",
+                rotate + "deg"
+              );
+
+              item.style.setProperty(
+                "--swing",
+                swing + "px"
+              );
+
+              item.style.transform =
+                `translate(-50%, -50%) rotate(${rotate}deg)`;
+
+              item.style.animation =
+                `photoSwing ${
+                  5.8 +
+                  Math.random() * 1.8
+                }s ${
+                  Math.random() * 1.8
+                }s var(--ease-spring) infinite`;
+
+              item.innerHTML = `
+                <div class="wood-clip"></div>
+                <img
+                  src="${photo.src}"
+                  alt="${photo.date} 的故事照片"
+                  loading="lazy"
+                />
+              `;
+
+              item.addEventListener(
+                "click",
+                () => {
+                  openModal(
+                    photo,
+                    photos.indexOf(photo)
+                  );
+                }
+              );
+
+              set.appendChild(item);
+
+              setTimeout(
+                () => {
+                  item.classList.add(
+                    "show"
+                  );
+                },
+                280 +
+                  index * 120 +
+                  ropeIndex * 180
+              );
+            }
+          );
+        }
+      );
+
+      addCuteElements();
+    }
+
+    const dynamicStyle =
+      document.createElement("style");
+
+    dynamicStyle.textContent = `
+      @keyframes photoSwing {
+        0%,
+        100% {
+          transform:
+            translate(-50%, -50%)
+            rotate(var(--rotate));
+        }
+
+        25% {
+          transform:
+            translate(
+              calc(-50% + var(--swing)),
+              -50%
+            )
+            rotate(
+              calc(var(--rotate) + 1.7deg)
+            );
+        }
+
+        50% {
+          transform:
+            translate(-50%, -50%)
+            rotate(var(--rotate));
+        }
+
+        75% {
+          transform:
+            translate(
+              calc(-50% - var(--swing)),
+              -50%
+            )
+            rotate(
+              calc(var(--rotate) - 1.7deg)
+            );
+        }
+      }
+
+      @media (max-width: 768px) {
+        @keyframes photoSwing {
+          0%,
+          100% {
+            transform:
+              translate(-50%, -50%)
+              rotate(var(--rotate));
+          }
+
+          50% {
+            transform:
+              translate(-50%, -50%)
+              rotate(var(--rotate));
+          }
+        }
+      }
+    `;
+
+    document.head.appendChild(
+      dynamicStyle
+    );
+
+    function addCuteElements() {
+      const elements = [
+        {
+          type: "animal",
+          emoji: "🦌",
+          left: "4%",
+          top: "8%",
+        },
+        {
+          type: "animal",
+          emoji: "🐯",
+          left: "90%",
+          top: "10%",
+        },
+        {
+          type: "animal",
+          emoji: "🐰",
+          left: "7%",
+          top: "38%",
+        },
+        {
+          type: "animal",
+          emoji: "🐻",
+          left: "92%",
+          top: "34%",
+        },
+        {
+          type: "animal",
+          emoji: "🦊",
+          left: "7%",
+          top: "67%",
+        },
+        {
+          type: "animal",
+          emoji: "🐱",
+          left: "90%",
+          top: "64%",
+        },
+        {
+          type: "tree",
+          emoji: "🌳",
+          left: "1%",
+          top: "82%",
+        },
+        {
+          type: "tree",
+          emoji: "🌲",
+          left: "94%",
+          top: "80%",
+        },
+        {
+          type: "leaf",
+          emoji: "🍃",
+          left: "19%",
+          top: "23%",
+        },
+        {
+          type: "leaf",
+          emoji: "🌿",
+          left: "82%",
+          top: "28%",
+        },
+        {
+          type: "star",
+          emoji: "✦",
+          left: "48%",
+          top: "4%",
+        },
+        {
+          type: "heart",
+          emoji: "♡",
+          left: "13%",
+          top: "86%",
+        },
+        {
+          type: "sparkle",
+          emoji: "✧",
+          left: "85%",
+          top: "76%",
+        },
+      ];
+
+      elements.forEach(
+        (element) => {
+          const item =
+            document.createElement(
+              "div"
+            );
+
+          item.className =
+            `cute-element ${element.type}`;
+
+          item.textContent =
+            element.emoji;
+
+          item.style.left =
+            element.left;
+
+          item.style.top =
+            element.top;
+
+          item.style.animationDelay =
+            Math.random() * 4 + "s";
+
+          photoWall.appendChild(item);
+        }
+      );
+    }
+
+    /*
+      ============================================================
+      STORY MODAL
+      ============================================================
+    */
+
+    const modal =
+      document.getElementById(
+        "storyModal"
+      );
+
+    const modalImg =
+      document.getElementById(
+        "modalImg"
+      );
+
+    const modalDate =
+      document.getElementById(
+        "modalDate"
+      );
+
+    const modalStory =
+      document.getElementById(
+        "modalStory"
+      );
+
+    const modalIndex =
+      document.getElementById(
+        "modalIndex"
+      );
+
+    const closeBtn =
+      document.getElementById(
+        "closeBtn"
+      );
+
+    function openModal(
+      photo,
+      index
+    ) {
+      modalImg.src =
+        photo.src;
+
+      modalImg.alt =
+        `${photo.date} 的故事照片`;
+
+      modalDate.textContent =
+        photo.date;
+
+      modalIndex.textContent =
+        `Memory ${String(
+          index + 1
+        ).padStart(2, "0")} / 18`;
+
+      modalStory.textContent =
+        photo.story;
+
+      modal.classList.add(
+        "active"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.style.overflow =
+        "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove(
+        "active"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      document.body.style.overflow =
+        "";
+    }
+
+    closeBtn.addEventListener(
+      "click",
+      closeModal
+    );
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target === modal
+        ) {
+          closeModal();
+        }
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Escape" &&
+          modal.classList.contains(
+            "active"
+          )
+        ) {
+          closeModal();
+        }
+      }
+    );
+
+    /*
+      ============================================================
+      BACKGROUND SNOW
+      ============================================================
+    */
+
+    const canvas =
+      document.getElementById(
+        "bgCanvas"
+      );
+
+    const ctx =
+      canvas.getContext("2d");
+
+    let snowflakes = [];
+
+    function resizeCanvas() {
+      const ratio =
+        Math.min(
+          window.devicePixelRatio || 1,
+          2
+        );
+
+      canvas.width =
+        window.innerWidth * ratio;
+
+      canvas.height =
+        window.innerHeight * ratio;
+
+      canvas.style.width =
+        window.innerWidth + "px";
+
+      canvas.style.height =
+        window.innerHeight + "px";
+
+      ctx.setTransform(
+        ratio,
+        0,
+        0,
+        ratio,
+        0,
+        0
+      );
+    }
+
+    resizeCanvas();
+
+    class SnowFlake {
+      constructor() {
+        this.reset();
+
+        this.y =
+          Math.random() *
+          window.innerHeight;
+      }
+
+      reset() {
+        this.x =
+          Math.random() *
+          window.innerWidth;
+
+        this.y = -20;
+
+        this.size =
+          1.5 +
+          Math.random() * 4;
+
+        this.speed =
+          0.15 +
+          Math.random() * 0.55;
+
+        this.opacity =
+          0.15 +
+          Math.random() * 0.28;
+
+        this.swayOffset =
+          Math.random() *
+          Math.PI *
+          2;
+
+        this.swaySpeed =
+          0.003 +
+          Math.random() * 0.006;
+      }
+
+      update() {
+        this.y +=
+          this.speed;
+
+        this.x +=
+          Math.sin(
+            this.y *
+              this.swaySpeed +
+              this.swayOffset
+          ) * 0.45;
+
+        if (
+          this.y >
+          window.innerHeight + 20
+        ) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+
+        ctx.globalAlpha =
+          this.opacity;
+
+        ctx.strokeStyle =
+          "#fff";
+
+        ctx.lineWidth = 0.8;
+
+        ctx.translate(
+          this.x,
+          this.y
+        );
+
+        ctx.beginPath();
+
+        ctx.arc(
+          0,
+          0,
+          this.size,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    function initSnowflakes() {
+      const count =
+        Math.min(
+          75,
+          Math.floor(
+            window.innerWidth / 18
+          )
+        );
+
+      snowflakes =
+        Array.from(
+          {
+            length: count,
+          },
+          () =>
+            new SnowFlake()
+        );
+    }
+
+    function animateSnow() {
+      ctx.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+      );
+
+      snowflakes.forEach(
+        (flake) => {
+          flake.update();
+          flake.draw();
+        }
+      );
+
+      requestAnimationFrame(
+        animateSnow
+      );
+    }
+
+    /*
+      ============================================================
+      REVEAL OBSERVER
+      ============================================================
+    */
+
+    const revealObserver =
+      new IntersectionObserver(
+        (entries) => {
+          entries.forEach(
+            (entry) => {
+              if (
+                entry.isIntersecting
+              ) {
+                entry.target.classList.add(
+                  "visible"
+                );
+
+                revealObserver.unobserve(
+                  entry.target
+                );
+              }
+            }
+          );
+        },
+        {
+          threshold: 0.08,
+          rootMargin:
+            "0px 0px -60px 0px",
+        }
+      );
+
+    document
+      .querySelectorAll(
+        ".reveal"
+      )
+      .forEach((element) => {
+        revealObserver.observe(
+          element
+        );
+      });
+
+    /*
+      ============================================================
+      MUSIC
+      原始音乐路径保持不变
+      ============================================================
+    */
+
+    const musicConfig = {
+      src: "music/桑田佳祐 - 白い恋人達 (白色恋人们)-soConvert.mp3",
+
+      songName:
+        "白い恋人達 - 桑田佳祐",
+
+      lyrics: [
+        {
+          time: 0,
+          text: "~~~~~~~~",
+        },
+        {
+          time: 16,
+          text: "夜に向かって雪が降り積もると",
+        },
+        {
+          time: 22,
+          text: "悲しみがそっと胸にこみ上げる",
+        },
+        {
+          time: 29,
+          text: "涙で心の灯を消して",
+        },
+        {
+          time: 35,
+          text: "通り過ぎてゆく季節を見ていた",
+        },
+        {
+          time: 41,
+          text: "外はため息さえ凍りついて",
+        },
+        {
+          time: 48,
+          text: "冬枯れの街路樹に風が泣く",
+        },
+        {
+          time: 54,
+          text: "あの赤レンガの停車場で",
+        },
+        {
+          time: 60,
+          text: "二度と帰らない誰かを待ってる Woo…",
+        },
+        {
+          time: 68,
+          text: "今宵 涙こらえて奏でる愛のSerenade",
+        },
+        {
+          time: 74,
+          text: "今も忘れない恋の歌",
+        },
+        {
+          time: 81,
+          text: "雪よもう一度だけこのときめきをCelebrate",
+        },
+        {
+          time: 87,
+          text: "ひとり泣き濡れた夜に White Love",
+        },
+        {
+          time: 98,
+          text: "聖なる鐘の音が響く頃に",
+        },
+        {
+          time: 104,
+          text: "最果ての街並みを夢に見る",
+        },
+        {
+          time: 110,
+          text: "天使が空から降りて来て",
+        },
+        {
+          time: 116,
+          text: "春が来る前に微笑みをくれた Woo…",
+        },
+        {
+          time: 124,
+          text: "心折れないように負けないように Loneliness",
+        },
+        {
+          time: 130,
+          text: "白い恋人が待っている",
+        },
+        {
+          time: 136,
+          text: "だから夢と希望を胸に抱いて Foreverness",
+        },
+        {
+          time: 142,
+          text: "辛い毎日がやがて White Love",
+        },
+        {
+          time: 155,
+          text: "Instruments~",
+        },
+        {
+          time: 192,
+          text: "今宵 涙こらえて奏でる愛のSerenade",
+        },
+        {
+          time: 198,
+          text: "今も忘れない恋の歌",
+        },
+        {
+          time: 204,
+          text: "せめてもう一度だけこの旅立ちをCelebrate",
+        },
+        {
+          time: 210,
+          text: "ひとり泣き濡れた冬に White Love",
+        },
+        {
+          time: 222,
+          text: "Ah ah...",
+        },
+        {
+          time: 226,
+          text: "永遠のWhite Love",
+        },
+        {
+          time: 235,
+          text: "My Love",
+        },
+        {
+          time: 240,
+          text: "ただ逢いたくて",
+        },
+        {
+          time: 244,
+          text: "もうせつなくて",
+        },
+        {
+          time: 247,
+          text: "恋しくて…",
+        },
+        {
+          time: 253,
+          text: "涙~",
+        },
+      ],
+    };
+
+    const bgmAudio =
+      new Audio(
+        musicConfig.src
+      );
+
+    bgmAudio.loop = true;
+
+    const musicIcon =
+      document.getElementById(
+        "musicIcon"
+      );
+
+    const lyricLine =
+      document.getElementById(
+        "lyricLine"
+      );
+
+    const songNameEl =
+      document.querySelector(
+        ".song-name"
+      );
+
+    songNameEl.textContent =
+      musicConfig.songName;
+
+    let isPlaying = false;
+
+    let iconRotateDeg = 0;
+
+    let rotateAnimId = null;
+
+    let userStartedMusic =
+      false;
+
+    function startIconRotate() {
+      if (rotateAnimId) {
+        return;
+      }
+
+      function tick() {
+        iconRotateDeg += 0.7;
+
+        musicIcon.style.transform =
+          `rotate(${iconRotateDeg}deg)`;
+
+        rotateAnimId =
+          requestAnimationFrame(
+            tick
+          );
+      }
+
+      tick();
+    }
+
+    function stopIconRotate() {
+      if (rotateAnimId) {
+        cancelAnimationFrame(
+          rotateAnimId
+        );
+
+        rotateAnimId = null;
+      }
+    }
+
+    async function playMusic() {
+      try {
+        await bgmAudio.play();
+
+        isPlaying = true;
+        userStartedMusic = true;
+
+        startIconRotate();
+
+        musicIcon.textContent =
+          "Ⅱ";
+      } catch (error) {
+        console.log(
+          "播放失败，请检查音乐文件路径",
+          error
+        );
+
+        lyricLine.textContent =
+          "音乐文件加载失败";
+      }
+    }
+
+    function pauseMusic() {
+      bgmAudio.pause();
+
+      isPlaying = false;
+
+      stopIconRotate();
+
+      musicIcon.textContent =
+        "♪";
+    }
+
+    musicIcon.addEventListener(
+      "click",
+      async (event) => {
+        event.stopPropagation();
+
+        if (isPlaying) {
+          pauseMusic();
+        } else {
+          await playMusic();
+        }
+      }
+    );
+
+    document.addEventListener(
+      "click",
+      async (event) => {
+        if (
+          event.target.closest(
+            "#musicIcon"
+          )
+        ) {
+          return;
+        }
+
+        if (
+          !userStartedMusic
+        ) {
+          await playMusic();
+        }
+      },
+      {
+        once: true,
+      }
+    );
+
+    let currentLyricIndex =
+      -1;
+
+    let isLyricSwitching =
+      false;
+
+    function switchLyric(index) {
+      if (
+        isLyricSwitching ||
+        index ===
+          currentLyricIndex
+      ) {
+        return;
+      }
+
+      isLyricSwitching = true;
+
+      currentLyricIndex =
+        index;
+
+      const text =
+        musicConfig.lyrics[
+          index
+        ].text;
+
+      lyricLine.style.opacity =
+        "0";
+
+      setTimeout(() => {
+        lyricLine.innerHTML =
+          `<span class="lyric-content">${escapeHtml(
+            text
+          )}</span>`;
+
+        const contentEl =
+          lyricLine.querySelector(
+            ".lyric-content"
+          );
+
+        if (
+          contentEl.scrollWidth >
+          lyricLine.clientWidth
+        ) {
+          lyricLine.classList.add(
+            "scrolling"
+          );
+        } else {
+          lyricLine.classList.remove(
+            "scrolling"
+          );
+        }
+
+        requestAnimationFrame(
+          () => {
+            lyricLine.style.opacity =
+              "1";
+          }
+        );
+
+        setTimeout(() => {
+          isLyricSwitching =
+            false;
+        }, 400);
+      }, 350);
+    }
+
+    bgmAudio.addEventListener(
+      "timeupdate",
+      () => {
+        const currentTime =
+          bgmAudio.currentTime;
+
+        let targetIndex = 0;
+
+        for (
+          let i =
+            musicConfig.lyrics
+              .length - 1;
+          i >= 0;
+          i--
+        ) {
+          if (
+            currentTime >=
+            musicConfig.lyrics[i]
+              .time
+          ) {
+            targetIndex = i;
+            break;
+          }
+        }
+
+        switchLyric(
+          targetIndex
+        );
+      }
+    );
+
+    bgmAudio.addEventListener(
+      "error",
+      () => {
+        lyricLine.textContent =
+          "音乐文件加载失败";
+      }
+    );
+
+    /*
+      ============================================================
+      PASSWORD
+      原密码保持不变
+      ============================================================
+    */
+
+    const PASSWORD = "000";
+
+    const overlay =
+      document.getElementById(
+        "passwordOverlay"
+      );
+
+    const input =
+      document.getElementById(
+        "passwordInput"
+      );
+
+    const unlockBtn =
+      document.getElementById(
+        "unlockBtn"
+      );
+
+    const error =
+      document.getElementById(
+        "errorMsg"
+      );
+
+    function unlock() {
+      if (
+        input.value ===
+        PASSWORD
+      ) {
+        overlay.style.opacity =
+          "0";
+
+        setTimeout(() => {
+          overlay.style.visibility =
+            "hidden";
+
+          overlay.style.display =
+            "none";
+
+          document.body.style.overflow =
+            "";
+        }, 800);
+
+        showToast(
+          "记忆已经为你打开。"
+        );
+      } else {
+        error.style.display =
+          "block";
+
+        input.value = "";
+
+        input.focus();
+      }
+    }
+
+    unlockBtn.addEventListener(
+      "click",
+      unlock
+    );
+
+    input.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Enter"
+        ) {
+          unlock();
+        }
+      }
+    );
+
+    /*
+      ============================================================
+      RESIZE / INIT
+      ============================================================
+    */
+
+    let resizeTimer = null;
+
+    window.addEventListener(
+      "resize",
+      () => {
+        clearTimeout(
+          resizeTimer
+        );
+
+        resizeTimer =
+          setTimeout(() => {
+            resizeCanvas();
+
+            initSnowflakes();
+
+            /*
+              不重新创建照片，
+              避免 resize 时重复生成 DOM。
+            */
+          }, 180);
+      },
+      {
+        passive: true,
+      }
+    );
+
+    window.addEventListener(
+      "load",
+      () => {
+        renderPhotos();
+
+        initSnowflakes();
+
+        animateSnow();
+
+        loadComments();
+
+        requestAnimationFrame(
+          () => {
+            document
+              .querySelectorAll(
+                ".page-title .reveal, .wall-intro.reveal"
+              )
+              .forEach(
+                (element) => {
+                  element.classList.add(
+                    "visible"
+                  );
+                }
+              );
+          }
+        );
+      }
+    );
+  </script>
+</body>
+</html>
