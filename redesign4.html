@@ -258,6 +258,11 @@
         white-space: nowrap;
         text-align: right;
         opacity: 0.85;
+
+        transition:
+          opacity 0.65s var(--ease),
+          transform 0.65s var(--ease);
+        transform: translateY(0);
       }
 
       .lyric-line .lyric-content {
@@ -2245,7 +2250,8 @@
 
         const text = musicConfig.lyrics[index].text;
 
-        lyricLine.style.opacity = "0";
+        lyricLine.style.opacity = "0.15";
+        lyricLine.style.transform = "translateY(4px)";
 
         setTimeout(() => {
           lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
@@ -2260,12 +2266,13 @@
 
           requestAnimationFrame(() => {
             lyricLine.style.opacity = "1";
+            lyricLine.style.transform = "translateY(0)";
           });
 
           setTimeout(() => {
             isLyricSwitching = false;
           }, 400);
-        }, 300);
+        }, 450);
       }
 
       bgmAudio.addEventListener("timeupdate", () => {
