@@ -1,651 +1,268 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <!-- HTML 连接 Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="我们的故事，一段关于相遇、陪伴、离别与重逢的回忆。"
+    />
+
+    <!-- Supabase 路径保持不变 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <title>我们的故事</title>
+
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap");
+
+      :root {
+        --paper: #f6f1e9;
+        --paper-deep: #eee6da;
+        --ink: #403a35;
+        --muted: #8b8178;
+        --soft: #b6a99d;
+        --accent: #b67c76;
+        --accent-soft: #d8aaa2;
+        --rope: #a87951;
+        --white: rgba(255, 255, 255, 0.78);
+
+        --shadow-soft:
+          0 20px 60px rgba(91, 72, 58, 0.1), 0 4px 18px rgba(91, 72, 58, 0.06);
+
+        --shadow-photo:
+          0 18px 40px rgba(65, 48, 37, 0.15), 0 4px 12px rgba(65, 48, 37, 0.08);
+
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        cursor: none !important;
+      }
+
+      html {
+        scroll-behavior: smooth;
       }
 
       body {
-        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        color: var(--ink);
         background:
           radial-gradient(
-            circle at 18% 22%,
-            rgba(255, 255, 255, 0.7) 0,
-            transparent 26%
+            circle at 12% 10%,
+            rgba(255, 255, 255, 0.85),
+            transparent 27%
           ),
           radial-gradient(
-            circle at 82% 75%,
-            rgba(255, 255, 255, 0.6) 0,
-            transparent 22%
+            circle at 86% 72%,
+            rgba(211, 188, 168, 0.18),
+            transparent 28%
           ),
-          radial-gradient(
-            circle at 50% 50%,
-            rgba(255, 255, 255, 0.35) 0,
-            transparent 35%
-          ),
-          repeating-radial-gradient(
-            circle at center,
-            rgba(220, 230, 245, 0.2) 0,
-            rgba(220, 230, 245, 0.2) 2px,
-            transparent 2px,
-            transparent 22px
-          ),
-          linear-gradient(135deg, #f5f7fa 0%, #eaf0f9 50%, #f3f0fa 100%);
-        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-        overflow-x: hidden;
-        color: #5a4a52;
+          linear-gradient(135deg, #faf7f1 0%, var(--paper) 46%, #eee7dc 100%);
+        font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
         position: relative;
       }
 
       body::before {
         content: "";
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        inset: 0;
         z-index: 0;
         pointer-events: none;
-        background-image:
-          radial-gradient(
-            circle at 12% 18%,
-            rgba(255, 255, 255, 0.85) 0 8%,
-            transparent 9%
-          ),
-          radial-gradient(
-            circle at 88% 12%,
-            rgba(255, 255, 255, 0.75) 0 10%,
-            transparent 11%
-          ),
-          radial-gradient(
-            circle at 15% 85%,
-            rgba(255, 255, 255, 0.65) 0 7%,
-            transparent 8%
-          ),
-          radial-gradient(
-            circle at 85% 80%,
-            rgba(255, 255, 255, 0.7) 0 9%,
-            transparent 10%
-          ),
-          linear-gradient(
-            90deg,
-            rgba(200, 215, 235, 0.15) 1px,
-            transparent 1px
-          ),
-          linear-gradient(rgba(200, 215, 235, 0.15) 1px, transparent 1px);
-        background-size:
-          100% 100%,
-          100% 100%,
-          100% 100%,
-          100% 100%,
-          50px 50px,
-          50px 50px;
-        background-position: center center;
-        opacity: 0.6;
+        opacity: 0.34;
+        background-image: radial-gradient(
+          rgba(75, 55, 40, 0.13) 0.6px,
+          transparent 0.6px
+        );
+        background-size: 5px 5px;
+        mix-blend-mode: multiply;
       }
 
-      .continue-text {
-        position: fixed;
-
-        right: 24px;
-
-        bottom: 24px;
-
-        z-index: 10;
-
-        width: 220px;
-
-        pointer-events: none;
-
-        animation: continueFloat 3s ease-in-out infinite;
+      body.locked {
+        overflow: hidden;
       }
 
-      .continue-text img {
-        width: 100%;
-
-        height: auto;
-
-        display: block;
+      button,
+      input,
+      textarea {
+        font: inherit;
       }
+
+      button {
+        border: 0;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      /* =========================================================
+       Ambient background
+    ========================================================= */
 
       #bgCanvas {
         position: fixed;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
         height: 100%;
         z-index: 0;
         pointer-events: none;
+        opacity: 0.48;
       }
 
-      #cursor {
+      .ambient-orb {
         position: fixed;
-        width: 20px;
-        height: 20px;
-        z-index: 9999;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
         pointer-events: none;
-        transform: translate(-50%, -50%);
-        animation: cursorBeat 1.2s ease-in-out infinite;
+        filter: blur(70px);
+        opacity: 0.16;
+        z-index: 0;
       }
 
-      #cursor::before,
-      #cursor::after {
-        content: "";
-        position: absolute;
-        width: 10px;
-        height: 16px;
-        background: #f093b8;
-        border-radius: 10px 10px 0 0;
-        top: 0;
-        box-shadow: 0 0 8px rgba(240, 147, 184, 0.5);
+      .ambient-orb.one {
+        left: -100px;
+        top: 30%;
+        background: #d5b8a2;
       }
 
-      #cursor::before {
-        left: 10px;
-        transform: rotate(-45deg);
-        transform-origin: 0 100%;
+      .ambient-orb.two {
+        right: -120px;
+        top: 55%;
+        background: #c6aaa0;
       }
 
-      #cursor::after {
-        left: 0;
-        transform: rotate(45deg);
-        transform-origin: 100% 100%;
-      }
+      /* =========================================================
+       Header
+    ========================================================= */
 
-      @keyframes cursorBeat {
-        0%,
-        100% {
-          transform: translate(-50%, -50%) scale(1);
-        }
-        50% {
-          transform: translate(-50%, -50%) scale(1.2);
-        }
-      }
-
-      @keyframes continueFloat {
-        0%,
-        100% {
-          transform: translateY(0px) rotate(-3deg);
-        }
-
-        50% {
-          transform: translateY(-8px) rotate(3deg);
-        }
-      }
-
-      .click-heart {
-        position: fixed;
-        pointer-events: none;
-        z-index: 9998;
-        animation: clickHeartFloat 1.5s ease-out forwards;
-        color: #f28eb8;
-      }
-
-      @keyframes clickHeartFloat {
-        0% {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(0.5);
-        }
-        100% {
-          opacity: 0;
-          transform: translate(-50%, -150%) scale(1.2);
-        }
-      }
-
-      .page-title {
-        text-align: center;
-        padding: 16px 20px 0;
-        position: relative;
-        z-index: 1;
-      }
-
-      .subtitle {
-        margin-top: 18px;
-
-        display: flex;
-
-        justify-content: center;
-
-        align-items: center;
-
-        gap: 15px;
-
-        font-family: "KaiTi", "STKaiti", serif;
-
-        font-size: 20px;
-
-        letter-spacing: 3px;
-
-        color: #ffffff;
-
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-      }
-
-      .story-title-img {
-        width: 420px;
-        height: auto;
-        display: block;
+      .page-header {
+        width: min(1240px, calc(100% - 48px));
         margin: 0 auto;
-      }
-
-      .page-title h1 {
-        font-size: 2.5rem;
-        color: #a87a9a;
-        font-weight: 500;
-        margin-bottom: 6px;
-        animation: titleGlow 3s ease-in-out infinite alternate;
-      }
-
-      .page-title p {
-        color: #8f8aa0;
-        font-size: 1.05rem;
-        opacity: 0.9;
-      }
-
-      @keyframes titleGlow {
-        0% {
-          text-shadow: 0 0 10px rgba(180, 150, 190, 0.25);
-        }
-        100% {
-          text-shadow: 0 0 20px rgba(180, 150, 190, 0.45);
-        }
-      }
-
-      .photo-wall {
+        padding: 44px 0 20px;
         position: relative;
-
-        width: 92%;
-        max-width: 1200px;
-
-        min-height: 780px;
-
-        margin: 0 auto 0;
-
-        z-index: 1;
-      }
-
-      .rope-set {
-        position: absolute;
-        left: 5%;
-        right: 5%;
-        z-index: 1;
-      }
-
-      .rope-set.top {
-        top: 32px;
-      }
-      .rope-set.middle {
-        top: 220px;
-      }
-      .rope-set.bottom {
-        top: 420px;
-      }
-
-      .rope-canvas {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 70px;
-        pointer-events: none;
         z-index: 2;
       }
 
-      .rope-anchor {
-        position: absolute;
-        top: 0;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background:
-          radial-gradient(
-            circle at 42% 38%,
-            rgba(255, 255, 255, 0.32),
-            transparent 35%
-          ),
-          radial-gradient(circle at 50% 50%, #e2c19b, #d4a373, #b8895a);
-        box-shadow:
-          inset 0 2px 3px rgba(255, 255, 255, 0.45),
-          inset 0 -3px 6px rgba(70, 40, 20, 0.4),
-          0 3px 5px rgba(0, 0, 0, 0.28),
-          0 8px 16px rgba(0, 0, 0, 0.22);
-        z-index: 4;
-      }
-
-      .rope-anchor.left {
-        left: -14px;
-      }
-      .rope-anchor.right {
-        right: -14px;
-      }
-
-      .rope-anchor::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(70, 45, 25, 0.55),
-          rgba(70, 45, 25, 0.35)
-        );
-        transform: translate(-50%, -50%);
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
-      }
-
-      .rope-anchor::after {
-        content: "";
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.18);
-      }
-
-      .photo-item {
-        position: absolute;
-        background: #ffffff;
-        padding: 7px 7px 16px;
-        border-radius: 4px;
-        box-shadow:
-          0 8px 20px rgba(180, 180, 200, 0.22),
-          0 4px 10px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s ease;
-        opacity: 0;
-        animation: photoFloat 6s ease-in-out infinite;
-        cursor: pointer;
-        z-index: 5;
-      }
-
-      .photo-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        border-radius: 2px;
-      }
-
-      .photo-item:hover {
-        transform: translate(-50%, -50%) scale(1.15) rotate(0deg) !important;
-        box-shadow:
-          0 15px 35px rgba(190, 180, 210, 0.35),
-          0 8px 18px rgba(0, 0, 0, 0.12);
-        z-index: 20;
-      }
-
-      @keyframes photoFloat {
-        0% {
-          transform: translate(-50%, -50%) translateX(0) translateY(0)
-            rotate(var(--rotate));
-        }
-
-        25% {
-          transform: translate(-50%, -50%) translateX(var(--swing))
-            translateY(-4px) rotate(calc(var(--rotate) + 2deg));
-        }
-
-        50% {
-          transform: translate(-50%, -50%) translateX(0) translateY(-8px)
-            rotate(var(--rotate));
-        }
-
-        75% {
-          transform: translate(-50%, -50%) translateX(calc(var(--swing) * -1))
-            translateY(-4px) rotate(calc(var(--rotate) - 2deg));
-        }
-
-        100% {
-          transform: translate(-50%, -50%) translateX(0) translateY(0)
-            rotate(var(--rotate));
-        }
-      }
-
-      .photo-item.show {
-        opacity: 1;
-      }
-
-      .photo-item {
-        opacity: 1;
-      }
-
-      .wood-clip {
-        position: absolute;
-        top: -7px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 42px;
-        height: 14px;
-        background: linear-gradient(
-          180deg,
-          #d9a876 0%,
-          #c18f5f 50%,
-          #a6784a 100%
-        );
-        border-radius: 2px;
-        z-index: 6;
-        box-shadow:
-          inset 0 1px 2px rgba(255, 255, 255, 0.4),
-          inset 0 -2px 4px rgba(70, 45, 20, 0.35),
-          0 2px 4px rgba(0, 0, 0, 0.25);
-      }
-
-      .wood-clip::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 5px;
-        height: 9px;
-        background: linear-gradient(180deg, #9a9a9a, #6a6a6a);
-        border-radius: 1px;
-      }
-
-      .cute-element {
-        position: absolute;
-        pointer-events: none;
-        opacity: 0.75;
-        animation: floatElement 8s ease-in-out infinite;
-        z-index: 0;
-        font-size: 28px;
-      }
-
-      .cute-element.star {
-        color: #f4d66b;
-        font-size: 22px;
-      }
-      .cute-element.heart {
-        color: #f4b6ce;
-        font-size: 20px;
-      }
-      .cute-element.sparkle {
-        color: #d8c8f0;
-        font-size: 24px;
-      }
-      .cute-element.cloud {
-        color: #ffffff;
-        font-size: 26px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
-      }
-      .cute-element.animal {
-        font-size: 42px;
-        opacity: 0.85;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
-      }
-      .cute-element.tree {
-        font-size: 38px;
-        opacity: 0.8;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
-      }
-      .cute-element.leaf {
-        color: #89b96a;
-        font-size: 20px;
-        opacity: 0.7;
-      }
-
-      @keyframes floatElement {
-        0%,
-        100% {
-          transform: translateY(0) rotate(0deg);
-        }
-        50% {
-          transform: translateY(-12px) rotate(8deg);
-        }
-      }
-
-      .story-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(240, 240, 250, 0.7);
-        backdrop-filter: blur(8px);
-        z-index: 1000;
+      .header-meta {
         display: flex;
-        justify-content: center;
         align-items: center;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        padding: 20px;
+        justify-content: space-between;
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
       }
 
-      .story-modal.active {
-        opacity: 1;
-        visibility: visible;
+      .header-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
       }
 
-      .modal-content {
-        background: #fafbff;
-        border-radius: 16px;
-        max-width: 700px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        transform: scale(0.8);
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        color: #5a4a52;
-        box-shadow: 0 15px 40px rgba(160, 160, 190, 0.2);
-      }
-
-      .story-modal.active .modal-content {
-        transform: scale(1);
-      }
-
-      .modal-content img {
-        width: 100%;
-        height: auto;
-        border-radius: 16px 16px 0 0;
-      }
-
-      .modal-body {
-        padding: 25px 30px 30px;
-      }
-
-      .modal-date {
-        color: #a07ba8;
-        font-size: 0.95rem;
-        margin-bottom: 10px;
-        font-weight: 500;
-      }
-
-      .modal-story {
-        font-size: 1.05rem;
-        line-height: 1.8;
-        color: #6b5a62;
-        text-align: left;
-        white-space: pre-line;
-      }
-
-      .close-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        width: 36px;
-        height: 36px;
+      .header-meta span::before {
+        content: "";
+        width: 5px;
+        height: 5px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.6);
-        border: none;
-        color: #a87a9a;
-        font-size: 20px;
-        line-height: 36px;
-        text-align: center;
-        transition: background 0.3s;
-        cursor: pointer;
+        background: var(--accent);
       }
 
-      .close-btn:hover {
-        background: rgba(255, 255, 255, 0.9);
+      .page-title {
+        padding: 58px 0 0;
+        max-width: 760px;
       }
 
-      /* ========== 背景音乐控件 ========== */
+      .eyebrow {
+        color: var(--accent);
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        margin-bottom: 20px;
+      }
+
+      .story-title-img {
+        width: min(420px, 78vw);
+        height: auto;
+        display: block;
+        margin: 0;
+        filter: saturate(0.72);
+      }
+
+      .title-copy {
+        max-width: 600px;
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 2;
+        letter-spacing: 0.02em;
+      }
+
+      .title-rule {
+        width: 100%;
+        height: 1px;
+        margin-top: 42px;
+        background: linear-gradient(
+          90deg,
+          rgba(166, 128, 106, 0.55),
+          rgba(166, 128, 106, 0.12),
+          transparent
+        );
+      }
+
+      /* =========================================================
+       Music player
+    ========================================================= */
+
       .music-player {
         position: fixed;
-        top: 20px;
-        right: 24px;
-        z-index: 1000;
+        top: 24px;
+        right: 28px;
+        z-index: 900;
         display: flex;
         align-items: center;
-        gap: 12px;
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(8px);
-        padding: 8px 15px;
-        border-radius: 30px;
-        box-shadow: 0 4px 12px rgba(180, 160, 200, 0.15);
-      }
-
-      .music-icon {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        cursor: pointer;
-        color: #a87a9a;
-        flex-shrink: 0;
+        gap: 14px;
+        padding: 9px 11px 9px 16px;
+        background: rgba(250, 247, 241, 0.74);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-radius: 16px;
       }
 
       .music-info {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 2px;
-        max-width: 200px;
+        min-width: 0;
+        max-width: 190px;
+        text-align: right;
       }
 
       .song-name {
-        font-size: 0.9rem;
-        color: #7a5a82;
-        font-weight: 500;
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 600;
         white-space: nowrap;
       }
 
       .lyric-line {
-        font-size: 0.8rem;
-        color: #9a8aa2;
-        white-space: nowrap;
-        overflow: hidden;
         width: 180px;
+        margin-top: 3px;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 9px;
+        white-space: nowrap;
         text-align: right;
-        position: relative;
-        opacity: 1;
-        transition: opacity 0.4s ease-in-out;
+        opacity: 0.85;
+
+        transition:
+          opacity 0.65s var(--ease),
+          transform 0.65s var(--ease);
+        transform: translateY(0);
       }
 
       .lyric-line .lyric-content {
@@ -653,434 +270,495 @@
       }
 
       .lyric-line.scrolling .lyric-content {
-        animation: lyricScroll 8s linear forwards;
+        animation: lyricScroll 7s linear forwards;
       }
 
       @keyframes lyricScroll {
-        0% {
+        from {
           transform: translateX(0);
         }
-        100% {
+        to {
           transform: translateX(-50%);
         }
       }
 
-      /* 移动端适配 */
-      @media (max-width: 768px) {
-        * {
-          cursor: auto !important;
-        }
-        #cursor {
-          display: none;
-        }
-
-        .page-title {
-          padding: 14px 20px 0;
-        }
-        .page-title h1 {
-          font-size: 1.8rem;
-        }
-
-        .photo-wall {
-          min-height: 620px;
-        }
-        /* 先+20 */
-        .rope-set.top {
-          top: 50px;
-        }
-        .rope-set.middle {
-          top: 205px;
-        }
-        .rope-set.bottom {
-          top: 360px;
-        }
-
-        .photo-item {
-          padding: 5px 5px 12px;
-        }
-        .wood-clip {
-          width: 36px;
-          height: 12px;
-          top: -6px;
-        }
-        .wood-clip::before {
-          width: 4px;
-          height: 8px;
-        }
-
-        .cute-element.animal {
-          font-size: 32px;
-        }
-        .cute-element.tree {
-          font-size: 30px;
-        }
-
-        .continue-text {
-          right: 16px;
-
-          bottom: 16px;
-
-          width: 140px;
-        }
-
-        .story-title-img {
-          width: 260px;
-        }
-
-        @media (max-width: 768px) {
-          .music-player {
-            position: absolute;
-
-            top: 120px;
-
-            right: 50%;
-
-            transform: translateX(50%);
-
-            padding: 4px 15px;
-
-            border-radius: 20px;
-          }
-        }
-
-        .music-icon {
-          width: 26px;
-
-          height: 26px;
-
-          font-size: 16px;
-        }
-
-        .music-info {
-          max-width: 90px;
-          transform: translateX(5px);
-        }
-
-        .song-name {
-          font-size: 0.65rem;
-        }
-
-        .lyric-line {
-          width: 90px;
-
-          font-size: 0.55rem;
-        }
-
-        /* =========================
-   留言板 - 手机端
-========================= */
-
-        .message-board {
-          width: 90%;
-
-          margin: 40px auto 90px;
-
-          position: relative;
-
-          clear: both;
-        }
-
-        .message-header h2 {
-          font-size: 22px;
-
-          letter-spacing: 2px;
-
-          padding: 6px 12px;
-        }
-
-        .message-header p {
-          font-size: 12px;
-
-          line-height: 1.8;
-        }
-
-        .message-header::before,
-        .message-header::after {
-          width: 15%;
-        }
-
-        .message-form {
-          padding: 20px 16px;
-
-          border-radius: 20px;
-        }
-
-        #commentName {
-          height: 44px;
-
-          font-size: 14px;
-        }
-
-        #commentMessage {
-          min-height: 115px;
-
-          font-size: 14px;
-        }
-
-        .message-submit {
-          width: 80%;
-
-          min-width: 0;
-
-          padding: 11px 16px;
-
-          font-size: 14px;
-        }
-
-        .comments-title {
-          margin-top: 40px;
-
-          font-size: 18px;
-
-          gap: 9px;
-        }
-
-        #commentsList {
-          grid-template-columns: 1fr;
-
-          gap: 18px;
-        }
-
-        .comment-item {
-          padding: 22px 20px 18px;
-        }
-
-        .comment-name {
-          font-size: 16px;
-        }
-
-        .comment-message {
-          font-size: 13px;
-
-          line-height: 1.85;
-        }
-
-        .comment-more {
-          font-size: 12px;
-          margin-top: 6px;
-        }
-
-        .comment-time {
-          font-size: 10px;
-        }
+      .music-icon {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.72);
+        cursor: pointer;
+        transition:
+          transform 0.5s var(--ease),
+          background 0.35s var(--ease);
       }
 
-      /* =========================
-   密码保护层
-========================= */
+      .music-icon:hover {
+        transform: scale(1.06);
+        background: rgba(255, 255, 255, 0.95);
+      }
 
-      #passwordOverlay {
+      .music-icon:active {
+        transform: scale(0.94);
+      }
+
+      /* =========================================================
+       Continue image
+    ========================================================= */
+
+      .continue-text {
         position: fixed;
+        right: 30px;
+        bottom: 26px;
+        width: 175px;
+        z-index: 10;
+        pointer-events: none;
+        opacity: 0.78;
+        animation: continueFloat 4s var(--ease) infinite;
+      }
 
+      .continue-text img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      @keyframes continueFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-2deg);
+        }
+        50% {
+          transform: translateY(-8px) rotate(1deg);
+        }
+      }
+
+      /* =========================================================
+       Photo wall
+    ========================================================= */
+
+      .photo-wall {
+        width: min(1240px, calc(100% - 48px));
+        min-height: 850px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+      }
+
+      .rope-set {
+        position: absolute;
+        left: 4%;
+        right: 4%;
+        height: 190px;
+        z-index: 2;
+      }
+
+      .rope-set.top {
+        top: 25px;
+      }
+
+      .rope-set.middle {
+        top: 245px;
+      }
+
+      .rope-set.bottom {
+        top: 470px;
+      }
+
+      .rope-canvas {
+        position: absolute;
         inset: 0;
-
-        z-index: 99999;
-
-        display: flex;
-
-        justify-content: center;
-
-        align-items: center;
-
-        background: rgba(255, 255, 255, 0.35);
-
-        backdrop-filter: blur(15px);
-
-        -webkit-backdrop-filter: blur(15px);
+        width: 100%;
+        height: 70px;
+        pointer-events: none;
+        z-index: 1;
       }
 
-      /* 密码卡片 */
-
-      .password-box {
-        width: 300px;
-
-        padding: 30px 25px;
-
-        background: rgba(255, 255, 255, 0.85);
-
-        border-radius: 30px;
-
-        text-align: center;
-
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      .rope-anchor {
+        position: absolute;
+        top: 0;
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        background:
+          radial-gradient(
+            circle at 38% 32%,
+            rgba(255, 255, 255, 0.45),
+            transparent 30%
+          ),
+          linear-gradient(145deg, #d4a779, #9a6745);
+        box-shadow:
+          inset 0 2px 4px rgba(255, 255, 255, 0.45),
+          0 5px 12px rgba(76, 54, 39, 0.18);
+        z-index: 3;
       }
 
-      .lock-icon {
-        font-size: 45px;
+      .rope-anchor.left {
+        left: -10px;
       }
 
-      .password-box h2 {
-        margin: 15px 0 8px;
+      .rope-anchor.right {
+        right: -10px;
+      }
 
-        color: #c57b95;
+      .photo-item {
+        position: absolute;
+        background: #fffdf9;
+        padding: 6px 6px 15px;
+        cursor: pointer;
+        opacity: 0;
+        z-index: 5;
+        box-shadow: var(--shadow-photo);
+        transform-origin: 50% -10px;
 
+        animation:
+          photoReveal 0.9s var(--ease) forwards,
+          photoSway 7s ease-in-out infinite;
+
+        transition:
+          box-shadow 0.5s var(--ease),
+          filter 0.5s var(--ease);
+      }
+
+      .photo-item.show {
+        opacity: 1;
+      }
+
+      /*
+      缩略图同样不裁剪。
+      原照片保持完整比例，只限制显示区域尺寸。
+    */
+      .photo-item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        background: #f2eee7;
+        border-radius: 1px;
+      }
+
+      .photo-item:hover {
+        z-index: 30;
+        box-shadow:
+          0 28px 55px rgba(63, 45, 35, 0.22),
+          0 7px 20px rgba(63, 45, 35, 0.12);
+        filter: brightness(1.025);
+      }
+
+      .wood-clip {
+        position: absolute;
+        top: -7px;
+        left: 50%;
+        width: 42px;
+        height: 14px;
+        transform: translateX(-50%);
+        border-radius: 2px;
+        background: linear-gradient(180deg, #d5a576, #b77d4e);
+        box-shadow:
+          inset 0 1px 2px rgba(255, 255, 255, 0.45),
+          0 3px 7px rgba(60, 40, 25, 0.18);
+        z-index: 10;
+      }
+
+      .wood-clip::before {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 9px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 1px;
+        background: #707070;
+      }
+
+      @keyframes photoReveal {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -35%) scale(0.88) rotate(var(--rotate));
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1) rotate(var(--rotate));
+        }
+      }
+
+      @keyframes photoSway {
+        0%,
+        100% {
+          margin-left: 0;
+          rotate: var(--rotate);
+        }
+        25% {
+          margin-left: var(--swing);
+          rotate: calc(var(--rotate) + 1.7deg);
+        }
+        50% {
+          margin-left: 0;
+          rotate: var(--rotate);
+        }
+        75% {
+          margin-left: calc(var(--swing) * -1);
+          rotate: calc(var(--rotate) - 1.7deg);
+        }
+      }
+
+      /* =========================================================
+       Decorative elements
+    ========================================================= */
+
+      .cute-element {
+        position: absolute;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.42;
+        filter: grayscale(0.15);
+        animation: decorFloat 8s ease-in-out infinite;
+      }
+
+      .cute-element.animal,
+      .cute-element.tree {
+        font-size: 34px;
+      }
+
+      .cute-element.leaf,
+      .cute-element.heart {
         font-size: 22px;
       }
 
-      .password-box p {
-        color: #999;
-
-        font-size: 14px;
+      .cute-element.star,
+      .cute-element.sparkle {
+        font-size: 20px;
       }
 
-      #passwordInput {
-        width: 100%;
-
-        padding: 12px;
-
-        margin-top: 20px;
-
-        border-radius: 20px;
-
-        border: 2px solid #f2c7d5;
-
-        outline: none;
-
-        text-align: center;
-
-        font-size: 16px;
+      @keyframes decorFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0);
+        }
+        50% {
+          transform: translateY(-10px) rotate(4deg);
+        }
       }
 
-      #unlockBtn {
-        margin-top: 15px;
+      /* =========================================================
+       Story modal — entire image visible
+    ========================================================= */
 
-        width: 100%;
+      .story-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 5000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+        background: rgba(42, 34, 29, 0.52);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
 
-        padding: 12px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
 
-        border: none;
-
-        border-radius: 20px;
-
-        background: #f3a8c0;
-
-        color: white;
-
-        font-size: 16px;
+        transition:
+          opacity 0.5s var(--ease),
+          visibility 0.5s var(--ease);
       }
 
-      #errorMsg {
-        display: none;
-
-        margin-top: 12px;
-
-        color: #ff8aa8;
-
-        font-size: 13px;
+      .story-modal.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
       }
 
-      #passwordOverlay {
-        transition: opacity 2s;
-      }
-
-      /* ========================================
-   💌 留言板
-======================================== */
-
-      .message-board {
-        width: min(900px, 88%);
-
+      /*
+      关键：
+      modal-content 不再固定图片高度。
+      图片使用 contain + auto，确保整张照片始终显示。
+    */
+      .modal-content {
         position: relative;
+        width: min(1100px, 94vw);
+        max-height: calc(100dvh - 56px);
 
-        margin: 20px auto 140px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
 
-        z-index: 2;
+        overflow: hidden;
 
-        text-align: center;
+        background: rgba(248, 245, 239, 0.96);
+        border-radius: 22px;
+        box-shadow:
+          0 40px 100px rgba(20, 15, 12, 0.28),
+          0 10px 30px rgba(20, 15, 12, 0.16);
 
-        clear: both;
+        transform: translateY(30px) scale(0.96);
+        transition: transform 0.65s var(--ease);
       }
 
-      /* ---------- 标题 ---------- */
-
-      .message-header {
-        position: relative;
-        margin-bottom: 32px;
+      .story-modal.active .modal-content {
+        transform: translateY(0) scale(1);
       }
 
-      .message-header::before,
-      .message-header::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 25%;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(196, 150, 170, 0.5)
+      .modal-image-stage {
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.92),
+          rgba(231, 223, 211, 0.92)
         );
       }
 
-      .message-header::before {
-        left: 0;
+      .modal-content img {
+        /*
+        永不裁切：
+        contain + max-width/max-height 保证整个图片完整出现。
+      */
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: calc(100dvh - 112px);
+        object-fit: contain;
+        object-position: center;
+        border-radius: 8px;
+        box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
       }
 
-      .message-header::after {
-        right: 0;
-        transform: rotate(180deg);
+      .modal-body {
+        min-width: 0;
+        overflow-y: auto;
+        padding: 52px 38px 42px;
+        background: rgba(250, 247, 242, 0.96);
       }
 
-      .message-deco {
-        color: #e8a8c0;
-        font-size: 20px;
-        margin-bottom: 8px;
-        animation: messageSparkle 2s ease-in-out infinite;
+      .modal-index {
+        color: var(--soft);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        margin-bottom: 18px;
+      }
+
+      .modal-date {
+        color: var(--accent);
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        margin-bottom: 22px;
+      }
+
+      .modal-story {
+        color: #625950;
+        font-size: 14px;
+        line-height: 2.05;
+        white-space: pre-line;
+        word-break: break-word;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 20;
+
+        width: 38px;
+        height: 38px;
+
+        display: grid;
+        place-items: center;
+
+        color: #5f554d;
+        background: rgba(255, 255, 255, 0.72);
+        border-radius: 12px;
+        cursor: pointer;
+
+        font-size: 21px;
+        font-weight: 300;
+
+        box-shadow: 0 8px 22px rgba(50, 40, 32, 0.1);
+
+        transition:
+          transform 0.4s var(--ease),
+          background 0.3s var(--ease);
+      }
+
+      .close-btn:hover {
+        transform: rotate(90deg) scale(1.06);
+        background: #fff;
+      }
+
+      .close-btn:active {
+        transform: scale(0.92);
+      }
+
+      /* =========================================================
+       Message board
+    ========================================================= */
+
+      .message-board {
+        width: min(980px, calc(100% - 48px));
+        margin: 20px auto 150px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .message-header {
+        max-width: 650px;
+        margin: 0 auto 44px;
+        text-align: center;
+      }
+
+      .message-kicker {
+        color: var(--accent);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        margin-bottom: 14px;
       }
 
       .message-header h2 {
-        display: inline-block;
-        margin: 0;
-        padding: 8px 24px;
-
-        color: #a67891;
-
-        font-family: "KaiTi", "STKaiti", "PingFang SC", serif;
-
-        font-size: 28px;
+        color: var(--ink);
+        font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+        font-size: clamp(28px, 4vw, 42px);
         font-weight: 500;
-        letter-spacing: 3px;
-
-        text-shadow: 0 2px 8px rgba(180, 140, 160, 0.15);
+        letter-spacing: -0.04em;
+        line-height: 1.2;
+        text-wrap: balance;
       }
 
       .message-header p {
-        margin-top: 10px;
-
-        color: #9a8b94;
-
-        font-size: 14px;
-        line-height: 1.9;
-        letter-spacing: 1px;
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 2;
       }
-
-      /* ---------- 输入区域 ---------- */
 
       .message-form {
-        width: min(600px, 100%);
+        width: min(650px, 100%);
         margin: 0 auto;
-
         padding: 30px;
 
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.82),
-          rgba(255, 248, 252, 0.72)
-        );
+        background: rgba(255, 255, 255, 0.54);
+        border: 1px solid rgba(255, 255, 255, 0.76);
+        border-radius: 20px;
 
-        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow-soft);
 
-        border-radius: 24px;
-
-        box-shadow:
-          0 12px 30px rgba(170, 145, 170, 0.13),
-          inset 0 1px 0 rgba(255, 255, 255, 0.8);
-
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
       }
-
-      /* ---------- 输入框 ---------- */
 
       .input-wrap,
       .textarea-wrap {
@@ -1088,578 +766,1589 @@
       }
 
       .input-wrap {
-        margin-bottom: 14px;
-      }
-
-      .input-icon,
-      .textarea-icon {
-        position: absolute;
-
-        left: 16px;
-        top: 50%;
-
-        transform: translateY(-50%);
-
-        color: #e0a4bb;
-
-        font-size: 18px;
-
-        pointer-events: none;
-      }
-
-      .textarea-icon {
-        top: 18px;
-        transform: none;
+        margin-bottom: 12px;
       }
 
       #commentName,
       #commentMessage {
         width: 100%;
-
-        border: 1.5px solid rgba(224, 175, 194, 0.55);
-
+        border: 1px solid rgba(157, 133, 116, 0.18);
+        outline: none;
+        color: var(--ink);
         background: rgba(255, 255, 255, 0.65);
 
-        color: #665660;
-
-        outline: none;
-
-        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-
         transition:
-          border-color 0.3s ease,
-          box-shadow 0.3s ease,
-          background 0.3s ease;
+          border-color 0.35s var(--ease),
+          box-shadow 0.35s var(--ease),
+          background 0.35s var(--ease);
       }
 
       #commentName {
         height: 48px;
-
-        padding: 0 18px 0 46px;
-
-        border-radius: 18px;
-
-        font-size: 15px;
+        padding: 0 17px;
+        border-radius: 12px;
+        font-size: 13px;
       }
 
       #commentMessage {
-        min-height: 130px;
-
-        padding: 16px 18px 16px 46px;
-
-        border-radius: 18px;
-
-        font-size: 15px;
-
-        line-height: 1.8;
-
+        min-height: 145px;
+        padding: 15px 17px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.9;
         resize: vertical;
       }
 
       #commentName::placeholder,
       #commentMessage::placeholder {
-        color: #b7a6ae;
+        color: #b4a99f;
       }
 
       #commentName:focus,
       #commentMessage:focus {
-        border-color: #e2a6bd;
-
-        background: rgba(255, 255, 255, 0.9);
-
-        box-shadow: 0 0 0 4px rgba(230, 170, 195, 0.12);
+        border-color: rgba(182, 124, 118, 0.5);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 0 0 4px rgba(182, 124, 118, 0.08);
       }
 
-      /* ---------- 提交按钮 ---------- */
-
       .message-submit {
-        margin-top: 18px;
+        width: 100%;
+        margin-top: 14px;
+        min-height: 48px;
 
-        min-width: 190px;
-
-        padding: 12px 24px;
-
-        border: none;
-
-        border-radius: 30px;
-
-        background: linear-gradient(135deg, #efb0c7, #e39bb7);
-
-        color: white;
-
-        font-size: 15px;
-
-        letter-spacing: 2px;
-
+        border-radius: 12px;
+        color: #fff;
+        background: var(--ink);
         cursor: pointer;
 
-        box-shadow: 0 7px 18px rgba(220, 150, 180, 0.25);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+
+        box-shadow: 0 10px 24px rgba(64, 58, 53, 0.15);
 
         transition:
-          transform 0.25s ease,
-          box-shadow 0.25s ease;
+          transform 0.45s var(--ease),
+          background 0.45s var(--ease),
+          box-shadow 0.45s var(--ease);
       }
 
       .message-submit:hover {
-        transform: translateY(-2px) scale(1.02);
-
-        box-shadow: 0 10px 24px rgba(220, 150, 180, 0.32);
+        transform: translateY(-2px);
+        background: #514942;
+        box-shadow: 0 15px 32px rgba(64, 58, 53, 0.2);
       }
 
       .message-submit:active {
-        transform: translateY(1px) scale(0.98);
+        transform: translateY(1px) scale(0.985);
       }
 
       .submit-heart {
-        display: inline-block;
-
-        margin-left: 8px;
-
-        font-size: 18px;
-
-        animation: submitHeartBeat 1.5s ease-in-out infinite;
+        margin-left: 7px;
+        opacity: 0.8;
       }
-
-      /* ---------- 留言标题 ---------- */
 
       .comments-title {
         display: flex;
-
         align-items: center;
         justify-content: center;
+        gap: 15px;
+        margin: 70px 0 28px;
 
-        gap: 14px;
-
-        margin: 55px auto 25px;
-
-        color: #a67c91;
-
-        font-family: "KaiTi", "STKaiti", serif;
-
-        font-size: 20px;
-
-        letter-spacing: 2px;
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
       }
 
-      .comments-title span:first-child,
-      .comments-title span:last-child {
-        color: #e8a8c0;
-
-        font-size: 14px;
+      .comments-title::before,
+      .comments-title::after {
+        content: "";
+        width: min(120px, 16vw);
+        height: 1px;
+        background: rgba(139, 129, 120, 0.25);
       }
-
-      /* ---------- 留言列表 ---------- */
 
       #commentsList {
-        width: min(760px, 100%);
-
-        margin: 0 auto;
-
         display: grid;
-
         grid-template-columns: repeat(2, minmax(0, 1fr));
-
-        gap: 22px;
-
-        text-align: left;
-
-        align-items: start;
+        gap: 18px;
       }
-
-      /* ---------- 单条留言 ---------- */
 
       .comment-item {
         position: relative;
+        min-height: 220px;
+        padding: 30px;
 
-        min-height: 260px;
-
-        height: auto;
-
-        padding: 38px 40px 28px;
-
-        display: flex;
-        flex-direction: column;
-
-        box-sizing: border-box;
-
+        background: rgba(255, 255, 255, 0.65);
         border-radius: 16px;
 
-        background: rgba(255, 255, 255, 0.92);
-
-        box-shadow: 0 8px 25px rgba(120, 100, 140, 0.08);
-
-        overflow: visible;
-
-        align-self: start;
+        box-shadow: 0 14px 38px rgba(73, 56, 44, 0.07);
 
         transition:
-          height 0.35s ease,
-          box-shadow 0.3s ease,
-          transform 0.3s ease;
-      }
-
-      /* 照片纸的小装饰 */
-
-      .comment-item::before {
-        content: "";
-
-        position: absolute;
-
-        top: -7px;
-        left: 50%;
-
-        width: 62px;
-        height: 14px;
-
-        transform: translateX(-50%) rotate(-2deg);
-
-        background: rgba(239, 205, 214, 0.72);
-
-        box-shadow: 0 2px 4px rgba(150, 120, 130, 0.08);
+          transform 0.45s var(--ease),
+          box-shadow 0.45s var(--ease);
       }
 
       .comment-item:hover {
-        transform: rotate(0deg) translateY(-4px);
-
-        box-shadow: 0 14px 28px rgba(170, 150, 175, 0.2);
+        transform: translateY(-4px);
+        box-shadow: 0 22px 48px rgba(73, 56, 44, 0.11);
       }
 
-      /* ---------- 名字 ---------- */
-
       .comment-name {
-        margin-bottom: 12px;
-
-        color: #a16f88;
-
-        font-family: "KaiTi", "STKaiti", serif;
-
-        font-size: 17px;
-
+        color: var(--accent);
+        font-size: 13px;
         font-weight: 600;
       }
 
-      /* ---------- 留言内容 ---------- */
-
       .comment-message {
-        margin-top: 15px;
-        margin-bottom: 10px;
-
-        font-size: 17px;
+        margin-top: 18px;
+        color: #645a53;
+        font-size: 13px;
         line-height: 1.9;
-
-        text-align: left;
-
         white-space: pre-line;
         word-break: break-word;
 
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 6;
-
         overflow: hidden;
-      }
-
-      .comment-more {
-        display: none;
-
-        margin-top: 8px;
-
-        border: none;
-
-        background: transparent;
-
-        padding: 2px 6px;
-
-        color: #c98aa4;
-
-        font-size: 13px;
-
-        font-family: "KaiTi", "STKaiti", serif;
-
-        cursor: pointer;
-
-        letter-spacing: 1px;
-
-        transition: all 0.25s ease;
       }
 
       .comment-message.expanded {
         display: block;
-
-        -webkit-line-clamp: unset;
-
         overflow: visible;
       }
 
-      .comment-more:active {
-        transform: scale(0.95);
+      .comment-more {
+        display: none;
+        margin-top: 10px;
+        padding: 0;
+        color: var(--accent);
+        background: transparent;
+        cursor: pointer;
+        font-size: 11px;
       }
-
-      .comment-more:hover {
-        color: #a96884;
-
-        transform: translateY(-1px);
-      }
-
-      /* ---------- 日期 ---------- */
 
       .comment-time {
-        margin-top: 14px;
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(139, 129, 120, 0.13);
 
-        padding-top: 10px;
-
-        border-top: 1px dashed rgba(205, 175, 190, 0.35);
-
-        color: #b2a2aa;
-
-        font-size: 11px;
-
+        color: var(--soft);
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
         text-align: right;
-
-        letter-spacing: 1px;
+        letter-spacing: 0.08em;
       }
 
-      /* ---------- 动画 ---------- */
-
-      @keyframes messageSparkle {
-        0%,
-        100% {
-          transform: scale(1) rotate(0deg);
-
-          opacity: 0.7;
-        }
-
-        50% {
-          transform: scale(1.18) rotate(8deg);
-
-          opacity: 1;
-        }
-      }
-
-      @keyframes submitHeartBeat {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-
-        50% {
-          transform: scale(1.25);
-        }
-      }
-      /* 暂无留言 */
       .empty-comments {
         grid-column: 1 / -1;
-
-        padding: 35px 20px;
-
+        padding: 50px 20px;
         text-align: center;
-
-        color: #ad9ca5;
-
-        background: rgba(255, 255, 255, 0.55);
-
-        border-radius: 20px;
-
-        border: 1px dashed rgba(220, 180, 195, 0.5);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.46);
+        border-radius: 18px;
       }
 
       .empty-heart {
-        margin-bottom: 8px;
-
-        color: #e5a5bd;
-
-        font-size: 28px;
-
-        animation: submitHeartBeat 1.6s ease-in-out infinite;
+        margin-bottom: 10px;
+        color: var(--accent);
+        font-size: 26px;
       }
 
       .empty-comments small {
         display: block;
+        margin-top: 8px;
+        color: var(--soft);
+        font-size: 11px;
+      }
 
-        margin-top: 7px;
+      /* =========================================================
+       Password overlay
+    ========================================================= */
 
-        color: #b9aab1;
+      #passwordOverlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+
+        background: radial-gradient(
+          circle at 50% 40%,
+          rgba(255, 255, 255, 0.72),
+          rgba(231, 223, 212, 0.72)
+        );
+
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+
+        transition:
+          opacity 0.8s var(--ease),
+          visibility 0.8s var(--ease);
+      }
+
+      .password-box {
+        width: min(390px, 100%);
+        padding: 44px 38px 38px;
+        text-align: center;
+
+        background: rgba(250, 247, 241, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        border-radius: 22px;
+
+        box-shadow:
+          0 35px 90px rgba(65, 48, 37, 0.16),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+      }
+
+      .lock-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 22px;
+
+        display: grid;
+        place-items: center;
+
+        color: var(--accent);
+        background: rgba(182, 124, 118, 0.09);
+        border-radius: 16px;
+
+        font-size: 21px;
+      }
+
+      .password-box h2 {
+        color: var(--ink);
+        font-family: "Noto Serif SC", "Songti SC", serif;
+        font-size: 25px;
+        font-weight: 500;
+      }
+
+      .password-box p {
+        margin-top: 10px;
+        color: var(--muted);
         font-size: 12px;
+        line-height: 1.8;
+      }
+
+      #passwordInput {
+        width: 100%;
+        height: 48px;
+        margin-top: 25px;
+        padding: 0 16px;
+
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.68);
+
+        border: 1px solid rgba(157, 133, 116, 0.18);
+        border-radius: 12px;
+        outline: none;
+
+        text-align: center;
+        font-family: "DM Mono", monospace;
+        font-size: 14px;
+
+        transition:
+          border-color 0.35s var(--ease),
+          box-shadow 0.35s var(--ease);
+      }
+
+      #passwordInput:focus {
+        border-color: rgba(182, 124, 118, 0.5);
+        box-shadow: 0 0 0 4px rgba(182, 124, 118, 0.08);
+      }
+
+      #unlockBtn {
+        width: 100%;
+        height: 48px;
+        margin-top: 10px;
+
+        color: #fff;
+        background: var(--ink);
+        border-radius: 12px;
+
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+
+        transition:
+          transform 0.45s var(--ease),
+          background 0.45s var(--ease);
+      }
+
+      #unlockBtn:hover {
+        transform: translateY(-2px);
+        background: #514942;
+      }
+
+      #unlockBtn:active {
+        transform: translateY(1px) scale(0.985);
+      }
+
+      #errorMsg {
+        display: none;
+        margin-top: 12px;
+        color: #a8645e;
+        font-size: 11px;
+      }
+
+      /* =========================================================
+       Focus / accessibility
+    ========================================================= */
+
+      :focus-visible {
+        outline: 2px solid rgba(182, 124, 118, 0.72);
+        outline-offset: 3px;
+      }
+
+      /* =========================================================
+       Mobile
+    ========================================================= */
+
+      @media (max-width: 768px) {
+        .page-header {
+          width: calc(100% - 34px);
+          padding-top: 28px;
+        }
+
+        .header-meta {
+          font-size: 8px;
+        }
+
+        .page-title {
+          padding-top: 42px;
+        }
+
+        .story-title-img {
+          width: min(320px, 82vw);
+        }
+
+        .title-copy {
+          font-size: 12px;
+          line-height: 1.9;
+        }
+
+        .music-player {
+          top: 18px;
+          right: 17px;
+          padding: 7px 8px 7px 12px;
+        }
+
+        .music-info {
+          max-width: 125px;
+        }
+
+        .lyric-line {
+          width: 120px;
+        }
+
+        .photo-wall {
+          width: calc(100% - 20px);
+          min-height: 650px;
+        }
+
+        .rope-set {
+          left: 5%;
+          right: 5%;
+        }
+
+        .rope-set.top {
+          top: 30px;
+        }
+
+        .rope-set.middle {
+          top: 205px;
+        }
+
+        .rope-set.bottom {
+          top: 380px;
+        }
+
+        .photo-item {
+          padding: 4px 4px 11px;
+        }
+
+        .wood-clip {
+          width: 34px;
+          height: 12px;
+        }
+
+        .cute-element.animal,
+        .cute-element.tree {
+          font-size: 25px;
+        }
+
+        .continue-text {
+          width: 125px;
+          right: 12px;
+          bottom: 14px;
+        }
+
+        /*
+        手机端 Modal：
+        改成上下结构。
+        图片区域使用 flex + contain，
+        因此横图、竖图、长图都不会被裁切。
+      */
+        .story-modal {
+          padding: 12px;
+          align-items: center;
+        }
+
+        .modal-content {
+          width: 100%;
+          max-height: calc(100dvh - 24px);
+          display: flex;
+          flex-direction: column;
+          border-radius: 18px;
+        }
+
+        .modal-image-stage {
+          flex: 0 1 auto;
+          min-height: 0;
+          padding: 18px;
+        }
+
+        .modal-content img {
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          max-height: 52dvh;
+          object-fit: contain;
+        }
+
+        .modal-body {
+          flex: 1 1 auto;
+          min-height: 0;
+          max-height: 38dvh;
+          padding: 25px 22px 28px;
+          overflow-y: auto;
+        }
+
+        .modal-story {
+          font-size: 13px;
+          line-height: 1.9;
+        }
+
+        .close-btn {
+          top: 9px;
+          right: 9px;
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
+        }
+
+        .message-board {
+          width: calc(100% - 34px);
+          margin-bottom: 100px;
+        }
+
+        .message-form {
+          padding: 20px;
+        }
+
+        #commentsList {
+          grid-template-columns: 1fr;
+        }
+
+        .comment-item {
+          min-height: 0;
+          padding: 25px 22px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+
+        #bgCanvas {
+          display: none;
+        }
       }
     </style>
   </head>
-  <body>
-    <!-- 密码控件 -->
+
+  <body class="locked">
+    <div class="ambient-orb one"></div>
+    <div class="ambient-orb two"></div>
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- =======================================================
+       Password
+  ======================================================== -->
     <div id="passwordOverlay">
       <div class="password-box">
-        <div class="lock-icon">🔒</div>
+        <div class="lock-icon">♡</div>
 
         <h2>请输入房间密码</h2>
 
-        <p>只有我们知道的小秘密 ✨</p>
+        <p>只有我们知道的小秘密</p>
 
-        <input id="passwordInput" type="password" placeholder="输入密码" />
+        <input
+          id="passwordInput"
+          type="password"
+          placeholder="输入密码"
+          aria-label="房间密码"
+          autocomplete="off"
+        />
 
-        <button id="unlockBtn">开启回忆</button>
+        <button id="unlockBtn" type="button">开启回忆</button>
 
-        <div id="errorMsg">密码不正确哦，再试一次 💕</div>
+        <div id="errorMsg" role="alert">密码不正确，请再试一次。</div>
       </div>
     </div>
 
-    <!-- 背景音乐控件 -->
+    <!-- =======================================================
+       Music
+  ======================================================== -->
     <div class="music-player" id="musicPlayer">
       <div class="music-info">
         <div class="song-name">白い恋人達</div>
-        <div class="lyric-line" id="lyricLine">点击右侧图标播放音乐</div>
+        <div class="lyric-line" id="lyricLine">点击图标播放音乐</div>
       </div>
-      <div class="music-icon" id="musicIcon">🎵</div>
+
+      <button
+        class="music-icon"
+        id="musicIcon"
+        type="button"
+        aria-label="播放或暂停背景音乐"
+      >
+        ♪
+      </button>
     </div>
 
-    <div id="cursor"></div>
-    <canvas id="bgCanvas"></canvas>
+    <!-- =======================================================
+       Header
+  ======================================================== -->
+    <header class="page-header">
+      <div class="header-meta">
+        <span>OUR STORY</span>
+        <span>2025 — 2026</span>
+      </div>
+
+      <div class="page-title">
+        <div class="eyebrow">A COLLECTION OF MEMORIES</div>
+
+        <img
+          src="image/story-title_compressed.png"
+          class="story-title-img"
+          alt="我们的故事"
+        />
+
+        <p class="title-copy">
+          有些故事并不是从某一个特别的瞬间开始，
+          而是在一次次见面、离开、等待与重逢中， 慢慢变成了我们。
+        </p>
+
+        <div class="title-rule"></div>
+      </div>
+    </header>
 
     <div class="continue-text">
-      <img src="image/continue_cropped_compressed.png" />
+      <img
+        src="image/continue_cropped_compressed.png"
+        alt=""
+        aria-hidden="true"
+      />
     </div>
 
-    <div class="page-title">
-      <img src="image/story-title_compressed.png" class="story-title-img" />
-    </div>
-    <!-- </div> -->
-
-    <div class="photo-wall" id="photoWall">
-      <div class="rope-set top">
-        <div class="rope-anchor left"></div>
-        <canvas class="rope-canvas"></canvas>
-        <div class="rope-anchor right"></div>
-      </div>
-      <div class="rope-set middle">
-        <div class="rope-anchor left"></div>
-        <canvas class="rope-canvas"></canvas>
-        <div class="rope-anchor right"></div>
-      </div>
-      <div class="rope-set bottom">
-        <div class="rope-anchor left"></div>
-        <canvas class="rope-canvas"></canvas>
-        <div class="rope-anchor right"></div>
-      </div>
-    </div>
-
-    <div class="story-modal" id="storyModal">
-      <button class="close-btn" id="closeBtn">×</button>
-      <div class="modal-content">
-        <img id="modalImg" src="" alt="照片" />
-        <div class="modal-body">
-          <div class="modal-date" id="modalDate"></div>
-          <div class="modal-story" id="modalStory"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 留言板 -->
-    <!-- ========================= -->
-    <!--       留言板               -->
-    <!-- ========================= -->
-
-    <section class="message-board">
-      <div class="message-header">
-        <div class="message-deco">✦</div>
-
-        <h2>如果你也走到了这里</h2>
-
-        <p>
-          不妨留下几句话，<br />
-          让这段故事多一份温柔的回忆。
-        </p>
-      </div>
-
-      <!-- 留言输入区域 -->
-
-      <div class="message-form">
-        <div class="input-wrap">
-          <span class="input-icon">♡</span>
-
-          <input
-            type="text"
-            id="commentName"
-            placeholder="你的名字"
-            maxlength="20"
-          />
+    <!-- =======================================================
+       Photo wall
+  ======================================================== -->
+    <main>
+      <section class="photo-wall" id="photoWall">
+        <div class="rope-set top">
+          <div class="rope-anchor left"></div>
+          <canvas class="rope-canvas"></canvas>
+          <div class="rope-anchor right"></div>
         </div>
 
-        <div class="textarea-wrap">
-          <span class="textarea-icon">✎</span>
-
-          <textarea
-            id="commentMessage"
-            placeholder="写下你想说的话……"
-            maxlength="300"
-          ></textarea>
+        <div class="rope-set middle">
+          <div class="rope-anchor left"></div>
+          <canvas class="rope-canvas"></canvas>
+          <div class="rope-anchor right"></div>
         </div>
 
-        <button id="submitComment" class="message-submit">
-          <span>留下这份心意</span>
+        <div class="rope-set bottom">
+          <div class="rope-anchor left"></div>
+          <canvas class="rope-canvas"></canvas>
+          <div class="rope-anchor right"></div>
+        </div>
+      </section>
 
-          <span class="submit-heart">♡</span>
-        </button>
+      <!-- =====================================================
+         Story Modal
+    ====================================================== -->
+      <div class="story-modal" id="storyModal" aria-hidden="true">
+        <div
+          class="modal-content"
+          role="dialog"
+          aria-modal="true"
+          aria-label="照片故事"
+          onclick="event.stopPropagation()"
+        >
+          <button
+            class="close-btn"
+            id="closeBtn"
+            type="button"
+            aria-label="关闭"
+          >
+            ×
+          </button>
+
+          <div class="modal-image-stage">
+            <img id="modalImg" src="" alt="完整照片" />
+          </div>
+
+          <div class="modal-body">
+            <div class="modal-index" id="modalIndex"></div>
+            <div class="modal-date" id="modalDate"></div>
+            <div class="modal-story" id="modalStory"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- 留言列表 -->
+      <!-- =====================================================
+         Message board
+    ====================================================== -->
+      <section class="message-board">
+        <div class="message-header">
+          <div class="message-kicker">LEAVE A NOTE</div>
 
-      <div class="comments-title">
-        <span>💌</span>
+          <h2>如果你也走到了这里</h2>
 
-        <span>大家留下的话</span>
+          <p>
+            不妨留下几句话，<br />
+            让这段故事多一份温柔的回忆。
+          </p>
+        </div>
 
-        <span>💌</span>
-      </div>
+        <div class="message-form">
+          <div class="input-wrap">
+            <input
+              type="text"
+              id="commentName"
+              placeholder="你的名字"
+              maxlength="20"
+              autocomplete="name"
+            />
+          </div>
 
-      <div id="commentsList"></div>
-    </section>
+          <div class="textarea-wrap">
+            <textarea
+              id="commentMessage"
+              placeholder="写下你想说的话……"
+              maxlength="300"
+            ></textarea>
+          </div>
+
+          <button id="submitComment" class="message-submit" type="button">
+            <span>留下这份心意</span>
+            <span class="submit-heart">♡</span>
+          </button>
+        </div>
+
+        <div class="comments-title">
+          <span>留言</span>
+        </div>
+
+        <div id="commentsList"></div>
+      </section>
+    </main>
 
     <script>
-      // 提交留言数据
-      async function submitComment() {
-        const nameInput = document.getElementById("commentName");
-        const messageInput = document.getElementById("commentMessage");
+      /* =========================================================
+       Supabase
+       原数据库地址与 Key 完全保持不变
+    ========================================================= */
 
+      const SUPABASE_URL = "https://oxtmecvezbcmeglqxnwz.supabase.co";
+
+      const SUPABASE_KEY = "sb_publishable_1OZPJc2qmeNW4PBobh5DGg_ebyYAOtK";
+
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
+
+      /* =========================================================
+       Photos
+       原照片路径全部保持不变
+    ========================================================= */
+
+      const photos = [
+        {
+          src: "image/photo01.png",
+          date: "2025.05.12",
+          story: `留学毕业后的第一次旅行，没想到在那片雪山与湖泊之间，遇见了生命中一个特别的人。
+
+巍峨耸立的雪山脚下，在夜晚宁静的泸沽湖旁，你的笑容成为了那段旅途中最难忘的风景。
+
+后来，这个故事我向别人讲过很多遍，每一次回忆，依然会觉得温暖。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo02.png",
+          date: "2025.05.21",
+          story: `5月20日原本是一个特别的日子，却因为航班延误没能如期抵达。
+
+但幸运的是，5月21日，我们还是补上了那份迟来的浪漫。美味的牛排、日本带回来的礼物，还有你抱着小熊和鲜花时可爱的笑容，都成为了那一天最珍贵的回忆。
+
+也正是在这一天，我终于鼓起勇气，向你说出了藏在心里的那句话。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo03.png",
+          date: "2025.06.04",
+          story: `我们相处的时间其实并不算长，很快你便踏上了上海实习的旅程。
+
+在那段忙碌的日子里，刚好迎来了你的生日，我送给你一支钢笔，也写下了一封想对你说的话。视频时，看着你第一次读到那封信而流泪的样子，成为了我记忆里最温柔的瞬间。
+
+我也一直记得，那些一起牵着手漫步在苏州河边的时光，平凡却无比珍贵。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo04.png",
+          date: "2025.06.09",
+          story: `那是你第一次写给我的明信片。
+
+恰逢我要去欧洲旅行，在出发前，我小心翼翼地将这份珍贵的心意塑封起来，只为了让它能够陪我走过更远的路。
+
+于是，我带着你写给我的明信片，走过欧洲一座又一座城市，去看那些曾经只在照片里见过的风景。
+
+虽然那时你不在我的身边，但有你的字迹陪伴，好像你也一直和我一起旅行。那张小小的明信片，成为了连接我们距离的温柔纽带。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo05.png",
+          date: "2025.08.22",
+          story: `在正式开始工作之前，我又一次来到上海看望你。
+
+虽然我们已经许久未见，刚见面时，你看着我还有些许陌生与拘谨，但那份熟悉的情感一直都在。没过多久，我们又回到了曾经的相处状态。
+
+看着你一件一件拆开我从欧洲带回来的礼物，看着你眼里的惊喜与开心，那一刻，我觉得所有等待和奔波都变得值得。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo06.png",
+          date: "2025.09.20",
+          story: `因为工作地点的变动，我努力争取来到深圳，只希望能离你更近一些。幸运的是，愿望终于实现，我即将在这里度过工作的一年。
+
+这是你第一次写信给我，也是第一次陪我一起寻找属于我们的小空间。记得那天，看着你小小的身影蹲在洗衣机旁，安静地看着滚筒转动，我忍不住想：这个小家伙此刻在想些什么呢？
+
+虽然我不知道答案，但在那一刻，只觉得你可爱得让人心动。谢谢你陪我一起看房，也谢谢你陪我走进人生新的阶段。`,
+          rope: 0,
+        },
+
+        {
+          src: "image/photo07.png",
+          date: "2025.10.01",
+          story: `十一假期，我和爸妈一起去看了你的学校，也一起去了广州，走过了许多地方，留下了许多属于我们的回忆。
+
+可爱的你，小小的一只，却总是喜欢黏在我身边，仿佛走到哪里都要跟着我。后来我们一起去了酒吧，你喝得有些醉醺醺的，甚至还有点想吐。看着你那副迷迷糊糊的样子，我只觉得又好笑又可爱。
+
+那些看似平凡的时光，如今回想起来，却成了我最喜欢珍藏的片段。💕`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo08.png",
+          date: "2025.12.11",
+          story: `周末，我和同事一起去了香港找你，也和你的朋友们漫步在海边公园。你总是那么热情、开朗又大方，很自然地赢得了大家的喜欢。
+
+那段时间，我的工作上也有一些不太顺心的事情。没想到，在一个普通的夜晚，下班时，我远远地看见了站在公司楼下的你——小小的身影，手里捧着一束花，安静地等着我。
+
+我偷偷从身后拍下了那一刻。也许你不知道，那一瞬间真的让我特别感动。原来，在忙碌而不太顺利的日子里，有一个人愿意捧着花，在夜色里等你下班，就是最温柔的安慰。💕`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo09.png",
+          date: "2025.12.26",
+          story: `你从呈坎回来，给我带了一些小小的礼物。直到现在，我依然把它们好好收藏着，因为那不只是礼物，也是你从旅途中带给我的一份心意。
+
+我们的周末总是很简单，一起去深夜食堂吃烤串，带着我们的平板窝在一起，在一个个周末里，把《哈利·波特》全部看完。
+
+还有那一次，你第一次为了我帮忙打扫卫生。虽然我知道你并不喜欢做这些事，但你还是愿意为我做。或许喜欢就是这样，不一定是多么轰轰烈烈的事情，而是愿意为对方做一些自己并不喜欢，却能让对方开心的小事。
+
+而这些小小的瞬间，我一直都记得。`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo10.png",
+          date: "2025.12.28",
+          story: `年末，我们一起去看了羽毛球比赛，你也带我去体验了拼豆。我们依旧在不同的地方寻找好吃的东西，也一起尝试着许多从前没有体验过的小事。
+
+看着你坐在车里认真试驾的样子，我忽然想起了第一次见到你的时候。那时的你，就像一个灵动又充满好奇的小女孩，总能给人一种特别的感觉。
+
+后来我才发现，正是你的出现，让原本平淡的生活多了许多新奇与惊喜，也让我开始期待每一个普通的日子。`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo11.png",
+          date: "2026.02.14",
+          story: `公司发表活动结束后，我们一起去吃了顿饭。那张我们的自拍，你似乎特别喜欢，后来还一直把它设成了手表的壁纸。
+
+有一次，我们骑了很远的路，只为了去吃一碗麻辣烫。一路的疲惫让你有些不开心，可当真正吃到好吃的东西时，你又立刻恢复了开心的样子，真是可爱得让人忍不住想笑。
+
+临近春节，我也去了你家拜访，给大家做了一道番茄炒鸡蛋。虽然炒得有些糊，但老弟却格外捧场，最后把它全部吃完了。
+
+现在想起来，这些看似平凡的小事，却一点一点拼成了我们最真实、也最温暖的日常。`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo12.png",
+          date: "2026.02.27",
+          story: `培训结束后，我突然被安排出差。
+
+那天晚上，我们抱在一起哭了很久。第二天醒来，彼此的眼睛都已经肿了。我们都知道，这一次离开之后，能够相处的时间真的所剩不多了。
+
+在出发前的最后一个周末，我带着你和老弟去了迪士尼。那一天，我们笑过，也沉默过。明明置身于这样快乐的地方，心里却始终藏着一点离别的难过。
+
+夜晚的烟花升起时，你靠在我的肩膀上，默默地流着泪。那一刻，我只希望时间能够停下来，让我们再多拥有一点属于彼此的时间。
+
+回到家，我突然想，如果我真的要离开，那我还能给你留下些什么？
+
+于是，我拿出剩下的便签，一张一张写下“我爱你”，然后把它们贴满了整间屋子。`,
+          rope: 1,
+        },
+
+        {
+          src: "image/photo13.png",
+          date: "2026.03.28",
+          story: `第一次出差，我开始了一个人的新生活，也努力适应着陌生的工作环境。可每当视频接通，看见你在电话那头偷偷掉眼泪，我的心还是会一下子软下来。
+
+后来，我们只能每隔两周，在短暂的周末里见上一面。见面的时间变少了，却也让每一次相聚都变得更加珍贵。
+
+也正是从那时候开始，我更加明白，原来两个人能够好好待在一起，就是一件值得珍惜的事情。`,
+          rope: 2,
+        },
+
+        {
+          src: "image/photo14.png",
+          date: "2026.04.04",
+          story: `清明假期，我们相约去了厦门。虽然只有短短的两天半，却留下了许多美好的回忆。
+
+那几天的你，穿着各种颜色的衣服，在海边迎着风翩翩起舞。为了把这些珍贵的瞬间留下来，我不停地举起相机，只想多记录一些你最美的样子。
+
+短暂的旅程很快结束了，但那些海风、阳光，还有你在镜头前的笑容，都被我好好收藏了起来。`,
+          rope: 2,
+        },
+
+        {
+          src: "image/photo15.png",
+          date: "2026.04.17",
+          story: `那时候，我们的见面变成了两周一次的限时相聚。为了见你，我常常一路奔波，可往返的飞机又总是晚点，等我真正到家时，天已经快亮了。
+
+但每一次推开门，看见熟睡的你，我都会觉得这一趟奔波并没有白费。哪怕只能陪你短短一会儿，也好像足够抵消所有的疲惫。
+
+相聚变得越来越难，也因此变得越来越珍贵。而我也在一次次奔向你的路上，慢慢发现自己的心正在发生变化。
+
+原来，不知不觉间，我已经开始向你倾斜了。`,
+          rope: 2,
+        },
+
+        {
+          src: "image/photo16.png",
+          date: "2026.05.01",
+          story: `五一假期，我们一起回到了昆明。你和爸爸妈妈一起来接我，那一刻的我，真的觉得幸福又开心。
+
+我们一起去了公园，慢慢走着，聊着一路上的琐碎，也诉说着即将分别的不舍。
+
+那时候才更加明白，无论是家人的陪伴，还是爱人的相守，真正能够在一起的时光其实都弥足珍贵。正因为知道分别终会到来，所以每一次相聚，都值得被好好珍藏。💕`,
+          rope: 2,
+        },
+
+        {
+          src: "image/photo17.png",
+          date: "2026.06.07",
+          story: `因为工作的安排，我又被调回了深圳。得知这个消息的时候，我是真的开心，因为这意味着，我们终于又可以经常见面了。
+
+等待与你见面的日子里，我提前为你挑选了一份属于我们的纪念礼物。看着你拆开它时脸上的笑容，我也跟着觉得满足。
+
+那个周末，你即将去香港实习，我陪你一起收拾宿舍。我们做着一些再普通不过的事情，却让我觉得这样的生活格外踏实。原来，只要身边是你，连收拾房间这样的小事，也可以变得有意义。
+
+晚上，我们一起走在海边的大坝上。我问你：“你知道我现在最想做的事情是什么吗？”
+
+其实答案一直很简单。我想和你一起过最普通的生活——每天一起下班，一起吃饭，一起散步，牵着手遛我们的小狗。
+
+就像你信里说的那样，这些话，我好像已经对你说过无数遍了。可我还是愿意一遍又一遍地说。💕`,
+          rope: 2,
+        },
+
+        {
+          src: "image/photo18.png",
+          date: "2026.06.29",
+          story: `走过了这么多地方，也经历了那么多次离别与重逢，我才慢慢看清自己的心。
+
+我想要的，其实并没有那么复杂。只是看着一家人围坐在一起，和和睦睦地吃一顿饭；看着你小小的一只，又习惯性地黏在我的身边，我就觉得，这样的生活好像已经足够让我满足。
+
+原来，我真正想要的不是去往哪里，而是和谁一起生活。
+
+所以这一次，我想听从自己的内心。哪怕只是为了离你近一点，我也愿意留下来。
+
+我想留在你身边，所以，我想留在深圳。
+
+我爱你！💕`,
+          rope: 2,
+        },
+      ];
+
+      /* =========================================================
+       Photo rendering
+    ========================================================= */
+
+      const photoWall = document.getElementById("photoWall");
+
+      const ropeSets = document.querySelectorAll(".rope-set");
+
+      function drawTwistedRope(canvas) {
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+
+        const width = Math.floor(rect.width);
+        const height = 70;
+
+        if (width <= 10) return null;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const startX = 16;
+        const endX = width - 16;
+        const startY = 16;
+        const endY = 16;
+
+        const midY = 40;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY + 3);
+
+        ctx.quadraticCurveTo(width / 2, midY + 11, endX, endY + 3);
+
+        ctx.strokeStyle = "rgba(60,35,15,.14)";
+        ctx.lineWidth = 7;
+        ctx.lineCap = "round";
+        ctx.filter = "blur(2px)";
+        ctx.stroke();
+
+        ctx.filter = "none";
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+
+        ctx.quadraticCurveTo(width / 2, midY, endX, endY);
+
+        ctx.strokeStyle = "#aa7650";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY - 1);
+
+        ctx.quadraticCurveTo(width / 2, midY - 2, endX, endY - 1);
+
+        ctx.strokeStyle = "rgba(255,255,255,.32)";
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        return {
+          startX,
+          endX,
+          startY,
+          endY,
+          controlY: midY,
+        };
+      }
+
+      function renderPhotos() {
+        ropeSets.forEach((set, ropeIndex) => {
+          const canvas = set.querySelector(".rope-canvas");
+
+          const curve = drawTwistedRope(canvas);
+
+          if (!curve) return;
+
+          const groupPhotos = photos.filter(
+            (photo) => photo.rope === ropeIndex,
+          );
+
+          const setRect = set.getBoundingClientRect();
+
+          const setWidth = setRect.width;
+
+          const isMobile = window.innerWidth <= 768;
+
+          const baseWidth = isMobile ? 70 : 106;
+
+          const sizeRange = isMobile ? 18 : 28;
+
+          const startX = 20;
+          const endX = setWidth - 20;
+
+          const gap = (endX - startX) / (groupPhotos.length + 1);
+
+          groupPhotos.forEach((photo, index) => {
+            const item = document.createElement("button");
+
+            item.type = "button";
+            item.className = "photo-item";
+
+            const size = baseWidth + Math.random() * sizeRange;
+
+            const photoHeight = size * 1.3;
+
+            const rotate = (Math.random() - 0.5) * 10;
+
+            const baseX = startX + gap * (index + 1);
+
+            const offsetX = (Math.random() - 0.5) * gap * 0.05;
+
+            const currentX = baseX + offsetX;
+
+            const t = (currentX - curve.startX) / (curve.endX - curve.startX);
+
+            const ropeY =
+              (1 - t) * (1 - t) * curve.startY +
+              2 * t * (1 - t) * curve.controlY +
+              t * t * curve.endY;
+
+            const itemTop = ropeY + photoHeight / 2 + 3;
+
+            item.style.width = `${size}px`;
+
+            item.style.height = `${photoHeight}px`;
+
+            item.style.left = `${currentX}px`;
+
+            item.style.top = `${itemTop}px`;
+
+            item.style.setProperty("--rotate", `${rotate}deg`);
+
+            const swing = (index % 2 === 0 ? 1 : -1) * (3 + Math.random() * 6);
+
+            item.style.setProperty("--swing", `${swing}px`);
+
+            item.style.animationDelay = `${index * 0.16 + Math.random() * 0.8}s`;
+
+            item.innerHTML = `
+              <span class="wood-clip"></span>
+              <img
+                src="${photo.src}"
+                alt="我们的故事 ${photo.date}"
+                loading="eager"
+                draggable="false"
+              />
+            `;
+
+            item.addEventListener("click", () => openModal(photo, index));
+
+            set.appendChild(item);
+
+            requestAnimationFrame(() => {
+              setTimeout(
+                () => item.classList.add("show"),
+                250 + index * 120 + ropeIndex * 150,
+              );
+            });
+          });
+        });
+
+        addCuteElements();
+      }
+
+      function addCuteElements() {
+        const elements = [
+          { type: "animal", emoji: "🦌", left: "5%", top: "8%" },
+          { type: "animal", emoji: "🐯", left: "90%", top: "9%" },
+          { type: "animal", emoji: "🐰", left: "7%", top: "36%" },
+          { type: "animal", emoji: "🐻", left: "91%", top: "35%" },
+          { type: "animal", emoji: "🦊", left: "8%", top: "64%" },
+          { type: "animal", emoji: "🐱", left: "88%", top: "63%" },
+          { type: "tree", emoji: "🌳", left: "3%", top: "78%" },
+          { type: "tree", emoji: "🌲", left: "93%", top: "77%" },
+          { type: "leaf", emoji: "🍃", left: "19%", top: "24%" },
+          { type: "leaf", emoji: "🍂", left: "81%", top: "23%" },
+          { type: "heart", emoji: "♡", left: "14%", top: "82%" },
+          { type: "star", emoji: "✦", left: "50%", top: "6%" },
+          { type: "sparkle", emoji: "✧", left: "85%", top: "81%" },
+        ];
+
+        elements.forEach((el) => {
+          const item = document.createElement("div");
+
+          item.className = `cute-element ${el.type}`;
+
+          item.textContent = el.emoji;
+
+          item.style.left = el.left;
+
+          item.style.top = el.top;
+
+          item.style.animationDelay = `${Math.random() * 5}s`;
+
+          photoWall.appendChild(item);
+        });
+      }
+
+      /* =========================================================
+       Modal
+       核心修复：
+       1. 图片使用 contain
+       2. 不设置固定图片高度
+       3. 根据 viewport 动态限制 max-height
+       4. 横图 / 竖图 / 长图全部保持完整
+    ========================================================= */
+
+      const modal = document.getElementById("storyModal");
+
+      const modalImg = document.getElementById("modalImg");
+
+      const modalDate = document.getElementById("modalDate");
+
+      const modalStory = document.getElementById("modalStory");
+
+      const modalIndex = document.getElementById("modalIndex");
+
+      const closeBtn = document.getElementById("closeBtn");
+
+      function openModal(photo, index) {
+        modalImg.src = photo.src;
+
+        modalImg.alt = `我们的故事 ${photo.date}`;
+
+        modalDate.textContent = photo.date;
+
+        modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        modalStory.textContent = photo.story;
+
+        modal.classList.add("active");
+
+        modal.setAttribute("aria-hidden", "false");
+
+        document.body.style.overflow = "hidden";
+
+        /*
+        等图片真正加载完成后再重新计算尺寸。
+        防止不同尺寸照片第一次打开时被压缩。
+      */
+        if (modalImg.complete) {
+          fitModalImage();
+        } else {
+          modalImg.onload = fitModalImage;
+        }
+      }
+
+      function fitModalImage() {
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+          modalImg.style.maxHeight = "52dvh";
+        } else {
+          modalImg.style.maxHeight = "calc(100dvh - 112px)";
+        }
+
+        modalImg.style.width = "auto";
+
+        modalImg.style.height = "auto";
+
+        modalImg.style.objectFit = "contain";
+      }
+
+      function closeModal() {
+        modal.classList.remove("active");
+
+        modal.setAttribute("aria-hidden", "true");
+
+        document.body.style.overflow = "";
+      }
+
+      closeBtn.addEventListener("click", closeModal);
+
+      modal.addEventListener("click", closeModal);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && modal.classList.contains("active")) {
+          closeModal();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (modal.classList.contains("active")) {
+          fitModalImage();
+        }
+      });
+
+      /* =========================================================
+       Background snow
+    ========================================================= */
+
+      const bgCanvas = document.getElementById("bgCanvas");
+
+      const bgCtx = bgCanvas.getContext("2d");
+
+      let snowflakes = [];
+
+      function resizeCanvas() {
+        bgCanvas.width = window.innerWidth;
+
+        bgCanvas.height = window.innerHeight;
+      }
+
+      class SnowFlake {
+        constructor() {
+          this.reset();
+          this.y = Math.random() * bgCanvas.height;
+        }
+
+        reset() {
+          this.x = Math.random() * bgCanvas.width;
+
+          this.y = -20;
+
+          this.size = 1.5 + Math.random() * 4;
+
+          this.speed = 0.25 + Math.random() * 0.65;
+
+          this.opacity = 0.18 + Math.random() * 0.35;
+
+          this.offset = Math.random() * Math.PI * 2;
+        }
+
+        update() {
+          this.y += this.speed;
+
+          this.x += Math.sin(this.y * 0.008 + this.offset) * 0.28;
+
+          if (this.y > bgCanvas.height + 20) {
+            this.reset();
+          }
+        }
+
+        draw() {
+          bgCtx.save();
+
+          bgCtx.globalAlpha = this.opacity;
+
+          bgCtx.fillStyle = "#ffffff";
+
+          bgCtx.beginPath();
+
+          bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+
+          bgCtx.fill();
+
+          bgCtx.restore();
+        }
+      }
+
+      function initSnowflakes() {
+        snowflakes = [];
+
+        const count = Math.min(90, Math.floor(bgCanvas.width / 16));
+
+        for (let i = 0; i < count; i++) {
+          snowflakes.push(new SnowFlake());
+        }
+      }
+
+      function animateSnow() {
+        bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+        snowflakes.forEach((snow) => {
+          snow.update();
+          snow.draw();
+        });
+
+        requestAnimationFrame(animateSnow);
+      }
+
+      resizeCanvas();
+      initSnowflakes();
+      animateSnow();
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        initSnowflakes();
+      });
+
+      /* =========================================================
+       Music
+       原音乐路径保持不变
+    ========================================================= */
+
+      const musicConfig = {
+        src: "music/桑田佳祐 - 白い恋人達 (白色恋人们)-soConvert.mp3",
+
+        songName: "白い恋人達-桑田圭祐",
+
+        lyrics: [
+          { time: 0, text: "Instrumentals~" },
+          { time: 16, text: "夜に向かって雪が降り積もると" },
+          { time: 22, text: "悲しみがそっと胸にこみ上げる" },
+          { time: 29, text: "涙で心の灯を消して" },
+          { time: 35, text: "通り過ぎてゆく季節を見ていた" },
+          { time: 41, text: "外はため息さえ凍りついて" },
+          { time: 48, text: "冬枯れの街路樹に風が泣く" },
+          { time: 54, text: "あの赤レンガの停車場で" },
+          { time: 60, text: "二度と帰らない誰かを待ってる Woo…" },
+          { time: 68, text: "今宵 涙こらえて奏でる愛のSerenade" },
+          { time: 74, text: "今も忘れない恋の歌" },
+          { time: 81, text: "雪よもう一度だけこのときめきをCelebrate" },
+          { time: 87, text: "ひとり泣き濡れた夜に White Love" },
+          { time: 98, text: "聖なる鐘の音が響く頃に" },
+          { time: 104, text: "最果ての街並みを夢に見る" },
+          { time: 110, text: "天使が空から降りて来て" },
+          { time: 116, text: "春が来る前に微笑みをくれた Woo…" },
+          { time: 124, text: "心折れないように負けないように Loneliness" },
+          { time: 130, text: "白い恋人が待っている" },
+          { time: 136, text: "だから夢と希望を胸に抱いて Foreverness" },
+          { time: 142, text: "辛い毎日がやがて White Love" },
+          { time: 155, text: "Instrumentals~" },
+          { time: 192, text: "今宵 涙こらえて奏でる愛のSerenade" },
+          { time: 198, text: "今も忘れない恋の歌" },
+          { time: 204, text: "せめてもう一度だけこの旅立ちをCelebrate" },
+          { time: 210, text: "ひとり泣き濡れた冬に White Love" },
+          { time: 222, text: "Ah ah..." },
+          { time: 226, text: "永遠のWhite Love" },
+          { time: 235, text: "My Love" },
+          { time: 240, text: "ただ逢いたくて" },
+          { time: 244, text: "もうせつなくて" },
+          { time: 247, text: "恋しくて…" },
+          { time: 253, text: "涙~" },
+        ],
+      };
+
+      const bgmAudio = new Audio(musicConfig.src);
+
+      bgmAudio.loop = true;
+
+      const musicIcon = document.getElementById("musicIcon");
+
+      const lyricLine = document.getElementById("lyricLine");
+
+      const songNameEl = document.querySelector(".song-name");
+
+      songNameEl.textContent = musicConfig.songName;
+
+      let isPlaying = false;
+      let iconRotateDeg = 0;
+      let rotateAnimId = null;
+      let userStartedMusic = false;
+
+      function startIconRotate() {
+        if (rotateAnimId) return;
+
+        function tick() {
+          iconRotateDeg += 1.2;
+
+          musicIcon.style.transform = `rotate(${iconRotateDeg}deg)`;
+
+          rotateAnimId = requestAnimationFrame(tick);
+        }
+
+        tick();
+      }
+
+      function stopIconRotate() {
+        if (rotateAnimId) {
+          cancelAnimationFrame(rotateAnimId);
+
+          rotateAnimId = null;
+        }
+      }
+
+      musicIcon.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        if (isPlaying) {
+          bgmAudio.pause();
+
+          stopIconRotate();
+
+          isPlaying = false;
+        } else {
+          bgmAudio
+            .play()
+            .then(() => {
+              isPlaying = true;
+              userStartedMusic = true;
+
+              startIconRotate();
+            })
+            .catch(() => {
+              lyricLine.textContent = "播放失败，请检查音乐文件";
+            });
+        }
+      });
+
+      /*
+      用户第一次点击页面时开始播放。
+      保留原来的交互逻辑。
+    */
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (event.target.closest("#musicIcon")) {
+            return;
+          }
+
+          if (!userStartedMusic) {
+            bgmAudio
+              .play()
+              .then(() => {
+                isPlaying = true;
+                userStartedMusic = true;
+
+                startIconRotate();
+              })
+              .catch(() => {});
+          }
+        },
+        { passive: true },
+      );
+
+      let currentLyricIndex = -1;
+      let isLyricSwitching = false;
+
+      function switchLyric(index) {
+        if (isLyricSwitching || index === currentLyricIndex) {
+          return;
+        }
+
+        isLyricSwitching = true;
+        currentLyricIndex = index;
+
+        const text = musicConfig.lyrics[index].text;
+
+        lyricLine.style.opacity = "0.15";
+        lyricLine.style.transform = "translateY(4px)";
+
+        setTimeout(() => {
+          lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
+
+          const content = lyricLine.querySelector(".lyric-content");
+
+          if (content.scrollWidth > lyricLine.clientWidth) {
+            lyricLine.classList.add("scrolling");
+          } else {
+            lyricLine.classList.remove("scrolling");
+          }
+
+          requestAnimationFrame(() => {
+            lyricLine.style.opacity = "1";
+            lyricLine.style.transform = "translateY(0)";
+          });
+
+          setTimeout(() => {
+            isLyricSwitching = false;
+          }, 400);
+        }, 450);
+      }
+
+      bgmAudio.addEventListener("timeupdate", () => {
+        const currentTime = bgmAudio.currentTime;
+
+        let targetIndex = 0;
+
+        for (let i = musicConfig.lyrics.length - 1; i >= 0; i--) {
+          if (currentTime >= musicConfig.lyrics[i].time) {
+            targetIndex = i;
+            break;
+          }
+        }
+
+        switchLyric(targetIndex);
+      });
+
+      bgmAudio.addEventListener("error", () => {
+        lyricLine.textContent = "音乐文件加载失败";
+      });
+
+      /* =========================================================
+       Comments
+       数据库表与路径保持不变
+    ========================================================= */
+
+      const nameInput = document.getElementById("commentName");
+
+      const messageInput = document.getElementById("commentMessage");
+
+      const submitCommentButton = document.getElementById("submitComment");
+
+      async function submitComment() {
         const name = nameInput.value.trim();
+
         const message = messageInput.value.trim();
 
         if (!name) {
-          alert("请输入你的名字");
+          nameInput.focus();
           return;
         }
 
         if (!message) {
-          alert("请输入留言内容");
+          messageInput.focus();
           return;
         }
 
+        submitCommentButton.disabled = true;
+
+        submitCommentButton.style.opacity = ".65";
+
         const { data, error } = await supabaseClient.from("comments").insert([
           {
-            name: name,
-            message: message,
+            name,
+            message,
           },
         ]);
+
+        submitCommentButton.disabled = false;
+
+        submitCommentButton.style.opacity = "";
 
         if (error) {
           console.error("留言提交失败：", error);
 
-          alert("留言没有成功提交，请稍后再试。");
-
           return;
         }
-
-        alert("你的留言已经留下啦 💌");
 
         nameInput.value = "";
         messageInput.value = "";
 
-        loadComments();
+        await loadComments();
       }
 
-      document
-        .getElementById("submitComment")
-        .addEventListener("click", submitComment);
+      submitCommentButton.addEventListener("click", submitComment);
 
-      // 读取留言数据
       async function loadComments() {
         const { data, error } = await supabaseClient
           .from("comments")
@@ -1677,77 +2366,65 @@
         const commentsList = document.getElementById("commentsList");
 
         commentsList.innerHTML = "";
-        // 暂无留言
+
         if (!data || data.length === 0) {
           commentsList.innerHTML = `
-        <div class="empty-comments">
-
+          <div class="empty-comments">
             <div class="empty-heart">♡</div>
-
-            <div>
-                还没有留言哦
-            </div>
-
+            <div>还没有留言</div>
             <small>
-                成为第一个留下心意的人吧 ✨
+              成为第一个留下心意的人
             </small>
-
-        </div>
-    `;
+          </div>
+        `;
 
           return;
         }
 
         data.forEach((comment, index) => {
-          const item = document.createElement("div");
+          const item = document.createElement("article");
 
           item.className = "comment-item";
 
-          // 让留言卡片产生轻微的手写便签感
-          const rotate =
-            (index % 2 === 0 ? -1 : 1) * (0.6 + Math.random() * 1.2);
-
-          item.style.setProperty("--comment-rotate", rotate + "deg");
-
           item.innerHTML = `
+            <div class="comment-name">
+              ♡ ${escapeHtml(comment.name)}
+            </div>
 
-    <div class="comment-name">
-        ♡ ${escapeHtml(comment.name)}
-    </div>
+            <div class="comment-message">
+              ${escapeHtml(comment.message)}
+            </div>
 
-    <div class="comment-message">
-        ${escapeHtml(comment.message)}
-    </div>
+            <button
+              class="comment-more"
+              type="button"
+            >
+              查看全文 ↓
+            </button>
 
-    <button class="comment-more" type="button">
-        查看全文 ↓
-    </button>
+            <div class="comment-time">
+              ${formatCommentTime(comment.created_at)}
+            </div>
+          `;
 
-    <div class="comment-time">
-        ${formatCommentTime(comment.created_at)}
-    </div>
-
-`;
           const messageElement = item.querySelector(".comment-message");
+
           const moreButton = item.querySelector(".comment-more");
 
           commentsList.appendChild(item);
-          // 判断留言是否超过 6 行
+
           requestAnimationFrame(() => {
             if (messageElement.scrollHeight > messageElement.clientHeight + 2) {
               moreButton.style.display = "inline-block";
 
               moreButton.addEventListener("click", () => {
-                const isExpanded =
-                  messageElement.classList.contains("expanded");
+                const expanded = messageElement.classList.contains("expanded");
 
-                if (isExpanded) {
-                  // 收起
+                if (expanded) {
                   messageElement.classList.remove("expanded");
 
                   moreButton.textContent = "查看全文 ↓";
                 } else {
-                  // 展开
                   messageElement.classList.add("expanded");
 
                   moreButton.textContent = "收起 ↑";
@@ -1758,7 +2435,6 @@
         });
       }
 
-      // 日期转换
       function formatCommentTime(time) {
         const date = new Date(time);
 
@@ -1771,784 +2447,64 @@
         return `${year}.${month}.${day}`;
       }
 
-      // 防止留言中的 HTML / JS 被执行
       function escapeHtml(text) {
         const div = document.createElement("div");
+
         div.textContent = text;
+
         return div.innerHTML;
       }
 
-      // supabase数据库
-      const SUPABASE_URL = "https://oxtmecvezbcmeglqxnwz.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_1OZPJc2qmeNW4PBobh5DGg_ebyYAOtK";
-
-      const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY,
-      );
-
-      // 网页打开读取数据
-      loadComments();
-
-      // ==================================================
-      // 【照片配置区】
-      // ==================================================
-      const photos = [
-        {
-          src: "image/photo01.png",
-          date: "2025.05.12",
-          story: `留学毕业后的第一次旅行，没想到在那片雪山与湖泊之间，遇见了生命中一个特别的人。
-
-巍峨耸立的雪山脚下，在夜晚宁静的泸沽湖旁，你的笑容成为了那段旅途中最难忘的风景。
-
-后来，这个故事我向别人讲过很多遍，每一次回忆，依然会觉得温暖。
-`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo02.png",
-          date: "2025.05.21",
-          story: `5月20日原本是一个特别的日子，却因为航班延误没能如期抵达。  
-
-但幸运的是，5月21日，我们还是补上了那份迟来的浪漫。美味的牛排、日本带回来的礼物，还有你抱着小熊和鲜花时可爱的笑容，都成为了那一天最珍贵的回忆。
-
-也正是在这一天，我终于鼓起勇气，向你说出了藏在心里的那句话。`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo03.png",
-          date: "2025.06.04",
-          story: `我们相处的时间其实并不算长，很快你便踏上了上海实习的旅程。 
-
-在那段忙碌的日子里，刚好迎来了你的生日，我送给你一支钢笔，也写下了一封想对你说的话。视频时，看着你第一次读到那封信而流泪的样子，成为了我记忆里最温柔的瞬间。
-
-我也一直记得，那些一起牵着手漫步在苏州河边的时光，平凡却无比珍贵。`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo04.png",
-          date: "2025.06.09",
-          story: `那是你第一次写给我的明信片。 
-
-恰逢我要去欧洲旅行，在出发前，我小心翼翼地将这份珍贵的心意塑封起来，只为了让它能够陪我走过更远的路。  
-
-于是，我带着你写给我的明信片，走过欧洲一座又一座城市，去看那些曾经只在照片里见过的风景。  
-
-虽然那时你不在我的身边，但有你的字迹陪伴，好像你也一直和我一起旅行。那张小小的明信片，成为了连接我们距离的温柔纽带。`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo05.png",
-          date: "2025.08.22",
-          story: `在正式开始工作之前，我又一次来到上海看望你。
-
-虽然我们已经许久未见，刚见面时，你看着我还有些许陌生与拘谨，但那份熟悉的情感一直都在。没过多久，我们又回到了曾经的相处状态。 
-
-看着你一件一件拆开我从欧洲带回来的礼物，看着你眼里的惊喜与开心，那一刻，我觉得所有等待和奔波都变得值得。`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo06.png",
-          date: "2025.09.20",
-          story: `因为工作地点的变动，我努力争取来到深圳，只希望能离你更近一些。幸运的是，愿望终于实现，我即将在这里度过工作的一年。
-
-这是你第一次写信给我，也是第一次陪我一起寻找属于我们的小空间。记得那天，看着你小小的身影蹲在洗衣机旁，安静地看着滚筒转动，我忍不住想：这个小家伙此刻在想些什么呢？ 
-
-虽然我不知道答案，但在那一刻，只觉得你可爱得让人心动。谢谢你陪我一起看房，也谢谢你陪我走进人生新的阶段。`,
-          rope: 0,
-        },
-
-        {
-          src: "image/photo07.png",
-          date: "2025.10.01",
-          story: `十一假期，我和爸妈一起去看了你的学校，也一起去了广州，走过了许多地方，留下了许多属于我们的回忆。  
-
-可爱的你，小小的一只，却总是喜欢黏在我身边，仿佛走到哪里都要跟着我。后来我们一起去了酒吧，你喝得有些醉醺醺的，甚至还有点想吐。看着你那副迷迷糊糊的样子，我只觉得又好笑又可爱。  
-
-那些看似平凡的时光，如今回想起来，却成了我最喜欢珍藏的片段。💕`,
-          rope: 1,
-        },
-        {
-          src: "image/photo08.png",
-          date: "2025.12.11",
-          story: `周末，我和同事一起去了香港找你，也和你的朋友们漫步在海边公园。你总是那么热情、开朗又大方，很自然地赢得了大家的喜欢。  
-
-那段时间，我的工作上也有一些不太顺心的事情。没想到，在一个普通的夜晚，下班时，我远远地看见了站在公司楼下的你——小小的身影，手里捧着一束花，安静地等着我。  
-
-我偷偷从身后拍下了那一刻。也许你不知道，那一瞬间真的让我特别感动。原来，在忙碌而不太顺利的日子里，有一个人愿意捧着花，在夜色里等你下班，就是最温柔的安慰。💕`,
-          rope: 1,
-        },
-        {
-          src: "image/photo09.png",
-          date: "2025.12.26",
-          story: `你从呈坎回来，给我带了一些小小的礼物。直到现在，我依然把它们好好收藏着，因为那不只是礼物，也是你从旅途中带给我的一份心意。  
-
-          我们的周末总是很简单，一起去深夜食堂吃烤串，带着我们的平板窝在一起，在一个个周末里，把《哈利·波特》全部看完。  
-
-          还有那一次，你第一次为了我帮忙打扫卫生。虽然我知道你并不喜欢做这些事，但你还是愿意为我做。或许喜欢就是这样，不一定是多么轰轰烈烈的事情，而是愿意为对方做一些自己并不喜欢，却能让对方开心的小事。  
-
-          而这些小小的瞬间，我一直都记得。`,
-          rope: 1,
-        },
-        {
-          src: "image/photo10.png",
-          date: "2025.12.28",
-          story: `年末，我们一起去看了羽毛球比赛，你也带我去体验了拼豆。我们依旧在不同的地方寻找好吃的东西，也一起尝试着许多从前没有体验过的小事。  
-
-          看着你坐在车里认真试驾的样子，我忽然想起了第一次见到你的时候。那时的你，就像一个灵动又充满好奇的小女孩，总能给人一种特别的感觉。  
-
-          后来我才发现，正是你的出现，让原本平淡的生活多了许多新奇与惊喜，也让我开始期待每一个普通的日子。`,
-          rope: 1,
-        },
-        {
-          src: "image/photo11.png",
-          date: "2026.02.14",
-          story: `公司发表活动结束后，我们一起去吃了顿饭。那张我们的自拍，你似乎特别喜欢，后来还一直把它设成了手表的壁纸。  
-
-          有一次，我们骑了很远的路，只为了去吃一碗麻辣烫。一路的疲惫让你有些不开心，可当真正吃到好吃的东西时，你又立刻恢复了开心的样子，真是可爱得让人忍不住想笑。  
-
-          临近春节，我也去了你家拜访，给大家做了一道番茄炒鸡蛋。虽然炒得有些糊，但老弟却格外捧场，最后把它全部吃完了。  
-
-          现在想起来，这些看似平凡的小事，却一点一点拼成了我们最真实、也最温暖的日常`,
-          rope: 1,
-        },
-        {
-          src: "image/photo12.png",
-          date: "2026.02.27",
-          story: `培训结束后，我突然被安排出差。  
-那天晚上，我们抱在一起哭了很久。第二天醒来，彼此的眼睛都已经肿了。我们都知道，这一次离开之后，能够相处的时间真的所剩不多了。  
-
-在出发前的最后一个周末，我带着你和老弟去了迪士尼。那一天，我们笑过，也沉默过。明明置身于这样快乐的地方，心里却始终藏着一点离别的难过。  
-夜晚的烟花升起时，你靠在我的肩膀上，默默地流着泪。那一刻，我只希望时间能够停下来，让我们再多拥有一点属于彼此的时间。  
-
-回到家，我突然想，如果我真的要离开，那我还能给你留下些什么？  
-于是，我拿出剩下的便签，一张一张写下“我爱你”，然后把它们贴满了整间屋子。`,
-          rope: 1,
-        },
-
-        {
-          src: "image/photo13.png",
-          date: "2026.03.28",
-          story: `第一次出差，我开始了一个人的新生活，也努力适应着陌生的工作环境。可每当视频接通，看见你在电话那头偷偷掉眼泪，我的心还是会一下子软下来。  
-
-          后来，我们只能每隔两周，在短暂的周末里见上一面。见面的时间变少了，却也让每一次相聚都变得更加珍贵。
-          
-          也正是从那时候开始，我更加明白，原来两个人能够好好待在一起，就是一件值得珍惜的事情。`,
-          rope: 2,
-        },
-        {
-          src: "image/photo14.png",
-          date: "2026.04.04",
-          story: `清明假期，我们相约去了厦门。虽然只有短短的两天半，却留下了许多美好的回忆。  
-
-          那几天的你，穿着各种颜色的衣服，在海边迎着风翩翩起舞。为了把这些珍贵的瞬间留下来，我不停地举起相机，只想多记录一些你最美的样子。  
-
-          短暂的旅程很快结束了，但那些海风、阳光，还有你在镜头前的笑容，都被我好好收藏了起来。`,
-          rope: 2,
-        },
-        {
-          src: "image/photo15.png",
-          date: "2026.04.17",
-          story: `那时候，我们的见面变成了两周一次的限时相聚。为了见你，我常常一路奔波，可往返的飞机又总是晚点，等我真正到家时，天已经快亮了。  
-
-          但每一次推开门，看见熟睡的你，我都会觉得这一趟奔波并没有白费。哪怕只能陪你短短一会儿，也好像足够抵消所有的疲惫。  
-
-          相聚变得越来越难，也因此变得越来越珍贵。而我也在一次次奔向你的路上，慢慢发现自己的心正在发生变化。  
-
-          原来，不知不觉间，我已经开始向你倾斜了。`,
-          rope: 2,
-        },
-        {
-          src: "image/photo16.png",
-          date: "2026.05.01",
-          story: `五一假期，我们一起回到了昆明。你和爸爸妈妈一起来接我，那一刻的我，真的觉得幸福又开心。  
-
-          我们一起去了公园，慢慢走着，聊着一路上的琐碎，也诉说着即将分别的不舍。  
-
-          那时候才更加明白，无论是家人的陪伴，还是爱人的相守，真正能够在一起的时光其实都弥足珍贵。正因为知道分别终会到来，所以每一次相聚，都值得被好好珍藏。💕`,
-          rope: 2,
-        },
-        {
-          src: "image/photo17.png",
-          date: "2026.06.07",
-          story: `因为工作的安排，我又被调回了深圳。得知这个消息的时候，我是真的开心，因为这意味着，我们终于又可以经常见面了。  
-等待与你见面的日子里，我提前为你挑选了一份属于我们的纪念礼物。看着你拆开它时脸上的笑容，我也跟着觉得满足。  
-
-那个周末，你即将去香港实习，我陪你一起收拾宿舍。我们做着一些再普通不过的事情，却让我觉得这样的生活格外踏实。原来，只要身边是你，连收拾房间这样的小事，也可以变得有意义。  
-
-晚上，我们一起走在海边的大坝上。我问你：“你知道我现在最想做的事情是什么吗？”  
-其实答案一直都很简单。我想和你一起过最普通的生活——每天一起下班，一起吃饭，一起散步，牵着手遛我们的小狗。  
-
-就像你信里说的那样，这些话，我好像已经对你说过无数遍了。可我还是愿意一遍又一遍地说。💕`,
-          rope: 2,
-        },
-        {
-          src: "image/photo18.png",
-          date: "2026.06.29",
-          story: `走过了这么多地方，也经历了那么多次离别与重逢，我才慢慢看清自己的心。  
-
-          我想要的，其实并没有那么复杂。只是看着一家人围坐在一起，和和睦睦地吃一顿饭；看着你小小的一只，又习惯性地黏在我的身边，我就觉得，这样的生活好像已经足够让我满足。  
-原来，我真正想要的不是去往哪里，而是和谁一起生活。  
-
-所以这一次，我想听从自己的内心。哪怕只是为了离你近一点，我也愿意留下来。  
-
-我想留在你身边，所以，我想留在深圳。
-我爱你！💕`,
-          rope: 2,
-        },
-      ];
-
-      const cursor = document.getElementById("cursor");
-      document.addEventListener("mousemove", (e) => {
-        cursor.style.left = e.clientX + "px";
-        cursor.style.top = e.clientY + "px";
-      });
-
-      document.addEventListener("click", (e) => {
-        for (let i = 0; i < 5; i++) {
-          const heart = document.createElement("div");
-          heart.className = "click-heart";
-          heart.innerHTML = "❤️";
-          heart.style.left = e.clientX + (Math.random() - 0.5) * 60 + "px";
-          heart.style.top = e.clientY + (Math.random() - 0.5) * 30 + "px";
-          heart.style.fontSize = 12 + Math.random() * 12 + "px";
-          heart.style.animationDelay = i * 0.1 + "s";
-          document.body.appendChild(heart);
-          setTimeout(() => heart.remove(), 1500);
-        }
-      });
-
-      const photoWall = document.getElementById("photoWall");
-      const ropeSets = document.querySelectorAll(".rope-set");
-
-      function drawTwistedRope(canvas) {
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        const width = Math.floor(rect.width);
-        const height = 70;
-
-        // 保护：宽度为0直接返回，不绘制
-        if (width <= 10) return null;
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.clearRect(0, 0, width, height);
-
-        const startX = 16;
-        const endX = width - 16;
-        const startY = 16;
-        const endY = 16;
-
-        const midY = 38 + Math.random() * 10;
-        const shadowOffsetY = 3;
-
-        ctx.beginPath();
-        ctx.moveTo(startX, startY + shadowOffsetY);
-        ctx.quadraticCurveTo(
-          width / 2,
-          midY + shadowOffsetY + 8,
-          endX,
-          endY + shadowOffsetY,
-        );
-        ctx.strokeStyle = "rgba(60, 35, 15, 0.2)";
-        ctx.lineWidth = 7;
-        ctx.lineCap = "round";
-        ctx.filter = "blur(2px)";
-        ctx.stroke();
-        ctx.filter = "none";
-
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(width / 2, midY + 4, endX, endY);
-        ctx.strokeStyle = "rgba(90, 60, 30, 0.15)";
-        ctx.lineWidth = 6;
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(width / 2, midY, endX, endY);
-        ctx.strokeStyle = "#c98f5a";
-        ctx.lineWidth = 5;
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(startX, startY - 1);
-        ctx.quadraticCurveTo(width / 2, midY - 1.5, endX, endY - 1);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        for (let i = 0; i < 12; i++) {
-          const t = i / 11;
-          const x = startX + (endX - startX) * t;
-          const y =
-            (1 - t) * (1 - t) * startY + 2 * t * (1 - t) * midY + t * t * endY;
-
-          ctx.fillStyle = "rgba(180, 130, 90, 0.45)";
-          ctx.beginPath();
-          ctx.arc(x, y, 1.8, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = "rgba(130, 90, 60, 0.35)";
-          ctx.beginPath();
-          ctx.arc(x + 2, y + 2, 1.2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        return { startX, endX, startY, endY, controlY: midY };
-      }
-
-      function renderPhotos() {
-        const wallRect = photoWall.getBoundingClientRect();
-        if (wallRect.width < 50) {
-          return;
-        }
-
-        ropeSets.forEach((set, ropeIndex) => {
-          const canvas = set.querySelector(".rope-canvas");
-          const curve = drawTwistedRope(canvas);
-          if (!curve) return;
-
-          const groupPhotos = photos.filter((p) => p.rope === ropeIndex);
-          const count = groupPhotos.length;
-
-          const setRect = set.getBoundingClientRect();
-          const setWidth = setRect.width;
-          const startX = 20;
-          const endX = setWidth - 20;
-          const gap = (endX - startX) / (count + 1);
-
-          const isMobile = window.innerWidth <= 768;
-          const baseWidth = isMobile ? 70 : 105;
-          const sizeRange = isMobile ? 20 : 28;
-
-          groupPhotos.forEach((photo, index) => {
-            const item = document.createElement("div");
-            item.className = "photo-item";
-
-            const size = baseWidth + Math.random() * sizeRange;
-            const photoHeight = size * 1.3;
-            const rotate = (Math.random() - 0.5) * 12;
-
-            const baseX = startX + gap * (index + 1);
-            const offsetX = (Math.random() - 0.5) * gap * 0.05;
-            const currentX = baseX + offsetX;
-
-            const t = (currentX - curve.startX) / (curve.endX - curve.startX);
-            const ropeY =
-              (1 - t) * (1 - t) * curve.startY +
-              2 * t * (1 - t) * curve.controlY +
-              t * t * curve.endY;
-
-            const itemTop = ropeY + photoHeight / 2 + Math.random() * 3;
-
-            item.style.width = size + "px";
-            item.style.height = photoHeight + "px";
-            item.style.left = currentX + "px";
-            item.style.top = itemTop + "px";
-            item.style.setProperty("--rotate", rotate + "deg");
-
-            // 设置风吹左右方向
-            const swing = (index % 2 === 0 ? 1 : -1) * (4 + Math.random() * 8);
-
-            item.style.setProperty("--swing", swing + "px");
-
-            item.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
-            item.style.animationDelay = index * 0.18 + Math.random() + "s";
-
-            item.innerHTML = `
-                        <div class="wood-clip"></div>
-                        <img src="${photo.src}" alt="照片" loading="lazy">
-                    `;
-
-            item.addEventListener("click", () => {
-              openModal(photo);
-            });
-
-            set.appendChild(item);
-
-            setTimeout(
-              () => {
-                item.classList.add("show");
-              },
-              350 + index * 120 + ropeIndex * 180,
-            );
-          });
-        });
-
-        addCuteElements();
-      }
-
-      function addCuteElements() {
-        const elements = [
-          { type: "animal", emoji: "🦌", left: "6%", top: "8%" },
-          { type: "animal", emoji: "🐯", left: "88%", top: "10%" },
-          { type: "animal", emoji: "🐰", left: "8%", top: "36%" },
-          { type: "animal", emoji: "🐻", left: "90%", top: "34%" },
-          { type: "animal", emoji: "🦊", left: "10%", top: "64%" },
-          { type: "animal", emoji: "🐱", left: "86%", top: "62%" },
-          { type: "animal", emoji: "🐶", left: "46%", top: "18%" },
-          { type: "animal", emoji: "🐼", left: "54%", top: "82%" },
-          { type: "tree", emoji: "🌳", left: "4%", top: "78%" },
-          { type: "tree", emoji: "🌲", left: "92%", top: "76%" },
-          { type: "tree", emoji: "🌴", left: "2%", top: "46%" },
-          { type: "tree", emoji: "🎄", left: "94%", top: "44%" },
-          { type: "leaf", emoji: "🍃", left: "18%", top: "24%" },
-          { type: "leaf", emoji: "🍂", left: "82%", top: "22%" },
-          { type: "leaf", emoji: "🌿", left: "22%", top: "74%" },
-          { type: "leaf", emoji: "☘️", left: "78%", top: "72%" },
-          { type: "star", emoji: "⭐", left: "50%", top: "6%" },
-          { type: "heart", emoji: "💗", left: "14%", top: "80%" },
-          { type: "sparkle", emoji: "✨", left: "86%", top: "78%" },
-          { type: "cloud", emoji: "☁️", left: "48%", top: "86%" },
-        ];
-
-        elements.forEach((el) => {
-          const item = document.createElement("div");
-          item.className = `cute-element ${el.type}`;
-          item.textContent = el.emoji;
-          item.style.left = el.left;
-          item.style.top = el.top;
-          item.style.animationDelay = Math.random() * 5 + "s";
-          photoWall.appendChild(item);
-        });
-      }
-
-      const modal = document.getElementById("storyModal");
-      const modalImg = document.getElementById("modalImg");
-      const modalDate = document.getElementById("modalDate");
-      const modalStory = document.getElementById("modalStory");
-      const closeBtn = document.getElementById("closeBtn");
-
-      function openModal(photo) {
-        modalImg.src = photo.src;
-        modalDate.textContent = photo.date;
-        modalStory.innerHTML = photo.story;
-        modal.classList.add("active");
-      }
-
-      function closeModal() {
-        modal.classList.remove("active");
-      }
-
-      closeBtn.addEventListener("click", closeModal);
-      modal.addEventListener("click", (e) => {
-        closeModal();
-      });
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
-      });
-
-      // 飘雪动画
-      const canvas = document.getElementById("bgCanvas");
-      const ctx = canvas.getContext("2d");
-      let snowflakes = [];
-
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-
-      class SnowFlake {
-        constructor() {
-          this.reset();
-          this.y = Math.random() * canvas.height;
-        }
-
-        reset() {
-          this.x = Math.random() * canvas.width;
-          this.y = -20;
-          this.size = 2 + Math.random() * 8;
-          this.speed = 0.3 + Math.random() * 1;
-          this.opacity = 0.4 + Math.random() * 0.5;
-          this.swayOffset = Math.random() * Math.PI * 2;
-          this.swaySpeed = 0.005 + Math.random() * 0.01;
-        }
-
-        update() {
-          this.y += this.speed;
-          this.x += Math.sin(this.y * this.swaySpeed + this.swayOffset) * 0.8;
-
-          if (this.y > canvas.height + 20) {
-            this.reset();
-          }
-        }
-
-        draw() {
-          ctx.save();
-
-          ctx.globalAlpha = this.opacity;
-          ctx.strokeStyle = "#ffffff";
-          ctx.lineWidth = 1.2;
-
-          ctx.translate(this.x, this.y);
-
-          // 雪花六角旋转
-          for (let i = 0; i < 6; i++) {
-            ctx.rotate(Math.PI / 3);
-
-            ctx.beginPath();
-
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -this.size * 2);
-
-            // 雪花枝杈
-            ctx.moveTo(0, -this.size * 1.2);
-            ctx.lineTo(-this.size * 0.5, -this.size * 1.7);
-
-            ctx.moveTo(0, -this.size * 1.2);
-            ctx.lineTo(this.size * 0.5, -this.size * 1.7);
-
-            ctx.stroke();
-          }
-
-          ctx.restore();
-        }
-      }
-
-      function initSnowflakes() {
-        snowflakes = [];
-        const count = Math.floor(canvas.width / 10);
-
-        for (let i = 0; i < count; i++) {
-          snowflakes.push(new SnowFlake());
-        }
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        snowflakes.forEach((s) => {
-          s.update();
-          s.draw();
-        });
-
-        requestAnimationFrame(animate);
-      }
-
-      window.addEventListener("load", () => {
-        renderPhotos();
-        initSnowflakes();
-        animate();
-      });
-
-      window.addEventListener("resize", () => {
-        requestAnimationFrame(() => {
-          initSnowflakes();
-        });
-      });
-
-      // ==================================================
-      // 【背景音乐配置区】
-      // ==================================================
-      const musicConfig = {
-        src: "music/桑田佳祐 - 白い恋人達 (白色恋人们)-soConvert.mp3",
-        songName: "白い恋人達-桑田圭祐",
-        lyrics: [
-          { time: 0, text: "~~~~~~~~" },
-          { time: 16, text: "夜に向かって雪が降り積もると" },
-          { time: 22, text: "悲しみがそっと胸にこみ上げる" },
-          { time: 29, text: "涙で心の灯を消して" },
-          { time: 35, text: "通り過ぎてゆく季節を見ていた" },
-          { time: 41, text: "外はため息さえ凍りついて" },
-          { time: 48, text: "冬枯れの街路樹に風が泣く" },
-          { time: 54, text: "あの赤レンガの停車場で" },
-          { time: 60, text: "二度と帰らない誰かを待ってる Woo…" },
-          { time: 68, text: "今宵 涙こらえて奏でる愛のSerenade" },
-          { time: 74, text: "今も忘れない恋の歌" },
-          { time: 81, text: "雪よもう一度だけこのときめきをCelebrate" },
-          { time: 87, text: "ひとり泣き濡れた夜に White Love" },
-
-          { time: 98, text: "聖なる鐘の音が響く頃に" },
-          { time: 104, text: "最果ての街並みを夢に見る" },
-          { time: 110, text: "天使が空から降りて来て" },
-          { time: 116, text: "春が来る前に微笑みをくれた Woo…" },
-          { time: 124, text: "心折れないように負けないように Loneliness" },
-          { time: 130, text: "白い恋人が待っている" },
-          { time: 136, text: "だから夢と希望を胸に抱いて Foreverness" },
-          { time: 142, text: "辛い毎日がやがて White Love" },
-
-          { time: 155, text: "Instruments~" },
-
-          { time: 192, text: "今宵 涙こらえて奏でる愛のSerenade" },
-          { time: 198, text: "今も忘れない恋の歌" },
-          { time: 204, text: "せめてもう一度だけこの旅立ちをCelebrate" },
-          { time: 210, text: "ひとり泣き濡れた冬に White Love" },
-          { time: 222, text: "Ah ah..." },
-
-          { time: 226, text: "永遠のWhite Love" },
-          { time: 235, text: "My Love" },
-          { time: 240, text: "ただ逢いたくて" },
-          { time: 244, text: "もうせつなくて" },
-          { time: 247, text: "恋しくて…" },
-          { time: 253, text: "涙~" },
-        ],
-      };
-
-      const bgmAudio = new Audio(musicConfig.src);
-      bgmAudio.loop = true;
-
-      const musicIcon = document.getElementById("musicIcon");
-      const lyricLine = document.getElementById("lyricLine");
-      const songNameEl = document.querySelector(".song-name");
-
-      songNameEl.textContent = musicConfig.songName;
-
-      let isPlaying = false;
-      let iconRotateDeg = 0;
-      let rotateAnimId = null;
-
-      let userStartedMusic = false;
-
-      document.addEventListener("click", (e) => {
-        // 如果点击的是音乐按钮，不处理
-        if (e.target.closest("#musicIcon")) {
-          return;
-        }
-
-        if (!userStartedMusic) {
-          bgmAudio
-            .play()
-            .then(() => {
-              isPlaying = true;
-              userStartedMusic = true;
-              startIconRotate();
-            })
-            .catch((err) => {
-              console.log("播放失败", err);
-            });
-        }
-      });
-
-      // 4秒一圈，每帧旋转角度
-      const rotateStep = 1.44;
-
-      function startIconRotate() {
-        function tick() {
-          iconRotateDeg += rotateStep;
-          musicIcon.style.transform = `rotate(${iconRotateDeg}deg)`;
-          rotateAnimId = requestAnimationFrame(tick);
-        }
-        tick();
-      }
-
-      function stopIconRotate() {
-        if (rotateAnimId) {
-          cancelAnimationFrame(rotateAnimId);
-          rotateAnimId = null;
-        }
-      }
-
-      musicIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        if (isPlaying) {
-          bgmAudio.pause();
-          stopIconRotate();
-          isPlaying = false;
-        } else {
-          bgmAudio.play().catch((err) => {
-            console.log("播放失败，请检查音乐文件路径", err);
-            lyricLine.textContent = "播放失败，请检查音乐文件";
-          });
-
-          startIconRotate();
-          isPlaying = true;
-          userStartedMusic = true;
-        }
-      });
-
-      let currentLyricIndex = -1;
-      let isLyricSwitching = false;
-
-      function switchLyric(index) {
-        if (isLyricSwitching || index === currentLyricIndex) return;
-
-        isLyricSwitching = true;
-        currentLyricIndex = index;
-        const text = musicConfig.lyrics[index].text;
-
-        lyricLine.style.opacity = "0";
-
-        setTimeout(() => {
-          lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
-          const contentEl = lyricLine.querySelector(".lyric-content");
-          const containerWidth = lyricLine.clientWidth;
-
-          if (contentEl.scrollWidth > containerWidth) {
-            lyricLine.innerHTML = `<span class="lyric-content">${text}</span>`;
-
-            lyricLine.classList.add("scrolling");
-          } else {
-            lyricLine.classList.remove("scrolling");
-          }
-
-          requestAnimationFrame(() => {
-            lyricLine.style.opacity = "1";
-          });
-
-          setTimeout(() => {
-            isLyricSwitching = false;
-          }, 400);
-        }, 400);
-      }
-
-      bgmAudio.addEventListener("timeupdate", () => {
-        const currentTime = bgmAudio.currentTime;
-        let targetIndex = 0;
-
-        for (let i = musicConfig.lyrics.length - 1; i >= 0; i--) {
-          if (currentTime >= musicConfig.lyrics[i].time) {
-            targetIndex = i;
-            break;
-          }
-        }
-
-        switchLyric(targetIndex);
-      });
-
-      bgmAudio.addEventListener("error", () => {
-        lyricLine.textContent = "音乐文件加载失败";
-      });
+      /* =========================================================
+       Password
+    ========================================================= */
 
       const PASSWORD = "000";
 
       const overlay = document.getElementById("passwordOverlay");
 
-      const input = document.getElementById("passwordInput");
+      const passwordInput = document.getElementById("passwordInput");
 
-      const btn = document.getElementById("unlockBtn");
+      const unlockBtn = document.getElementById("unlockBtn");
 
-      const error = document.getElementById("errorMsg");
+      const errorMsg = document.getElementById("errorMsg");
 
-      btn.onclick = function () {
-        if (input.value === PASSWORD) {
+      function unlock() {
+        if (passwordInput.value === PASSWORD) {
           overlay.style.opacity = "0";
+
+          document.body.classList.remove("locked");
 
           setTimeout(() => {
             overlay.style.display = "none";
-          }, 600);
+          }, 800);
         } else {
-          error.style.display = "block";
+          errorMsg.style.display = "block";
 
-          input.value = "";
-        }
-      };
+          passwordInput.value = "";
 
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          btn.click();
+          passwordInput.focus();
         }
+      }
+
+      unlockBtn.addEventListener("click", unlock);
+
+      passwordInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          unlock();
+        }
+      });
+
+      /* =========================================================
+       Init
+    ========================================================= */
+
+      window.addEventListener("load", () => {
+        renderPhotos();
+
+        loadComments();
+
+        passwordInput.focus();
       });
     </script>
   </body>
