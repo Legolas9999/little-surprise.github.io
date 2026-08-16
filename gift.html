@@ -1869,7 +1869,10 @@
               />
             `;
 
-            item.addEventListener("click", () => openModal(photo, index));
+            item.addEventListener("click", () => {
+              const globalIndex = photos.indexOf(photo);
+              openModal(photo, globalIndex);
+            });
 
             set.appendChild(item);
 
