@@ -1265,6 +1265,33 @@
         }
       }
 
+      /* =========================================================
+   Desktop：顶部标题区域居中
+   不影响手机端
+========================================================= */
+
+      @media (min-width: 769px) {
+        .page-title {
+          max-width: 900px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+        }
+
+        .story-title-img {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .title-copy {
+          max-width: 760px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         html {
           scroll-behavior: auto;
