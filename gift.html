@@ -1282,6 +1282,93 @@
           display: none;
         }
       }
+
+      /* =========================================================
+   iPad / Tablet
+   仅针对中大型触控平板
+   不影响电脑和手机
+========================================================= */
+
+      @media (min-width: 769px) and (hover: none) and (pointer: coarse) {
+        /* ---------- 顶部区域 ---------- */
+
+        .page-header {
+          width: calc(100% - 72px);
+          padding-top: 38px;
+        }
+
+        .page-title {
+          padding-top: 48px;
+          max-width: 900px;
+        }
+
+        .story-title-img {
+          width: min(500px, 62vw);
+        }
+
+        .title-copy {
+          max-width: 820px;
+          font-size: 15px;
+          line-height: 2;
+        }
+
+        .title-rule {
+          margin-top: 36px;
+        }
+
+        /* ---------- 音乐播放器 ---------- */
+
+        .music-player {
+          top: 22px;
+          right: 24px;
+        }
+
+        /* ---------- 照片墙 ---------- */
+
+        .photo-wall {
+          width: calc(100% - 70px);
+          min-height: 790px;
+        }
+
+        .rope-set {
+          left: 3%;
+          right: 3%;
+        }
+
+        .rope-set.top {
+          top: 25px;
+        }
+
+        .rope-set.middle {
+          top: 225px;
+        }
+
+        .rope-set.bottom {
+          top: 425px;
+        }
+
+        /* ---------- 木夹子 ---------- */
+
+        .wood-clip {
+          width: 46px;
+          height: 15px;
+        }
+
+        /* ---------- 装饰元素 ---------- */
+
+        .cute-element.animal,
+        .cute-element.tree {
+          font-size: 31px;
+        }
+
+        /* ---------- 右下角继续 ---------- */
+
+        .continue-text {
+          width: 155px;
+          right: 24px;
+          bottom: 20px;
+        }
+      }
     </style>
   </head>
 
@@ -1807,9 +1894,13 @@
 
           const isMobile = window.innerWidth <= 768;
 
-          const baseWidth = isMobile ? 70 : 106;
+          const isTablet =
+            window.innerWidth > 768 &&
+            window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
-          const sizeRange = isMobile ? 18 : 28;
+          const baseWidth = isMobile ? 70 : isTablet ? 128 : 106;
+
+          const sizeRange = isMobile ? 18 : isTablet ? 24 : 28;
 
           const startX = 20;
           const endX = setWidth - 20;
