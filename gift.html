@@ -636,6 +636,53 @@
         box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
       }
 
+      /* =========================================================
+   图片二次点击：全屏大图模式
+========================================================= */
+
+      .story-modal.image-expanded .modal-content {
+        width: 100vw;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .story-modal.image-expanded .modal-image-stage {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent;
+      }
+
+      .story-modal.image-expanded .modal-content img {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: calc(100dvh - 40px);
+
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+
+        cursor: zoom-out;
+      }
+
+      .story-modal.image-expanded .modal-body {
+        display: none;
+      }
       .modal-body {
         min-width: 0;
         overflow-y: auto;
@@ -2034,22 +2081,41 @@
 
       function fitModalImage() {
         const isMobile = window.innerWidth <= 768;
+        const isExpanded = modal.classList.contains("image-expanded");
 
-        if (isMobile) {
-          modalImg.style.maxHeight = "52dvh";
+        if (isExpanded) {
+          // 全屏大图模式
+          modalImg.style.maxHeight = "calc(100dvh - 40px)";
+          modalImg.style.maxWidth = "calc(100vw - 40px)";
         } else {
-          modalImg.style.maxHeight = "calc(100dvh - 112px)";
+          // 原来的左右布局模式
+          if (isMobile) {
+            modalImg.style.maxHeight = "52dvh";
+          } else {
+            modalImg.style.maxHeight = "calc(100dvh - 112px)";
+          }
+
+          modalImg.style.maxWidth = "100%";
         }
 
         modalImg.style.width = "auto";
-
         modalImg.style.height = "auto";
-
         modalImg.style.objectFit = "contain";
+      }
+
+      function toggleImageExpanded() {
+        if (!modal.classList.contains("active")) {
+          return;
+        }
+
+        modal.classList.toggle("image-expanded");
+
+        fitModalImage();
       }
 
       function closeModal() {
         modal.classList.remove("active");
+        modal.classList.remove("image-expanded");
 
         modal.setAttribute("aria-hidden", "true");
 
@@ -2057,6 +2123,11 @@
       }
 
       closeBtn.addEventListener("click", closeModal);
+
+      modalImg.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleImageExpanded();
+      });
 
       modal.addEventListener("click", closeModal);
 
