@@ -2263,7 +2263,6 @@
       let suppressNextClick = false;
 
       const SWIPE_THRESHOLD = 70;
-      const EDGE_RESISTANCE = 0.28;
 
       /* ---------------------------------------------------------
    开始触摸
@@ -2339,28 +2338,27 @@
           isSwipingPhoto = true;
           isDraggingPhoto = true;
 
-          let moveX = deltaX;
-
           /*
-           * 第一张继续右滑：
-           * 增加阻尼，产生“拉不动”的感觉
+           * 边界处理
+           *
+           * 第一张向右：
+           * 完全禁止移动
+           *
+           * 最后一张向左：
+           * 完全禁止移动
            */
-          if (currentPhotoIndex === 0 && deltaX > 0) {
-            moveX = deltaX * EDGE_RESISTANCE;
+          if (
+            (currentPhotoIndex === 0 && deltaX > 0) ||
+            (currentPhotoIndex === photos.length - 1 && deltaX < 0)
+          ) {
+            photoSlider.style.transform = "translateX(-100%)";
+            return;
           }
 
           /*
-           * 最后一张继续左滑：
-           * 增加阻尼
+           * 正常情况下，图片跟随手指移动
            */
-          if (currentPhotoIndex === photos.length - 1 && deltaX < 0) {
-            moveX = deltaX * EDGE_RESISTANCE;
-          }
-
-          /*
-           * 图片 + 文字整个 Modal 一起移动
-           */
-          photoSlider.style.transform = `translateX(calc(-100% + ${moveX}px))`;
+          photoSlider.style.transform = `translateX(calc(-100% + ${deltaX}px))`;
         },
         { passive: true },
       );
@@ -2368,7 +2366,6 @@
       /* ---------------------------------------------------------
    手指松开
 --------------------------------------------------------- */
-
       modal.addEventListener(
         "touchend",
         () => {
@@ -2389,25 +2386,44 @@
           isDraggingPhoto = false;
 
           /*
-           * 恢复动画
+           * =================================================
+           * 第一张 / 最后一张边界
+           *
+           * 如果已经在边界，
+           * 无论用户怎么拖，都回到当前图片。
+           * =================================================
            */
-          modalContent.style.transition =
-            "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
 
-          /* =================================================
-           左滑 → 下一张
-        ================================================= */
+          const isFirstPhoto = currentPhotoIndex === 0;
+          const isLastPhoto = currentPhotoIndex === photos.length - 1;
+
+          if ((isFirstPhoto && deltaX > 0) || (isLastPhoto && deltaX < 0)) {
+            photoSlider.style.transition =
+              "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
+
+            photoSlider.style.transform = "translateX(-100%)";
+
+            suppressNextClick = true;
+
+            setTimeout(() => {
+              suppressNextClick = false;
+            }, 350);
+
+            isSwipingPhoto = false;
+
+            return;
+          }
+
+          /*
+           * =================================================
+           * 左滑 → 下一张
+           * =================================================
+           */
 
           if (
             deltaX < -SWIPE_THRESHOLD &&
             currentPhotoIndex < photos.length - 1
           ) {
-            /*
-             * 左滑 → 下一张
-             *
-             * 当前已经向左移动了一部分，
-             * 松手后继续向左完成剩余距离。
-             */
             photoSlider.style.transition =
               "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -2418,8 +2434,11 @@
 
               showPhotoByIndex(currentPhotoIndex);
 
+              /*
+               * 重新把 slider 放回当前图片
+               */
               photoSlider.style.transition = "none";
-              photoSlider.style.transform = "translateX(-200%)";
+              photoSlider.style.transform = "translateX(-100%)";
 
               void photoSlider.offsetWidth;
 
@@ -2429,7 +2448,9 @@
             }, 380);
           } else if (deltaX > SWIPE_THRESHOLD && currentPhotoIndex > 0) {
             /*
+             * =================================================
              * 右滑 → 上一张
+             * =================================================
              */
             photoSlider.style.transition =
               "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
@@ -2441,6 +2462,9 @@
 
               showPhotoByIndex(currentPhotoIndex);
 
+              /*
+               * 重新把 slider 放回当前图片
+               */
               photoSlider.style.transition = "none";
               photoSlider.style.transform = "translateX(-100%)";
 
@@ -2451,11 +2475,16 @@
               photoSlider.style.transform = "translateX(-100%)";
             }, 380);
           } else {
-            /* =================================================
-           没有达到滑动距离
-           → 回弹
-        ================================================= */
-            modalContent.style.transform = "translateX(0)";
+            /*
+             * =================================================
+             * 没有达到滑动距离
+             * → 回弹
+             * =================================================
+             */
+            photoSlider.style.transition =
+              "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
+
+            photoSlider.style.transform = "translateX(-100%)";
           }
 
           /*
