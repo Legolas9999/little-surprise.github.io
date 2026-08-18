@@ -2,7 +2,10 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta
       name="description"
       content="我们的故事，一段关于相遇、陪伴、离别与重逢的回忆。"
@@ -1346,6 +1349,23 @@
         }
       }
 
+      /* =========================================================
+   Mobile：进入主页面时保持标准 100% 页面比例
+========================================================= */
+
+      @media (max-width: 768px) {
+        html,
+        body {
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+        }
+
+        body {
+          zoom: 1;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         html {
           scroll-behavior: auto;
@@ -2609,8 +2629,29 @@
 
           document.body.classList.remove("locked");
 
+          // 手机端进入主页面时，强制恢复到 100% 缩放
+          if (window.innerWidth <= 768) {
+            document.documentElement.style.zoom = "1";
+            document.body.style.zoom = "1";
+
+            // 延迟一帧，确保密码层消失后重新计算页面布局
+            requestAnimationFrame(() => {
+              window.scrollTo(0, 0);
+
+              document.documentElement.style.zoom = "1";
+              document.body.style.zoom = "1";
+            });
+          }
+
           setTimeout(() => {
             overlay.style.display = "none";
+
+            // 密码层完全消失后再次确保页面保持 1:1
+            if (window.innerWidth <= 768) {
+              document.documentElement.style.zoom = "1";
+              document.body.style.zoom = "1";
+              window.scrollTo(0, 0);
+            }
           }, 800);
         } else {
           errorMsg.style.display = "block";
@@ -2620,7 +2661,6 @@
           passwordInput.focus();
         }
       }
-
       unlockBtn.addEventListener("click", unlock);
 
       passwordInput.addEventListener("keydown", (event) => {
