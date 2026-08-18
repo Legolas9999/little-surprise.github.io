@@ -623,6 +623,12 @@
           rgba(231, 223, 211, 0.92)
         );
       }
+      /* =========================================================
+   单图片滑动容器
+   ---------------------------------------------------------
+   不再同时放上一张 / 当前 / 下一张照片。
+   整个 slider 永远只有当前照片。
+========================================================= */
 
       .photo-slider {
         width: 100%;
@@ -630,12 +636,16 @@
 
         display: flex;
 
-        transform: translateX(-100%);
+        justify-content: center;
+        align-items: center;
+
+        overflow: visible;
+
         will-change: transform;
 
         touch-action: pan-y;
 
-        transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+        transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
       .photo-slider .slide {
@@ -664,23 +674,10 @@
         border-radius: 8px;
 
         box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
-      }
 
-      .photo-slider {
-        height: 100%;
-      }
-
-      .photo-slider .slide {
-        flex: 0 0 100%;
-      }
-
-      .photo-slider .slide img {
-        width: auto;
-        height: auto;
-        max-width: 100%;
-        max-height: 52dvh;
-
-        object-fit: contain;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
       }
 
       /* =========================================================
@@ -1619,15 +1616,7 @@
           <div class="modal-image-stage">
             <div class="photo-slider" id="photoSlider">
               <div class="slide">
-                <img id="prevModalImg" src="" alt="" />
-              </div>
-
-              <div class="slide">
                 <img id="modalImg" src="" alt="完整照片" />
-              </div>
-
-              <div class="slide">
-                <img id="nextModalImg" src="" alt="" />
               </div>
             </div>
           </div>
@@ -2152,7 +2141,6 @@
 
       const modalImg = document.getElementById("modalImg");
 
-      const prevModalImg = document.getElementById("prevModalImg");
       const nextModalImg = document.getElementById("nextModalImg");
       const photoSlider = document.getElementById("photoSlider");
 
@@ -2165,20 +2153,11 @@
       const closeBtn = document.getElementById("closeBtn");
 
       function updateSliderImages(index) {
-        const prevIndex = index > 0 ? index - 1 : index;
-
-        const nextIndex = index < photos.length - 1 ? index + 1 : index;
-
-        prevModalImg.src = photos[prevIndex].src;
         modalImg.src = photos[index].src;
-        nextModalImg.src = photos[nextIndex].src;
-
-        prevModalImg.alt = `我们的故事 ${photos[prevIndex].date}`;
         modalImg.alt = `我们的故事 ${photos[index].date}`;
-        nextModalImg.alt = `我们的故事 ${photos[nextIndex].date}`;
 
         photoSlider.style.transition = "none";
-        photoSlider.style.transform = "translateX(-100%)";
+        photoSlider.style.transform = "translateX(0)";
       }
       // 当前正在查看的照片索引
       let currentPhotoIndex = 0;
@@ -2314,6 +2293,20 @@
    4. 防止上下滚动误触发
    5. 普通模式和全屏模式使用完全一致的滑动逻辑
 ========================================================= */
+      /* =========================================================
+   手机端照片左右滑动
+   ---------------------------------------------------------
+   单图片模式
+
+   核心特点：
+
+   1. 屏幕中永远只有当前照片
+   2. 不提前显示上一张 / 下一张
+   3. 手指拖动时当前照片跟手移动
+   4. 松手后完成切换
+   5. 第一张 / 最后一张有阻尼
+   6. 普通模式 + 大图模式完全一致
+========================================================= */
 
       let touchStartX = 0;
       let touchStartY = 0;
@@ -2323,6 +2316,7 @@
 
       let isDraggingPhoto = false;
       let isSwipingPhoto = false;
+
       let suppressNextClick = false;
 
       const SWIPE_THRESHOLD = 70;
@@ -2330,16 +2324,13 @@
       /* ---------------------------------------------------------
    开始触摸
 --------------------------------------------------------- */
+
       modal.addEventListener(
         "touchstart",
         (event) => {
-          if (window.innerWidth > 768) {
-            return;
-          }
+          if (window.innerWidth > 768) return;
 
-          if (!modal.classList.contains("active")) {
-            return;
-          }
+          if (!modal.classList.contains("active")) return;
 
           const touch = event.touches[0];
 
@@ -2352,14 +2343,11 @@
           isDraggingPhoto = false;
           isSwipingPhoto = false;
 
-          /*
-           * 开始滑动时关闭动画，
-           * 让图片真正跟随手指移动。
-           */
           photoSlider.style.transition = "none";
         },
         { passive: true },
       );
+
       /* ---------------------------------------------------------
    手指移动
 --------------------------------------------------------- */
@@ -2367,9 +2355,9 @@
       modal.addEventListener(
         "touchmove",
         (event) => {
-          if (window.innerWidth > 768) {
-            return;
-          }
+          if (window.innerWidth > 768) return;
+
+          if (!modal.classList.contains("active")) return;
 
           const touch = event.touches[0];
 
@@ -2380,10 +2368,8 @@
           const deltaY = touchCurrentY - touchStartY;
 
           /*
-           * 判断用户是不是在上下滑动
-           *
-           * 如果是上下滑动：
-           * 不干涉浏览器原本的滚动行为
+           * 如果明显是上下滑动，
+           * 不干扰页面原本的滚动。
            */
           if (
             !isSwipingPhoto &&
@@ -2394,7 +2380,7 @@
           }
 
           /*
-           * 横向距离太小，不开始滑动
+           * 横向移动太小，不开始滑动。
            */
           if (Math.abs(deltaX) < 10) {
             return;
@@ -2403,39 +2389,32 @@
           isSwipingPhoto = true;
           isDraggingPhoto = true;
 
-          /*
-           * =====================================================
-           * 第一张 / 最后一张
-           *
-           * 第一张继续右拉
-           * 最后一张继续左拉
-           *
-           * 不让图片真正越界
-           * =====================================================
-           */
-
-          /*
-           * =====================================================
-           * 正常跟手移动
-           * =====================================================
-           */
-
           let dragX = deltaX;
 
           /*
-           * 边缘阻尼
-           *
-           * 第一张继续右拉 / 最后一张继续左拉时，
-           * 不让图片完全不动，而是产生一点“拉不动”的阻尼感。
+           * 第一张继续向右拉：
+           * 增加阻尼。
            */
-          if (
-            (currentPhotoIndex === 0 && deltaX > 0) ||
-            (currentPhotoIndex === photos.length - 1 && deltaX < 0)
-          ) {
+          if (currentPhotoIndex === 0 && deltaX > 0) {
             dragX = deltaX * 0.18;
           }
 
-          photoSlider.style.transform = `translateX(calc(-100% + ${dragX}px))`;
+          /*
+           * 最后一张继续向左拉：
+           * 增加阻尼。
+           */
+          if (currentPhotoIndex === photos.length - 1 && deltaX < 0) {
+            dragX = deltaX * 0.18;
+          }
+
+          /*
+           * 当前照片跟随手指移动。
+           *
+           * 注意：
+           * slider 中现在只有当前这一张图片，
+           * 所以无论怎么拖，都不会看到相邻照片。
+           */
+          photoSlider.style.transform = `translateX(${dragX}px)`;
         },
         { passive: true },
       );
@@ -2447,13 +2426,9 @@
       modal.addEventListener(
         "touchend",
         () => {
-          if (window.innerWidth > 768) {
-            return;
-          }
+          if (window.innerWidth > 768) return;
 
-          if (!isSwipingPhoto) {
-            return;
-          }
+          if (!isSwipingPhoto) return;
 
           const deltaX = touchCurrentX - touchStartX;
 
@@ -2464,7 +2439,7 @@
 
           /*
            * =====================================================
-           * 边界
+           * 第一张 / 最后一张
            * =====================================================
            */
 
@@ -2472,7 +2447,7 @@
             photoSlider.style.transition =
               "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
 
-            photoSlider.style.transform = "translateX(-100%)";
+            photoSlider.style.transform = "translateX(0)";
 
             suppressNextClick = true;
 
@@ -2495,23 +2470,21 @@
             deltaX < -SWIPE_THRESHOLD &&
             currentPhotoIndex < photos.length - 1
           ) {
+            /*
+             * 当前照片向左离开屏幕。
+             *
+             * 因为 slider 里没有下一张照片，
+             * 所以这里不会出现下一张照片的边缘。
+             */
             photoSlider.style.transition =
               "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
 
-            photoSlider.style.transform = "translateX(-200%)";
+            photoSlider.style.transform = "translateX(-100%)";
 
             setTimeout(() => {
               currentPhotoIndex++;
 
-              showPhotoByIndex(currentPhotoIndex);
-
-              /*
-               * 更新数据之后重新回到中间
-               */
-              photoSlider.style.transition = "none";
-              photoSlider.style.transform = "translateX(-100%)";
-
-              void photoSlider.offsetWidth;
+              showPhotoAfterSwipe(currentPhotoIndex, "next");
             }, 380);
           } else if (deltaX > SWIPE_THRESHOLD && currentPhotoIndex > 0) {
             /*
@@ -2519,40 +2492,32 @@
              * 右滑 → 上一张
              * =====================================================
              */
+            /*
+             * 当前照片向右离开。
+             */
             photoSlider.style.transition =
               "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
 
-            photoSlider.style.transform = "translateX(0)";
+            photoSlider.style.transform = "translateX(100%)";
 
             setTimeout(() => {
               currentPhotoIndex--;
 
-              showPhotoByIndex(currentPhotoIndex);
-
-              /*
-               * 更新数据之后重新回到中间
-               */
-              photoSlider.style.transition = "none";
-              photoSlider.style.transform = "translateX(-100%)";
-
-              void photoSlider.offsetWidth;
+              showPhotoAfterSwipe(currentPhotoIndex, "prev");
             }, 380);
           } else {
             /*
              * =====================================================
-             * 滑动距离不够
-             * → 回到当前照片
+             * 距离不够
+             * → 回到原位置
              * =====================================================
              */
             photoSlider.style.transition =
               "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
 
-            photoSlider.style.transform = "translateX(-100%)";
+            photoSlider.style.transform = "translateX(0)";
           }
 
-          /*
-           * 防止 touchend 后触发图片 click
-           */
           suppressNextClick = true;
 
           setTimeout(() => {
@@ -2563,6 +2528,71 @@
         },
         { passive: true },
       );
+
+      function showPhotoAfterSwipe(index, direction) {
+        if (index < 0 || index >= photos.length) {
+          return;
+        }
+
+        const photo = photos[index];
+
+        /*
+         * 先更新文字信息
+         */
+        currentPhotoIndex = index;
+
+        modalDate.textContent = photo.date;
+
+        modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        modalStory.textContent = photo.story;
+
+        /*
+         * 先让 slider 瞬间回到另一侧。
+         *
+         * 注意：
+         * 此时新照片还没有显示，
+         * 所以用户看不到相邻照片。
+         */
+        photoSlider.style.transition = "none";
+
+        if (direction === "next") {
+          photoSlider.style.transform = "translateX(100%)";
+        } else {
+          photoSlider.style.transform = "translateX(-100%)";
+        }
+
+        /*
+         * 更换照片。
+         */
+        modalImg.src = photo.src;
+        modalImg.alt = `我们的故事 ${photo.date}`;
+
+        /*
+         * 强制浏览器重新计算布局，
+         * 保证下一段动画能够正常执行。
+         */
+        void photoSlider.offsetWidth;
+
+        /*
+         * 新照片从另一侧进入。
+         */
+        requestAnimationFrame(() => {
+          photoSlider.style.transition =
+            "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
+
+          photoSlider.style.transform = "translateX(0)";
+        });
+
+        /*
+         * 图片加载完成后重新计算尺寸。
+         */
+        if (modalImg.complete) {
+          fitModalImage();
+        } else {
+          modalImg.onload = fitModalImage;
+        }
+      }
 
       /* ---------------------------------------------------------
    点击 Modal 背景关闭
