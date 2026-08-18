@@ -2051,7 +2051,13 @@
 
       const closeBtn = document.getElementById("closeBtn");
 
+      // 当前正在查看的照片索引
+      let currentPhotoIndex = 0;
+
       function openModal(photo, index) {
+        // 记录当前照片索引
+        currentPhotoIndex = index;
+
         modalImg.src = photo.src;
 
         modalImg.alt = `我们的故事 ${photo.date}`;
@@ -2068,16 +2074,114 @@
 
         document.body.style.overflow = "hidden";
 
-        /*
-        等图片真正加载完成后再重新计算尺寸。
-        防止不同尺寸照片第一次打开时被压缩。
-      */
         if (modalImg.complete) {
           fitModalImage();
         } else {
           modalImg.onload = fitModalImage;
         }
       }
+      function showPhotoByIndex(index) {
+        // 第一张之前不能继续向前
+        if (index < 0) {
+          return;
+        }
+
+        // 最后一张之后不能继续向后
+        if (index >= photos.length) {
+          return;
+        }
+
+        const photo = photos[index];
+
+        currentPhotoIndex = index;
+
+        modalImg.src = photo.src;
+
+        modalImg.alt = `我们的故事 ${photo.date}`;
+
+        modalDate.textContent = photo.date;
+
+        modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        modalStory.textContent = photo.story;
+
+        // 如果当前处于全屏大图模式，
+        // 切换照片后仍然保持全屏
+        if (modalImg.complete) {
+          fitModalImage();
+        } else {
+          modalImg.onload = fitModalImage;
+        }
+      }
+
+      /* =========================================================
+   手机端左右滑动切换照片
+   左滑 → 下一张
+   右滑 → 上一张
+========================================================= */
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+
+      modal.addEventListener(
+        "touchstart",
+        (event) => {
+          // 只在手机端启用
+          if (window.innerWidth > 768) {
+            return;
+          }
+
+          const touch = event.changedTouches[0];
+
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+        },
+        { passive: true },
+      );
+
+      modal.addEventListener("touchend", (event) => {
+        // 只在手机端启用
+        if (window.innerWidth > 768) {
+          return;
+        }
+
+        const touch = event.changedTouches[0];
+
+        touchEndX = touch.clientX;
+        touchEndY = touch.clientY;
+
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // 如果上下移动距离比左右移动距离大，
+        // 就认为这是滚动，而不是左右滑动
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          return;
+        }
+
+        // 最少滑动 60px 才触发
+        const swipeDistance = 60;
+
+        if (Math.abs(deltaX) < swipeDistance) {
+          return;
+        }
+
+        // 左滑 → 下一张
+        if (deltaX < 0) {
+          if (currentPhotoIndex < photos.length - 1) {
+            showPhotoByIndex(currentPhotoIndex + 1);
+          }
+        }
+
+        // 右滑 → 上一张
+        else {
+          if (currentPhotoIndex > 0) {
+            showPhotoByIndex(currentPhotoIndex - 1);
+          }
+        }
+      });
 
       function fitModalImage() {
         const isMobile = window.innerWidth <= 768;
