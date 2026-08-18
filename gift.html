@@ -587,6 +587,9 @@
       .modal-content {
         position: relative;
         width: min(1100px, 94vw);
+
+        /* 关键：不只是 max-height，而是真正限定高度 */
+        height: min(900px, calc(100dvh - 56px));
         max-height: calc(100dvh - 56px);
 
         display: grid;
@@ -611,10 +614,17 @@
       .modal-image-stage {
         min-width: 0;
         min-height: 0;
+
+        width: 100%;
+        height: 100%;
+
         display: flex;
         align-items: center;
         justify-content: center;
+
         padding: 28px;
+
+        overflow: hidden;
 
         background: radial-gradient(
           circle at center,
@@ -648,6 +658,9 @@
       .story-modal.image-expanded .modal-content {
         width: 100vw;
         height: 100dvh;
+
+        min-height: 0;
+
         max-width: none;
         max-height: none;
 
@@ -697,9 +710,20 @@
       }
       .modal-body {
         min-width: 0;
+        min-height: 0;
+
+        height: 100%;
+
         overflow-y: auto;
+        overflow-x: hidden;
+
         padding: 52px 38px 42px;
+
         background: rgba(250, 247, 242, 0.96);
+
+        /* iPad / Safari 滚动优化 */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
 
       .modal-index {
@@ -1417,6 +1441,76 @@
           margin-left: auto;
           margin-right: auto;
           text-align: center;
+        }
+      }
+
+      /* =========================================================
+   iPad：Modal 图片与右侧文字独立滚动
+========================================================= */
+
+      @media (min-width: 769px) and (hover: none) and (pointer: coarse) {
+        .story-modal {
+          padding: 28px;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content {
+          width: min(1100px, 94vw);
+
+          height: min(900px, calc(100dvh - 56px));
+          max-height: calc(100dvh - 56px);
+
+          min-height: 0;
+
+          display: grid;
+          grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+
+          overflow: hidden;
+        }
+
+        .modal-image-stage {
+          min-width: 0;
+          min-height: 0;
+
+          width: 100%;
+          height: 100%;
+
+          padding: 28px;
+
+          overflow: hidden;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content img {
+          display: block;
+
+          width: auto;
+          height: auto;
+
+          max-width: 100%;
+          max-height: calc(100dvh - 112px);
+
+          object-fit: contain;
+          object-position: center;
+        }
+
+        .modal-body {
+          min-width: 0;
+          min-height: 0;
+
+          height: 100%;
+
+          overflow-y: auto;
+          overflow-x: hidden;
+
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+
+          padding: 52px 38px 42px;
         }
       }
 
