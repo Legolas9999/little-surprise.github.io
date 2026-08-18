@@ -588,6 +588,8 @@
 
         will-change: transform;
 
+        overflow: hidden;
+
         display: grid;
         grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
 
@@ -622,20 +624,63 @@
         );
       }
 
-      .modal-content img {
-        /*
-        永不裁切：
-        contain + max-width/max-height 保证整个图片完整出现。
-      */
+      .photo-slider {
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+
+        transform: translateX(-100%);
+        will-change: transform;
+
+        touch-action: pan-y;
+
+        transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .photo-slider .slide {
+        flex: 0 0 100%;
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 0;
+      }
+
+      .photo-slider .slide img {
         display: block;
+
+        width: auto;
+        height: auto;
+
+        max-width: 100%;
+        max-height: calc(100dvh - 112px);
+
+        object-fit: contain;
+
+        border-radius: 8px;
+
+        box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
+      }
+
+      .photo-slider {
+        height: 100%;
+      }
+
+      .photo-slider .slide {
+        flex: 0 0 100%;
+      }
+
+      .photo-slider .slide img {
         width: auto;
         height: auto;
         max-width: 100%;
-        max-height: calc(100dvh - 112px);
+        max-height: 52dvh;
+
         object-fit: contain;
-        object-position: center;
-        border-radius: 8px;
-        box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
       }
 
       /* =========================================================
@@ -1524,7 +1569,19 @@
           </button>
 
           <div class="modal-image-stage">
-            <img id="modalImg" src="" alt="完整照片" />
+            <div class="photo-slider" id="photoSlider">
+              <div class="slide">
+                <img id="prevModalImg" src="" alt="" />
+              </div>
+
+              <div class="slide">
+                <img id="modalImg" src="" alt="完整照片" />
+              </div>
+
+              <div class="slide">
+                <img id="nextModalImg" src="" alt="" />
+              </div>
+            </div>
           </div>
 
           <div class="modal-body">
@@ -2047,6 +2104,10 @@
 
       const modalImg = document.getElementById("modalImg");
 
+      const prevModalImg = document.getElementById("prevModalImg");
+      const nextModalImg = document.getElementById("nextModalImg");
+      const photoSlider = document.getElementById("photoSlider");
+
       const modalDate = document.getElementById("modalDate");
 
       const modalStory = document.getElementById("modalStory");
@@ -2055,6 +2116,22 @@
 
       const closeBtn = document.getElementById("closeBtn");
 
+      function updateSliderImages(index) {
+        const prevIndex = index > 0 ? index - 1 : index;
+
+        const nextIndex = index < photos.length - 1 ? index + 1 : index;
+
+        prevModalImg.src = photos[prevIndex].src;
+        modalImg.src = photos[index].src;
+        nextModalImg.src = photos[nextIndex].src;
+
+        prevModalImg.alt = `我们的故事 ${photos[prevIndex].date}`;
+        modalImg.alt = `我们的故事 ${photos[index].date}`;
+        nextModalImg.alt = `我们的故事 ${photos[nextIndex].date}`;
+
+        photoSlider.style.transition = "none";
+        photoSlider.style.transform = "translateX(-100%)";
+      }
       // 当前正在查看的照片索引
       let currentPhotoIndex = 0;
 
@@ -2064,9 +2141,7 @@
         modalContent.style.transition = "none";
         modalContent.style.transform = "translateX(0)";
 
-        modalImg.src = photo.src;
-
-        modalImg.alt = `我们的故事 ${photo.date}`;
+        updateSliderImages(index);
 
         modalDate.textContent = photo.date;
 
@@ -2088,13 +2163,7 @@
       }
 
       function showPhotoByIndex(index) {
-        // 第一张之前不能继续向前
-        if (index < 0) {
-          return;
-        }
-
-        // 最后一张之后不能继续向后
-        if (index >= photos.length) {
+        if (index < 0 || index >= photos.length) {
           return;
         }
 
@@ -2102,9 +2171,7 @@
 
         currentPhotoIndex = index;
 
-        modalImg.src = photo.src;
-
-        modalImg.alt = `我们的故事 ${photo.date}`;
+        updateSliderImages(index);
 
         modalDate.textContent = photo.date;
 
@@ -2112,8 +2179,6 @@
 
         modalStory.textContent = photo.story;
 
-        // 如果当前处于全屏大图模式，
-        // 切换照片后仍然保持全屏
         if (modalImg.complete) {
           fitModalImage();
         } else {
@@ -2295,7 +2360,7 @@
           /*
            * 图片 + 文字整个 Modal 一起移动
            */
-          modalContent.style.transform = `translateX(${moveX}px)`;
+          photoSlider.style.transform = `translateX(calc(-100% + ${moveX}px))`;
         },
         { passive: true },
       );
@@ -2337,60 +2402,53 @@
             deltaX < -SWIPE_THRESHOLD &&
             currentPhotoIndex < photos.length - 1
           ) {
-            // 先让当前页面滑出屏幕
-            modalContent.style.transform = "translateX(-110vw)";
+            /*
+             * 左滑 → 下一张
+             *
+             * 当前已经向左移动了一部分，
+             * 松手后继续向左完成剩余距离。
+             */
+            photoSlider.style.transition =
+              "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
+
+            photoSlider.style.transform = "translateX(-200%)";
 
             setTimeout(() => {
-              // 切换到下一张
-              showPhotoByIndex(currentPhotoIndex + 1);
+              currentPhotoIndex++;
 
-              /*
-               * 新照片从右边准备进入
-               */
-              modalContent.style.transition = "none";
+              showPhotoByIndex(currentPhotoIndex);
 
-              modalContent.style.transform = "translateX(110vw)";
+              photoSlider.style.transition = "none";
+              photoSlider.style.transform = "translateX(-200%)";
 
-              /*
-               * 强制浏览器重新计算布局
-               */
-              void modalContent.offsetWidth;
+              void photoSlider.offsetWidth;
 
-              /*
-               * 新照片滑入
-               */
-              modalContent.style.transition =
-                "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
+              photoSlider.style.transition = "transform 0.01s linear";
 
-              modalContent.style.transform = "translateX(0)";
+              photoSlider.style.transform = "translateX(-100%)";
             }, 380);
           } else if (deltaX > SWIPE_THRESHOLD && currentPhotoIndex > 0) {
-            /* =================================================
-           右滑 → 上一张
-        ================================================= */
-            // 当前照片向右滑出
-            modalContent.style.transform = "translateX(110vw)";
+            /*
+             * 右滑 → 上一张
+             */
+            photoSlider.style.transition =
+              "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
+
+            photoSlider.style.transform = "translateX(0)";
 
             setTimeout(() => {
-              // 切换上一张
-              showPhotoByIndex(currentPhotoIndex - 1);
+              currentPhotoIndex--;
 
-              /*
-               * 新照片从左边准备进入
-               */
-              modalContent.style.transition = "none";
+              showPhotoByIndex(currentPhotoIndex);
 
-              modalContent.style.transform = "translateX(-110vw)";
+              photoSlider.style.transition = "none";
+              photoSlider.style.transform = "translateX(-100%)";
 
-              void modalContent.offsetWidth;
+              void photoSlider.offsetWidth;
 
-              /*
-               * 新照片滑入
-               */
-              modalContent.style.transition =
-                "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
+              photoSlider.style.transition = "transform 0.01s linear";
 
-              modalContent.style.transform = "translateX(0)";
+              photoSlider.style.transform = "translateX(-100%)";
             }, 380);
           } else {
             /* =================================================
