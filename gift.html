@@ -2241,15 +2241,16 @@
 
         toggleImageExpanded();
       });
+
       /* =========================================================
    手机端照片左右滑动
    ---------------------------------------------------------
-   新版：
+   普通模式 + 全屏大图模式均支持
    1. 手指移动时图片跟手移动
    2. 松手后自动完成滑动
-   3. 第一张 / 最后一张有阻尼效果
+   3. 第一张 / 最后一张有边界限制
    4. 防止上下滚动误触发
-   5. 全屏大图模式不参与照片切换
+   5. 普通模式和全屏模式使用完全一致的滑动逻辑
 ========================================================= */
 
       let touchStartX = 0;
@@ -2271,13 +2272,7 @@
       modal.addEventListener(
         "touchstart",
         (event) => {
-          // 只针对手机端
           if (window.innerWidth > 768) {
-            return;
-          }
-
-          // 全屏大图模式不进行照片切换
-          if (modal.classList.contains("image-expanded")) {
             return;
           }
 
@@ -2292,8 +2287,11 @@
           isDraggingPhoto = false;
           isSwipingPhoto = false;
 
-          // 关闭过渡，让图片能够真正跟着手指移动
-          modalContent.style.transition = "none";
+          /*
+           * 普通模式 / 全屏模式
+           * 都关闭 transition，让图片真正跟手
+           */
+          photoSlider.style.transition = "none";
         },
         { passive: true },
       );
@@ -2309,10 +2307,6 @@
             return;
           }
 
-          if (modal.classList.contains("image-expanded")) {
-            return;
-          }
-
           const touch = event.touches[0];
 
           touchCurrentX = touch.clientX;
@@ -2321,7 +2315,12 @@
           const deltaX = touchCurrentX - touchStartX;
           const deltaY = touchCurrentY - touchStartY;
 
-          // 如果明显是上下滑动，就交给页面正常处理
+          /*
+           * 判断用户是不是在上下滑动
+           *
+           * 如果是上下滑动：
+           * 不干涉浏览器原本的滚动行为
+           */
           if (
             !isSwipingPhoto &&
             Math.abs(deltaY) > Math.abs(deltaX) &&
@@ -2330,7 +2329,9 @@
             return;
           }
 
-          // 横向距离还太小，不处理
+          /*
+           * 横向距离太小，不开始滑动
+           */
           if (Math.abs(deltaX) < 10) {
             return;
           }
@@ -2339,14 +2340,16 @@
           isDraggingPhoto = true;
 
           /*
-           * 边界处理
+           * =====================================================
+           * 第一张 / 最后一张
            *
-           * 第一张向右：
-           * 完全禁止移动
+           * 第一张继续右拉
+           * 最后一张继续左拉
            *
-           * 最后一张向左：
-           * 完全禁止移动
+           * 不让图片真正越界
+           * =====================================================
            */
+
           if (
             (currentPhotoIndex === 0 && deltaX > 0) ||
             (currentPhotoIndex === photos.length - 1 && deltaX < 0)
@@ -2356,8 +2359,11 @@
           }
 
           /*
-           * 正常情况下，图片跟随手指移动
+           * =====================================================
+           * 正常跟手移动
+           * =====================================================
            */
+
           photoSlider.style.transform = `translateX(calc(-100% + ${deltaX}px))`;
         },
         { passive: true },
@@ -2366,14 +2372,11 @@
       /* ---------------------------------------------------------
    手指松开
 --------------------------------------------------------- */
+
       modal.addEventListener(
         "touchend",
         () => {
           if (window.innerWidth > 768) {
-            return;
-          }
-
-          if (modal.classList.contains("image-expanded")) {
             return;
           }
 
@@ -2385,17 +2388,14 @@
 
           isDraggingPhoto = false;
 
-          /*
-           * =================================================
-           * 第一张 / 最后一张边界
-           *
-           * 如果已经在边界，
-           * 无论用户怎么拖，都回到当前图片。
-           * =================================================
-           */
-
           const isFirstPhoto = currentPhotoIndex === 0;
           const isLastPhoto = currentPhotoIndex === photos.length - 1;
+
+          /*
+           * =====================================================
+           * 边界
+           * =====================================================
+           */
 
           if ((isFirstPhoto && deltaX > 0) || (isLastPhoto && deltaX < 0)) {
             photoSlider.style.transition =
@@ -2415,9 +2415,9 @@
           }
 
           /*
-           * =================================================
+           * =====================================================
            * 左滑 → 下一张
-           * =================================================
+           * =====================================================
            */
 
           if (
@@ -2435,23 +2435,20 @@
               showPhotoByIndex(currentPhotoIndex);
 
               /*
-               * 重新把 slider 放回当前图片
+               * 更新数据之后重新回到中间
                */
               photoSlider.style.transition = "none";
               photoSlider.style.transform = "translateX(-100%)";
 
               void photoSlider.offsetWidth;
-
-              photoSlider.style.transition = "transform 0.01s linear";
-
-              photoSlider.style.transform = "translateX(-100%)";
             }, 380);
           } else if (deltaX > SWIPE_THRESHOLD && currentPhotoIndex > 0) {
-            /*
-             * =================================================
-             * 右滑 → 上一张
-             * =================================================
-             */
+
+          /*
+           * =====================================================
+           * 右滑 → 上一张
+           * =====================================================
+           */
             photoSlider.style.transition =
               "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -2463,24 +2460,21 @@
               showPhotoByIndex(currentPhotoIndex);
 
               /*
-               * 重新把 slider 放回当前图片
+               * 更新数据之后重新回到中间
                */
               photoSlider.style.transition = "none";
               photoSlider.style.transform = "translateX(-100%)";
 
               void photoSlider.offsetWidth;
-
-              photoSlider.style.transition = "transform 0.01s linear";
-
-              photoSlider.style.transform = "translateX(-100%)";
             }, 380);
           } else {
-            /*
-             * =================================================
-             * 没有达到滑动距离
-             * → 回弹
-             * =================================================
-             */
+
+          /*
+           * =====================================================
+           * 滑动距离不够
+           * → 回到当前照片
+           * =====================================================
+           */
             photoSlider.style.transition =
               "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -2488,7 +2482,7 @@
           }
 
           /*
-           * 防止滑动结束后触发 click
+           * 防止 touchend 后触发图片 click
            */
           suppressNextClick = true;
 
@@ -2501,8 +2495,11 @@
         { passive: true },
       );
 
-      modal.addEventListener("click", closeModal);
+      /* ---------------------------------------------------------
+   点击 Modal 背景关闭
+--------------------------------------------------------- */
 
+      modal.addEventListener("click", closeModal);
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && modal.classList.contains("active")) {
           closeModal();
