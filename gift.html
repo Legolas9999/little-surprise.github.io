@@ -2,7 +2,10 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta
       name="description"
       content="我们的故事，一段关于相遇、陪伴、离别与重逢的回忆。"
@@ -584,11 +587,10 @@
       .modal-content {
         position: relative;
         width: min(1100px, 94vw);
+
+        /* 关键：不只是 max-height，而是真正限定高度 */
+        height: min(900px, calc(100dvh - 56px));
         max-height: calc(100dvh - 56px);
-
-        will-change: transform;
-
-        overflow: hidden;
 
         display: grid;
         grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
@@ -612,177 +614,116 @@
       .modal-image-stage {
         min-width: 0;
         min-height: 0;
+
+        width: 100%;
+        height: 100%;
+
         display: flex;
         align-items: center;
         justify-content: center;
+
         padding: 28px;
+
+        overflow: hidden;
 
         background: radial-gradient(
           circle at center,
           rgba(255, 255, 255, 0.92),
           rgba(231, 223, 211, 0.92)
         );
-      }
-
-      .photo-slider {
-        width: 100%;
-        height: 100%;
-
-        display: flex;
-
-        transform: translateX(-100%);
-        will-change: transform;
 
         touch-action: pan-y;
-
-        transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      .photo-slider .slide {
-        flex: 0 0 100%;
-        width: 100%;
-        height: 100%;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        min-width: 0;
-      }
-
-      .photo-slider .slide img {
+      .modal-content img {
+        /*
+        永不裁切：
+        contain + max-width/max-height 保证整个图片完整出现。
+      */
         display: block;
-
         width: auto;
         height: auto;
-
         max-width: 100%;
         max-height: calc(100dvh - 112px);
-
         object-fit: contain;
-
+        object-position: center;
         border-radius: 8px;
-
         box-shadow: 0 16px 36px rgba(53, 42, 33, 0.16);
-      }
-
-      .photo-slider {
-        height: 100%;
-      }
-
-      .photo-slider .slide {
-        flex: 0 0 100%;
-      }
-
-      .photo-slider .slide img {
-        width: auto;
-        height: auto;
-        max-width: 100%;
-        max-height: 52dvh;
-
-        object-fit: contain;
       }
 
       /* =========================================================
    图片二次点击：全屏大图模式
-========================================================= */
-      /* =========================================================
-   全屏大图模式
-   ---------------------------------------------------------
-   整个屏幕 = 一个滑动页面
-   每一张照片 = 100vw
 ========================================================= */
 
       .story-modal.image-expanded .modal-content {
         width: 100vw;
         height: 100dvh;
 
+        min-height: 0;
+
         max-width: none;
         max-height: none;
-
-        display: block;
-
-        background: transparent;
-        border-radius: 0;
-        box-shadow: none;
-
-        overflow: hidden;
-      }
-
-      .story-modal.image-expanded .modal-image-stage {
-        width: 100vw;
-        height: 100dvh;
-
-        padding: 20px;
-
-        display: block;
-
-        background: transparent;
-
-        overflow: hidden;
-      }
-
-      /* 大图模式下，slider 必须占满整个屏幕 */
-      .story-modal.image-expanded .photo-slider {
-        width: 100vw;
-        height: 100dvh;
-
-        display: flex;
-
-        touch-action: pan-y;
-
-        overflow: visible;
-
-        will-change: transform;
-      }
-
-      /* 每一张照片占满整个屏幕 */
-      .story-modal.image-expanded .photo-slider .slide {
-        flex: 0 0 100vw;
-
-        width: 100vw;
-        height: 100dvh;
 
         display: flex;
         align-items: center;
         justify-content: center;
 
-        padding: 20px;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
       }
 
-      /* 大图本身完整显示，不裁剪 */
-      .story-modal.image-expanded .photo-slider .slide img {
-        display: block;
+      .story-modal.image-expanded .modal-image-stage {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent;
+      }
+
+      .story-modal.image-expanded .modal-content img {
         width: auto;
         height: auto;
 
-        max-width: calc(100vw - 40px);
+        max-width: 100%;
         max-height: calc(100dvh - 40px);
 
         object-fit: contain;
-
         border-radius: 4px;
 
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
 
         cursor: zoom-out;
 
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-user-drag: none;
+        transform-origin: center center;
+        transition: none;
+        touch-action: none;
+        will-change: transform;
       }
 
-      /* 大图模式隐藏文字 */
       .story-modal.image-expanded .modal-body {
         display: none;
       }
-
       .modal-body {
         min-width: 0;
+        min-height: 0;
+
+        height: 100%;
+
         overflow-y: auto;
+        overflow-x: hidden;
+
         padding: 52px 38px 42px;
+
         background: rgba(250, 247, 242, 0.96);
+
+        /* iPad / Safari 滚动优化 */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
 
       .modal-index {
@@ -1441,6 +1382,23 @@
         }
       }
 
+      /* =========================================================
+   Mobile：进入主页面时保持标准 100% 页面比例
+========================================================= */
+
+      @media (max-width: 768px) {
+        html,
+        body {
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+        }
+
+        body {
+          zoom: 1;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         html {
           scroll-behavior: auto;
@@ -1484,6 +1442,103 @@
           margin-right: auto;
           text-align: center;
         }
+      }
+
+      /* =========================================================
+   iPad：Modal 图片与右侧文字独立滚动
+========================================================= */
+
+      @media (min-width: 769px) and (hover: none) and (pointer: coarse) {
+        .story-modal {
+          padding: 28px;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content {
+          width: min(1100px, 94vw);
+
+          height: min(900px, calc(100dvh - 56px));
+          max-height: calc(100dvh - 56px);
+
+          min-height: 0;
+
+          display: grid;
+          grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+
+          overflow: hidden;
+        }
+
+        .modal-image-stage {
+          min-width: 0;
+          min-height: 0;
+
+          width: 100%;
+          height: 100%;
+
+          padding: 28px;
+
+          overflow: hidden;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content img {
+          display: block;
+
+          width: auto;
+          height: auto;
+
+          max-width: 100%;
+          max-height: calc(100dvh - 112px);
+
+          object-fit: contain;
+          object-position: center;
+        }
+
+        .modal-body {
+          min-width: 0;
+          min-height: 0;
+
+          height: 100%;
+
+          overflow-y: auto;
+          overflow-x: hidden;
+
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+
+          padding: 52px 38px 42px;
+        }
+      }
+
+      .fullscreen-counter {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+
+        transform: translateX(-50%);
+
+        z-index: 5100;
+
+        color: rgba(255, 255, 255, 0.82);
+
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+
+        opacity: 0;
+        pointer-events: none;
+
+        transition: opacity 0.25s ease;
+      }
+
+      .story-modal.image-expanded .fullscreen-counter {
+        opacity: 1;
       }
     </style>
   </head>
@@ -1617,19 +1672,7 @@
           </button>
 
           <div class="modal-image-stage">
-            <div class="photo-slider" id="photoSlider">
-              <div class="slide">
-                <img id="prevModalImg" src="" alt="" />
-              </div>
-
-              <div class="slide">
-                <img id="modalImg" src="" alt="完整照片" />
-              </div>
-
-              <div class="slide">
-                <img id="nextModalImg" src="" alt="" />
-              </div>
-            </div>
+            <img id="modalImg" src="" alt="完整照片" />
           </div>
 
           <div class="modal-body">
@@ -1638,6 +1681,8 @@
             <div class="modal-story" id="modalStory"></div>
           </div>
         </div>
+
+        <div class="fullscreen-counter" id="fullscreenCounter">Image 01/18</div>
       </div>
 
       <!-- =====================================================
@@ -1712,11 +1757,11 @@
         {
           src: "https://oxtmecvezbcmeglqxnwz.supabase.co/storage/v1/object/public/gift-assets/photo01.png",
           date: "2025.05.12",
-          story: `留学毕业后的第一次旅行，没想到在那片雪山与湖泊之间，遇见了生命中一个特别的人。
+          story: `留学毕业后的第一次旅行，没想到在那片雪山与湖泊之间，遇见了生命中一个特别的人，原来命运早已把一场特别的相遇藏在了路上。
 
-巍峨耸立的雪山脚下，在夜晚宁静的泸沽湖旁，你的笑容成为了那段旅途中最难忘的风景。
+巍峨耸立的雪山脚下，在月色宁静的泸沽湖旁，你羞涩的笑容与明亮的眼睛成为了那段旅途中最难忘的风景。
 
-后来，这个故事我向别人讲过很多遍，每一次回忆，依然会觉得温暖。`,
+后来，我曾无数次向别人讲起那段旅程，每一次回忆，依然会觉得温暖与梦幻，彷佛是命运写给我的一场浪漫梦境。`,
           rope: 0,
         },
 
@@ -1725,18 +1770,18 @@
           date: "2025.05.21",
           story: `5月20日原本是一个特别的日子，却因为航班延误没能如期抵达。
 
-但幸运的是，5月21日，我们还是补上了那份迟来的浪漫。美味的牛排、日本带回来的礼物，还有你抱着小熊和鲜花时可爱的笑容，都成为了那一天最珍贵的回忆。
+可命运似乎并没有让这份浪漫缺席。5月21日，我们还是补上了那份迟来的浪漫。美味的牛排、日本带回来的礼物，还有你抱着小熊和鲜花时藏不住的可爱笑容，都被悄悄写进了那一天的记忆里。
 
-也正是在这一天，我终于鼓起勇气，向你说出了藏在心里的那句话。`,
+或许真正重要的日子，从来不在于是哪一天，而在于那一天，我终于鼓起了勇气，把藏在心里很久的那句话，认真地告诉了你。`,
           rope: 0,
         },
 
         {
           src: "https://oxtmecvezbcmeglqxnwz.supabase.co/storage/v1/object/public/gift-assets/photo03.png",
           date: "2025.06.04",
-          story: `我们相处的时间其实并不算长，很快你便踏上了上海实习的旅程。
+          story: `我们相处的时间其实并不算长，还没来得及好好享受那段时光，你便踏上了上海实习的旅程。
 
-在那段忙碌的日子里，刚好迎来了你的生日，我送给你一支钢笔，也写下了一封想对你说的话。视频时，看着你第一次读到那封信而流泪的样子，成为了我记忆里最温柔的瞬间。
+在忙碌与思念交织的日子里，恰好迎来了你的生日，我送给你一支钢笔，也把那些平时不太敢说出口的话，认真写进了一封信里。视频的另一端，看着你第一次读到那封信而流泪的样子，成为了我记忆里最温柔的瞬间。
 
 我也一直记得，那些一起牵着手漫步在苏州河边的时光，平凡却无比珍贵。`,
           rope: 0,
@@ -1747,11 +1792,11 @@
           date: "2025.06.09",
           story: `那是你第一次写给我的明信片。
 
-恰逢我要去欧洲旅行，在出发前，我小心翼翼地将这份珍贵的心意塑封起来，只为了让它能够陪我走过更远的路。
+恰逢我要踏上欧洲的旅程，在出发前，我小心翼翼地将这份珍贵的心意塑封起来，只为了让它能够陪我走过更远的路。
 
-于是，我带着你写给我的明信片，走过欧洲一座又一座城市，去看那些曾经只在照片里见过的风景。
+于是，我带着你写下的字迹，走过欧洲一座又一座城市，去看那些曾经只在照片里见过的风景。
 
-虽然那时你不在我的身边，但有你的字迹陪伴，好像你也一直和我一起旅行。那张小小的明信片，成为了连接我们距离的温柔纽带。`,
+虽然那时你不在我的身边，但有你的字迹陪伴，好像你也一直和我一起旅行，它也成为了连接我们距离的温柔纽带。原来，一张小小的明信片、一行熟悉的字迹，就足以跨越千山万水。`,
           rope: 0,
         },
 
@@ -1762,7 +1807,7 @@
 
 虽然我们已经许久未见，刚见面时，你看着我还有些许陌生与拘谨，但那份熟悉的情感一直都在。没过多久，我们又回到了曾经的相处状态。
 
-看着你一件一件拆开我从欧洲带回来的礼物，看着你眼里的惊喜与开心，那一刻，我觉得所有等待和奔波都变得值得。`,
+看着你一件一件拆开我从欧洲带回来的礼物，看到你因为我带来的小小心意而惊喜开心，那一刻，我觉得所有等待和奔波都变得值得。`,
           rope: 0,
         },
 
@@ -1884,7 +1929,7 @@
 
 相聚变得越来越难，也因此变得越来越珍贵。而我也在一次次奔向你的路上，慢慢发现自己的心正在发生变化。
 
-原来，不知不觉间，我已经开始向你倾斜了。`,
+原来，不知不觉间，我的心已经开始向你倾斜了。`,
           rope: 2,
         },
 
@@ -2148,13 +2193,7 @@
 
       const modal = document.getElementById("storyModal");
 
-      const modalContent = document.querySelector(".modal-content");
-
       const modalImg = document.getElementById("modalImg");
-
-      const prevModalImg = document.getElementById("prevModalImg");
-      const nextModalImg = document.getElementById("nextModalImg");
-      const photoSlider = document.getElementById("photoSlider");
 
       const modalDate = document.getElementById("modalDate");
 
@@ -2164,36 +2203,77 @@
 
       const closeBtn = document.getElementById("closeBtn");
 
-      function updateSliderImages(index) {
-        const prevIndex = index > 0 ? index - 1 : index;
+      let scale = 1;
+      let startDistance = 0;
+      let startScale = 1;
 
-        const nextIndex = index < photos.length - 1 ? index + 1 : index;
+      let isPinching = false;
+      function getTouchDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
 
-        prevModalImg.src = photos[prevIndex].src;
-        modalImg.src = photos[index].src;
-        nextModalImg.src = photos[nextIndex].src;
-
-        prevModalImg.alt = `我们的故事 ${photos[prevIndex].date}`;
-        modalImg.alt = `我们的故事 ${photos[index].date}`;
-        nextModalImg.alt = `我们的故事 ${photos[nextIndex].date}`;
-
-        photoSlider.style.transition = "none";
-        photoSlider.style.transform = "translateX(-100%)";
+        return Math.sqrt(dx * dx + dy * dy);
       }
-      // 当前正在查看的照片索引
-      let currentPhotoIndex = 0;
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+      let isSwiping = false;
+
+      function changeModalPhoto(direction) {
+        if (!modal.classList.contains("active")) {
+          return;
+        }
+
+        const currentIndex = photos.findIndex(
+          (photo) => photo.src === modalImg.src,
+        );
+
+        if (currentIndex === -1) {
+          return;
+        }
+
+        const nextIndex = currentIndex + direction;
+
+        if (nextIndex < 0 || nextIndex >= photos.length) {
+          return;
+        }
+
+        const nextPhoto = photos[nextIndex];
+
+        // 切换照片时恢复 1 倍
+        scale = 1;
+        modalImg.style.transform = "scale(1)";
+
+        modalImg.src = nextPhoto.src;
+        modalImg.alt = `我们的故事 ${nextPhoto.date}`;
+
+        modalDate.textContent = nextPhoto.date;
+
+        modalIndex.textContent = `MEMORY ${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        modalStory.textContent = nextPhoto.story;
+
+        updateFullscreenImageCounter(nextIndex);
+
+        if (modalImg.complete) {
+          fitModalImage();
+        } else {
+          modalImg.onload = fitModalImage;
+        }
+      }
 
       function openModal(photo, index) {
-        currentPhotoIndex = index;
+        modalImg.src = photo.src;
 
-        modalContent.style.transition = "none";
-        modalContent.style.transform = "translateX(0)";
-
-        updateSliderImages(index);
+        modalImg.alt = `我们的故事 ${photo.date}`;
 
         modalDate.textContent = photo.date;
 
         modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        updateFullscreenImageCounter(index);
 
         modalStory.textContent = photo.story;
 
@@ -2203,30 +2283,10 @@
 
         document.body.style.overflow = "hidden";
 
-        if (modalImg.complete) {
-          fitModalImage();
-        } else {
-          modalImg.onload = fitModalImage;
-        }
-      }
-
-      function showPhotoByIndex(index) {
-        if (index < 0 || index >= photos.length) {
-          return;
-        }
-
-        const photo = photos[index];
-
-        currentPhotoIndex = index;
-
-        updateSliderImages(index);
-
-        modalDate.textContent = photo.date;
-
-        modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
-
-        modalStory.textContent = photo.story;
-
+        /*
+        等图片真正加载完成后再重新计算尺寸。
+        防止不同尺寸照片第一次打开时被压缩。
+      */
         if (modalImg.complete) {
           fitModalImage();
         } else {
@@ -2239,18 +2299,11 @@
         const isExpanded = modal.classList.contains("image-expanded");
 
         if (isExpanded) {
-          /*
-           * 全屏大图模式
-           *
-           * 图片始终完整显示
-           * 不裁剪、不拉伸
-           */
+          // 全屏大图模式
           modalImg.style.maxHeight = "calc(100dvh - 40px)";
           modalImg.style.maxWidth = "calc(100vw - 40px)";
         } else {
-          /*
-           * 普通模式
-           */
+          // 原来的左右布局模式
           if (isMobile) {
             modalImg.style.maxHeight = "52dvh";
           } else {
@@ -2270,7 +2323,15 @@
           return;
         }
 
-        modal.classList.toggle("image-expanded");
+        const expanded = modal.classList.toggle("image-expanded");
+
+        if (expanded) {
+          scale = 1;
+          modalImg.style.transform = "scale(1)";
+        } else {
+          scale = 1;
+          modalImg.style.transform = "scale(1)";
+        }
 
         fitModalImage();
       }
@@ -2289,286 +2350,136 @@
       modalImg.addEventListener("click", (event) => {
         event.stopPropagation();
 
-        /*
-         * 如果刚刚发生过左右滑动，
-         * 不进入 / 退出大图模式。
-         */
-        if (suppressNextClick) {
+        if (isSwiping) {
           return;
         }
 
-        /*
-         * 当前照片已经处于大图模式时，
-         * 点击照片退出大图模式。
-         */
         toggleImageExpanded();
       });
 
-      /* =========================================================
-   手机端照片左右滑动
-   ---------------------------------------------------------
-   普通模式 + 全屏大图模式均支持
-   1. 手指移动时图片跟手移动
-   2. 松手后自动完成滑动
-   3. 第一张 / 最后一张有边界限制
-   4. 防止上下滚动误触发
-   5. 普通模式和全屏模式使用完全一致的滑动逻辑
-========================================================= */
+      const modalContent = document.querySelector(".modal-content");
 
-      let touchStartX = 0;
-      let touchStartY = 0;
-
-      let touchCurrentX = 0;
-      let touchCurrentY = 0;
-
-      let isDraggingPhoto = false;
-      let isSwipingPhoto = false;
-      let suppressNextClick = false;
-
-      const SWIPE_THRESHOLD = 70;
-
-      /* ---------------------------------------------------------
-   开始触摸
---------------------------------------------------------- */
-      modal.addEventListener(
+      modalContent.addEventListener(
         "touchstart",
         (event) => {
-          if (window.innerWidth > 768) {
+          // 大图模式 + 双指
+          if (
+            modal.classList.contains("image-expanded") &&
+            event.touches.length === 2
+          ) {
+            isPinching = true;
+
+            startDistance = getTouchDistance(
+              event.touches[0],
+              event.touches[1],
+            );
+
+            startScale = scale;
+
             return;
           }
 
-          if (!modal.classList.contains("active")) {
-            return;
+          // 单指，用于左右滑动
+          if (event.touches.length === 1) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+
+            isSwiping = false;
           }
-
-          const touch = event.touches[0];
-
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
-
-          touchCurrentX = touch.clientX;
-          touchCurrentY = touch.clientY;
-
-          isDraggingPhoto = false;
-          isSwipingPhoto = false;
-
-          /*
-           * 开始滑动时关闭动画，
-           * 让图片真正跟随手指移动。
-           */
-          photoSlider.style.transition = "none";
         },
         { passive: true },
       );
-      /* ---------------------------------------------------------
-   手指移动
---------------------------------------------------------- */
 
-      modal.addEventListener(
+      modalContent.addEventListener(
         "touchmove",
         (event) => {
-          if (window.innerWidth > 768) {
-            return;
-          }
-
-          const touch = event.touches[0];
-
-          touchCurrentX = touch.clientX;
-          touchCurrentY = touch.clientY;
-
-          const deltaX = touchCurrentX - touchStartX;
-          const deltaY = touchCurrentY - touchStartY;
-
-          /*
-           * 判断用户是不是在上下滑动
-           *
-           * 如果是上下滑动：
-           * 不干涉浏览器原本的滚动行为
-           */
+          // ==========================
+          // 大图模式：双指缩放
+          // ==========================
           if (
-            !isSwipingPhoto &&
-            Math.abs(deltaY) > Math.abs(deltaX) &&
-            Math.abs(deltaY) > 10
+            modal.classList.contains("image-expanded") &&
+            event.touches.length === 2
           ) {
+            const currentDistance = getTouchDistance(
+              event.touches[0],
+              event.touches[1],
+            );
+
+            if (startDistance > 0) {
+              scale = startScale * (currentDistance / startDistance);
+
+              // 限制缩放范围
+              scale = Math.min(Math.max(scale, 1), 4);
+
+              modalImg.style.transform = `scale(${scale})`;
+            }
+
             return;
           }
 
-          /*
-           * 横向距离太小，不开始滑动
-           */
-          if (Math.abs(deltaX) < 10) {
-            return;
+          // ==========================
+          // 单指：左右滑动
+          // ==========================
+          if (event.touches.length === 1) {
+            touchEndX = event.touches[0].clientX;
+            touchEndY = event.touches[0].clientY;
+
+            const deltaX = touchEndX - touchStartX;
+
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+              isSwiping = true;
+            }
           }
-
-          isSwipingPhoto = true;
-          isDraggingPhoto = true;
-
-          /*
-           * =====================================================
-           * 第一张 / 最后一张
-           *
-           * 第一张继续右拉
-           * 最后一张继续左拉
-           *
-           * 不让图片真正越界
-           * =====================================================
-           */
-
-          /*
-           * =====================================================
-           * 正常跟手移动
-           * =====================================================
-           */
-
-          let dragX = deltaX;
-
-          /*
-           * 边缘阻尼
-           *
-           * 第一张继续右拉 / 最后一张继续左拉时，
-           * 不让图片完全不动，而是产生一点“拉不动”的阻尼感。
-           */
-          if (
-            (currentPhotoIndex === 0 && deltaX > 0) ||
-            (currentPhotoIndex === photos.length - 1 && deltaX < 0)
-          ) {
-            dragX = deltaX * 0.18;
-          }
-
-          photoSlider.style.transform = `translateX(calc(-100% + ${dragX}px))`;
         },
         { passive: true },
       );
 
-      /* ---------------------------------------------------------
-   手指松开
---------------------------------------------------------- */
-
-      modal.addEventListener(
+      modalContent.addEventListener(
         "touchend",
         () => {
-          if (window.innerWidth > 768) {
-            return;
-          }
-
-          if (!isSwipingPhoto) {
-            return;
-          }
-
-          const deltaX = touchCurrentX - touchStartX;
-
-          isDraggingPhoto = false;
-
-          const isFirstPhoto = currentPhotoIndex === 0;
-          const isLastPhoto = currentPhotoIndex === photos.length - 1;
-
-          /*
-           * =====================================================
-           * 边界
-           * =====================================================
-           */
-
-          if ((isFirstPhoto && deltaX > 0) || (isLastPhoto && deltaX < 0)) {
-            photoSlider.style.transition =
-              "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
-
-            photoSlider.style.transform = "translateX(-100%)";
-
-            suppressNextClick = true;
-
-            setTimeout(() => {
-              suppressNextClick = false;
-            }, 350);
-
-            isSwipingPhoto = false;
+          if (isPinching) {
+            isPinching = false;
+            startDistance = 0;
+            startScale = scale;
 
             return;
           }
 
-          /*
-           * =====================================================
-           * 左滑 → 下一张
-           * =====================================================
-           */
+          const deltaX = touchEndX - touchStartX;
+
+          const deltaY = touchEndY - touchStartY;
+
+          const swipeThreshold = 50;
 
           if (
-            deltaX < -SWIPE_THRESHOLD &&
-            currentPhotoIndex < photos.length - 1
+            Math.abs(deltaX) > swipeThreshold &&
+            Math.abs(deltaX) > Math.abs(deltaY) * 1.2
           ) {
-            photoSlider.style.transition =
-              "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
-
-            photoSlider.style.transform = "translateX(-200%)";
-
-            setTimeout(() => {
-              currentPhotoIndex++;
-
-              showPhotoByIndex(currentPhotoIndex);
-
-              /*
-               * 更新数据之后重新回到中间
-               */
-              photoSlider.style.transition = "none";
-              photoSlider.style.transform = "translateX(-100%)";
-
-              void photoSlider.offsetWidth;
-            }, 380);
-          } else if (deltaX > SWIPE_THRESHOLD && currentPhotoIndex > 0) {
-            /*
-             * =====================================================
-             * 右滑 → 上一张
-             * =====================================================
-             */
-            photoSlider.style.transition =
-              "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
-
-            photoSlider.style.transform = "translateX(0)";
-
-            setTimeout(() => {
-              currentPhotoIndex--;
-
-              showPhotoByIndex(currentPhotoIndex);
-
-              /*
-               * 更新数据之后重新回到中间
-               */
-              photoSlider.style.transition = "none";
-              photoSlider.style.transform = "translateX(-100%)";
-
-              void photoSlider.offsetWidth;
-            }, 380);
-          } else {
-            /*
-             * =====================================================
-             * 滑动距离不够
-             * → 回到当前照片
-             * =====================================================
-             */
-            photoSlider.style.transition =
-              "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
-
-            photoSlider.style.transform = "translateX(-100%)";
+            if (deltaX < 0) {
+              changeModalPhoto(1);
+            } else {
+              changeModalPhoto(-1);
+            }
           }
 
-          /*
-           * 防止 touchend 后触发图片 click
-           */
-          suppressNextClick = true;
+          touchStartX = 0;
+          touchStartY = 0;
+          touchEndX = 0;
+          touchEndY = 0;
 
           setTimeout(() => {
-            suppressNextClick = false;
-          }, 450);
-
-          isSwipingPhoto = false;
+            isSwiping = false;
+          }, 50);
         },
         { passive: true },
       );
-
-      /* ---------------------------------------------------------
-   点击 Modal 背景关闭
---------------------------------------------------------- */
-
       modal.addEventListener("click", closeModal);
+
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && modal.classList.contains("active")) {
           closeModal();
@@ -3047,8 +2958,29 @@
 
           document.body.classList.remove("locked");
 
+          // 手机端进入主页面时，强制恢复到 100% 缩放
+          if (window.innerWidth <= 768) {
+            document.documentElement.style.zoom = "1";
+            document.body.style.zoom = "1";
+
+            // 延迟一帧，确保密码层消失后重新计算页面布局
+            requestAnimationFrame(() => {
+              window.scrollTo(0, 0);
+
+              document.documentElement.style.zoom = "1";
+              document.body.style.zoom = "1";
+            });
+          }
+
           setTimeout(() => {
             overlay.style.display = "none";
+
+            // 密码层完全消失后再次确保页面保持 1:1
+            if (window.innerWidth <= 768) {
+              document.documentElement.style.zoom = "1";
+              document.body.style.zoom = "1";
+              window.scrollTo(0, 0);
+            }
           }, 800);
         } else {
           errorMsg.style.display = "block";
@@ -3058,7 +2990,6 @@
           passwordInput.focus();
         }
       }
-
       unlockBtn.addEventListener("click", unlock);
 
       passwordInput.addEventListener("keydown", (event) => {
@@ -3078,6 +3009,12 @@
 
         passwordInput.focus();
       });
+
+      const fullscreenCounter = document.getElementById("fullscreenCounter");
+
+      function updateFullscreenImageCounter(index) {
+        fullscreenCounter.textContent = `Image ${String(index + 1).padStart(2, "0")}/${String(photos.length).padStart(2, "0")}`;
+      }
     </script>
   </body>
 </html>
