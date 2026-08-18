@@ -621,6 +621,8 @@
           rgba(255, 255, 255, 0.92),
           rgba(231, 223, 211, 0.92)
         );
+
+        touch-action: pan-y;
       }
 
       .modal-content img {
@@ -2071,6 +2073,50 @@
 
       const closeBtn = document.getElementById("closeBtn");
 
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+      let isSwiping = false;
+
+      function changeModalPhoto(direction) {
+        if (!modal.classList.contains("active")) {
+          return;
+        }
+
+        const currentIndex = photos.findIndex(
+          (photo) => photo.src === modalImg.src,
+        );
+
+        if (currentIndex === -1) {
+          return;
+        }
+
+        const nextIndex = currentIndex + direction;
+
+        // 第一张继续向前 / 最后一张继续向后，直接禁止
+        if (nextIndex < 0 || nextIndex >= photos.length) {
+          return;
+        }
+
+        const nextPhoto = photos[nextIndex];
+
+        modalImg.src = nextPhoto.src;
+        modalImg.alt = `我们的故事 ${nextPhoto.date}`;
+
+        modalDate.textContent = nextPhoto.date;
+
+        modalIndex.textContent = `MEMORY ${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        modalStory.textContent = nextPhoto.story;
+
+        if (modalImg.complete) {
+          fitModalImage();
+        } else {
+          modalImg.onload = fitModalImage;
+        }
+      }
+
       function openModal(photo, index) {
         modalImg.src = photo.src;
 
@@ -2146,8 +2192,89 @@
 
       modalImg.addEventListener("click", (event) => {
         event.stopPropagation();
+
+        if (isSwiping) {
+          return;
+        }
+
         toggleImageExpanded();
       });
+      const modalContent = document.querySelector(".modal-content");
+
+      modalContent.addEventListener(
+        "touchstart",
+        (event) => {
+          if (event.touches.length !== 1) {
+            return;
+          }
+
+          touchStartX = event.touches[0].clientX;
+          touchStartY = event.touches[0].clientY;
+
+          touchEndX = touchStartX;
+          touchEndY = touchStartY;
+
+          isSwiping = false;
+        },
+        { passive: true },
+      );
+
+      modalContent.addEventListener(
+        "touchmove",
+        (event) => {
+          if (event.touches.length !== 1) {
+            return;
+          }
+
+          touchEndX = event.touches[0].clientX;
+          touchEndY = event.touches[0].clientY;
+
+          const deltaX = touchEndX - touchStartX;
+          const deltaY = touchEndY - touchStartY;
+
+          // 只有横向移动明显大于纵向移动时，才认为是照片滑动
+          if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+            isSwiping = true;
+          }
+        },
+        { passive: true },
+      );
+
+      modalContent.addEventListener(
+        "touchend",
+        () => {
+          const deltaX = touchEndX - touchStartX;
+          const deltaY = touchEndY - touchStartY;
+
+          const swipeThreshold = 50;
+
+          // 必须是明显的横向滑动
+          if (
+            Math.abs(deltaX) > swipeThreshold &&
+            Math.abs(deltaX) > Math.abs(deltaY) * 1.2
+          ) {
+            if (deltaX < 0) {
+              // 左滑 → 下一张
+              changeModalPhoto(1);
+            } else {
+              // 右滑 → 上一张
+              changeModalPhoto(-1);
+            }
+          }
+
+          // 重置
+          touchStartX = 0;
+          touchStartY = 0;
+          touchEndX = 0;
+          touchEndY = 0;
+
+          // 延迟一点清除，避免滑动后触发 click
+          setTimeout(() => {
+            isSwiping = false;
+          }, 50);
+        },
+        { passive: true },
+      );
 
       modal.addEventListener("click", closeModal);
 
