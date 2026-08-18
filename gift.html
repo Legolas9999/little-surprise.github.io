@@ -675,14 +675,21 @@
       .story-modal.image-expanded .modal-content img {
         width: auto;
         height: auto;
+
         max-width: 100%;
         max-height: calc(100dvh - 40px);
 
         object-fit: contain;
         border-radius: 4px;
+
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
 
         cursor: zoom-out;
+
+        transform-origin: center center;
+        transition: none;
+        touch-action: none;
+        will-change: transform;
       }
 
       .story-modal.image-expanded .modal-body {
@@ -1412,6 +1419,33 @@
           text-align: center;
         }
       }
+
+      .fullscreen-counter {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+
+        transform: translateX(-50%);
+
+        z-index: 5100;
+
+        color: rgba(255, 255, 255, 0.82);
+
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+
+        opacity: 0;
+        pointer-events: none;
+
+        transition: opacity 0.25s ease;
+      }
+
+      .story-modal.image-expanded .fullscreen-counter {
+        opacity: 1;
+      }
     </style>
   </head>
 
@@ -1553,6 +1587,8 @@
             <div class="modal-story" id="modalStory"></div>
           </div>
         </div>
+
+        <div class="fullscreen-counter" id="fullscreenCounter">Image 01/18</div>
       </div>
 
       <!-- =====================================================
@@ -2073,6 +2109,18 @@
 
       const closeBtn = document.getElementById("closeBtn");
 
+      let scale = 1;
+      let startDistance = 0;
+      let startScale = 1;
+
+      let isPinching = false;
+      function getTouchDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
       let touchStartX = 0;
       let touchStartY = 0;
       let touchEndX = 0;
@@ -2094,12 +2142,15 @@
 
         const nextIndex = currentIndex + direction;
 
-        // 第一张继续向前 / 最后一张继续向后，直接禁止
         if (nextIndex < 0 || nextIndex >= photos.length) {
           return;
         }
 
         const nextPhoto = photos[nextIndex];
+
+        // 切换照片时恢复 1 倍
+        scale = 1;
+        modalImg.style.transform = "scale(1)";
 
         modalImg.src = nextPhoto.src;
         modalImg.alt = `我们的故事 ${nextPhoto.date}`;
@@ -2109,6 +2160,8 @@
         modalIndex.textContent = `MEMORY ${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
 
         modalStory.textContent = nextPhoto.story;
+
+        updateFullscreenImageCounter(nextIndex);
 
         if (modalImg.complete) {
           fitModalImage();
@@ -2125,6 +2178,8 @@
         modalDate.textContent = photo.date;
 
         modalIndex.textContent = `MEMORY ${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+        updateFullscreenImageCounter(index);
 
         modalStory.textContent = photo.story;
 
@@ -2174,7 +2229,15 @@
           return;
         }
 
-        modal.classList.toggle("image-expanded");
+        const expanded = modal.classList.toggle("image-expanded");
+
+        if (expanded) {
+          scale = 1;
+          modalImg.style.transform = "scale(1)";
+        } else {
+          scale = 1;
+          modalImg.style.transform = "scale(1)";
+        }
 
         fitModalImage();
       }
@@ -2199,22 +2262,39 @@
 
         toggleImageExpanded();
       });
+
       const modalContent = document.querySelector(".modal-content");
 
       modalContent.addEventListener(
         "touchstart",
         (event) => {
-          if (event.touches.length !== 1) {
+          // 大图模式 + 双指
+          if (
+            modal.classList.contains("image-expanded") &&
+            event.touches.length === 2
+          ) {
+            isPinching = true;
+
+            startDistance = getTouchDistance(
+              event.touches[0],
+              event.touches[1],
+            );
+
+            startScale = scale;
+
             return;
           }
 
-          touchStartX = event.touches[0].clientX;
-          touchStartY = event.touches[0].clientY;
+          // 单指，用于左右滑动
+          if (event.touches.length === 1) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
 
-          touchEndX = touchStartX;
-          touchEndY = touchStartY;
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
 
-          isSwiping = false;
+            isSwiping = false;
+          }
         },
         { passive: true },
       );
@@ -2222,19 +2302,44 @@
       modalContent.addEventListener(
         "touchmove",
         (event) => {
-          if (event.touches.length !== 1) {
+          // ==========================
+          // 大图模式：双指缩放
+          // ==========================
+          if (
+            modal.classList.contains("image-expanded") &&
+            event.touches.length === 2
+          ) {
+            const currentDistance = getTouchDistance(
+              event.touches[0],
+              event.touches[1],
+            );
+
+            if (startDistance > 0) {
+              scale = startScale * (currentDistance / startDistance);
+
+              // 限制缩放范围
+              scale = Math.min(Math.max(scale, 1), 4);
+
+              modalImg.style.transform = `scale(${scale})`;
+            }
+
             return;
           }
 
-          touchEndX = event.touches[0].clientX;
-          touchEndY = event.touches[0].clientY;
+          // ==========================
+          // 单指：左右滑动
+          // ==========================
+          if (event.touches.length === 1) {
+            touchEndX = event.touches[0].clientX;
+            touchEndY = event.touches[0].clientY;
 
-          const deltaX = touchEndX - touchStartX;
-          const deltaY = touchEndY - touchStartY;
+            const deltaX = touchEndX - touchStartX;
 
-          // 只有横向移动明显大于纵向移动时，才认为是照片滑动
-          if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-            isSwiping = true;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+              isSwiping = true;
+            }
           }
         },
         { passive: true },
@@ -2243,39 +2348,42 @@
       modalContent.addEventListener(
         "touchend",
         () => {
+          if (isPinching) {
+            isPinching = false;
+            startDistance = 0;
+            startScale = scale;
+
+            return;
+          }
+
           const deltaX = touchEndX - touchStartX;
+
           const deltaY = touchEndY - touchStartY;
 
           const swipeThreshold = 50;
 
-          // 必须是明显的横向滑动
           if (
             Math.abs(deltaX) > swipeThreshold &&
             Math.abs(deltaX) > Math.abs(deltaY) * 1.2
           ) {
             if (deltaX < 0) {
-              // 左滑 → 下一张
               changeModalPhoto(1);
             } else {
-              // 右滑 → 上一张
               changeModalPhoto(-1);
             }
           }
 
-          // 重置
           touchStartX = 0;
           touchStartY = 0;
           touchEndX = 0;
           touchEndY = 0;
 
-          // 延迟一点清除，避免滑动后触发 click
           setTimeout(() => {
             isSwiping = false;
           }, 50);
         },
         { passive: true },
       );
-
       modal.addEventListener("click", closeModal);
 
       document.addEventListener("keydown", (event) => {
@@ -2807,6 +2915,12 @@
 
         passwordInput.focus();
       });
+
+      const fullscreenCounter = document.getElementById("fullscreenCounter");
+
+      function updateFullscreenImageCounter(index) {
+        fullscreenCounter.textContent = `Image ${String(index + 1).padStart(2, "0")}/${String(photos.length).padStart(2, "0")}`;
+      }
     </script>
   </body>
 </html>
